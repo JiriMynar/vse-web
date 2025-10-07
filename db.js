@@ -1,12 +1,9 @@
-import fs from 'fs';
+
 import path from 'path';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
-const dataDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
+
 
 const dbPromise = open({
   filename: path.join(dataDir, 'app.db'),
