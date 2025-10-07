@@ -73,6 +73,6 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 ## Poznámky
 
-- Databáze SQLite se ukládá do adresáře `data/`
-- Logy se nacházejí v `logs/app.log`
+- Databáze SQLite se ukládá do adresáře `data/` (pokud není zapisovatelný, automaticky se použije `/tmp/vse-web/data`)
+- Logy se nacházejí v `logs/app.log` (nebo v `/tmp/vse-web/logs/app.log`)
 - V produkčním prostředí nezapomeňte nastavit silný `JWT_SECRET` a používat HTTPS

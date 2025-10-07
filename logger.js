@@ -1,4 +1,9 @@
+import path from 'path';
+import winston from 'winston';
 
+import { ensureWritableDir } from './pathUtils.js';
+
+const logDir = ensureWritableDir({ envVar: 'LOG_DIR', defaultSubdir: 'logs' });
 
 export const logger = winston.createLogger({
   level: 'info',

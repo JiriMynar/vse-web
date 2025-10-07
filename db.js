@@ -3,7 +3,9 @@ import path from 'path';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
+import { ensureWritableDir } from './pathUtils.js';
 
+const dataDir = ensureWritableDir({ envVar: 'DATA_DIR', defaultSubdir: 'data' });
 
 const dbPromise = open({
   filename: path.join(dataDir, 'app.db'),
