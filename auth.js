@@ -1,20 +1,87 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import jwt from 'jsonwebtoken';
 
 import { getDb } from './db.js';
+import { logger } from './logger.js';
+import { ensureWritableDir } from './pathUtils.js';
 
 const TOKEN_COOKIE = 'token';
 const REFRESH_COOKIE = 'refresh_token';
 const defaultSecret = 'change-me-secret';
+const MIN_SECRET_LENGTH = 32;
+const SECRET_FILE_NAME = 'jwt_secret';
 
-function getSecret() {
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === defaultSecret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET musí být nastaven a odlišný od výchozí hodnoty.');
+let cachedSecret;
+let secretFilePath;
+
+function resolveSecretFilePath() {
+  if (!secretFilePath) {
+    const dir = ensureWritableDir({ envVar: 'DATA_DIR', defaultSubdir: 'data' });
+    secretFilePath = path.join(dir, SECRET_FILE_NAME);
+  }
+  return secretFilePath;
+}
+
+function isValidSecret(value) {
+  return typeof value === 'string' && value.trim().length >= MIN_SECRET_LENGTH;
+}
+
+function readSecretFromDisk() {
+  try {
+    const fileSecret = fs.readFileSync(resolveSecretFilePath(), 'utf8').trim();
+    if (isValidSecret(fileSecret)) {
+      return fileSecret;
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      logger.warn(`Čtení tajného klíče JWT selhalo: ${error.message}`);
     }
   }
+  return null;
+}
 
-  return process.env.JWT_SECRET || defaultSecret;
+function persistSecretToDisk(secret) {
+  try {
+    fs.writeFileSync(resolveSecretFilePath(), secret, { mode: 0o600 });
+  } catch (error) {
+    logger.warn(`Uložení tajného klíče JWT selhalo: ${error.message}`);
+  }
+}
+
+function generateSecret() {
+  return crypto.randomBytes(64).toString('hex');
+}
+
+function getSecret() {
+  if (cachedSecret) {
+    return cachedSecret;
+  }
+
+  const envSecret = process.env.JWT_SECRET;
+  if (envSecret) {
+    const trimmed = envSecret.trim();
+    if (!isValidSecret(trimmed) || trimmed === defaultSecret) {
+      throw new Error('JWT_SECRET musí být nastaven na alespoň 32 znaků a odlišný od výchozí hodnoty.');
+    }
+    cachedSecret = trimmed;
+    return cachedSecret;
+  }
+
+  const storedSecret = readSecretFromDisk();
+  if (storedSecret) {
+    cachedSecret = storedSecret;
+    return cachedSecret;
+  }
+
+  const generatedSecret = generateSecret();
+  cachedSecret = generatedSecret;
+  persistSecretToDisk(generatedSecret);
+  if (process.env.NODE_ENV === 'production') {
+    logger.warn('JWT_SECRET nebyl nastaven, byl automaticky vygenerován a uložen.');
+  }
+  return cachedSecret;
 }
 
 export function signToken(payload, expiresIn = '15m') {
