@@ -84,14 +84,176 @@ app.get('/api/me', authMiddleware, async (req, res) => {
   res.json({ user });
 });
 
-app.get('/api/chat/history', authMiddleware, async (req, res) => {
+async function ensureDefaultThread(db, userId) {
+  const existing = await db.get('SELECT id FROM chat_threads WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1', userId);
+  if (existing) {
+    return existing.id;
+  }
+
+  const threadTitle = 'Nová konverzace';
+  const result = await db.run('INSERT INTO chat_threads (user_id, title) VALUES (?, ?)', userId, threadTitle);
+
+  await db.run('UPDATE chat_messages SET thread_id = ? WHERE user_id = ? AND (thread_id IS NULL OR thread_id = "")', result.lastID, userId);
+
+  return result.lastID;
+}
+
+async function loadThreads(db, userId) {
+  await ensureDefaultThread(db, userId);
+
+  const threads = await db.all(
+    `SELECT
+        t.id,
+        t.title,
+        t.created_at,
+        t.updated_at,
+        t.is_favorite,
+        COALESCE((SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1), t.updated_at) AS last_activity,
+        (SELECT role FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1) AS last_role,
+        (SELECT content FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1) AS last_message,
+        (SELECT COUNT(*) FROM chat_messages WHERE thread_id = t.id) AS message_count
+      FROM chat_threads t
+      WHERE t.user_id = ?
+      ORDER BY t.is_favorite DESC, last_activity DESC, t.id DESC
+    `,
+    userId
+  );
+
+  return threads.map((thread) => ({
+    ...thread,
+    is_favorite: Boolean(thread.is_favorite)
+  }));
+}
+
+async function touchThread(db, threadId) {
+  await db.run('UPDATE chat_threads SET updated_at = CURRENT_TIMESTAMP WHERE id = ?', threadId);
+}
+
+app.get('/api/chat/threads', authMiddleware, async (req, res) => {
   const db = await getDb();
-  const messages = await db.all('SELECT role, content, created_at FROM chat_messages WHERE user_id = ? ORDER BY id ASC', req.user.id);
-  res.json({ messages });
+  const threads = await loadThreads(db, req.user.id);
+  const activeThreadId = threads[0]?.id || null;
+  res.json({ threads, activeThreadId });
+});
+
+app.post('/api/chat/threads', authMiddleware, async (req, res) => {
+  const { title } = req.body || {};
+  const db = await getDb();
+
+  const baseTitle = title && title.trim() ? title.trim() : 'Nová konverzace';
+
+  const result = await db.run('INSERT INTO chat_threads (user_id, title) VALUES (?, ?)', req.user.id, baseTitle);
+  const [thread] = await loadThreads(db, req.user.id).then((threads) => threads.filter((t) => t.id === result.lastID));
+
+  res.status(201).json({ thread });
+});
+
+app.patch('/api/chat/threads/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { title, is_favorite } = req.body || {};
+  const db = await getDb();
+
+  const thread = await db.get('SELECT * FROM chat_threads WHERE id = ? AND user_id = ?', id, req.user.id);
+  if (!thread) {
+    return res.status(404).json({ message: 'Vlákno nebylo nalezeno.' });
+  }
+
+  if (typeof title === 'string' && title.trim()) {
+    await db.run('UPDATE chat_threads SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', title.trim(), id);
+  }
+
+  if (typeof is_favorite === 'boolean') {
+    await db.run('UPDATE chat_threads SET is_favorite = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', is_favorite ? 1 : 0, id);
+  }
+
+  const updatedThread = await db.get(
+    `SELECT
+        t.id,
+        t.title,
+        t.created_at,
+        t.updated_at,
+        t.is_favorite,
+        COALESCE((SELECT created_at FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1), t.updated_at) AS last_activity,
+        (SELECT role FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1) AS last_role,
+        (SELECT content FROM chat_messages WHERE thread_id = t.id ORDER BY id DESC LIMIT 1) AS last_message,
+        (SELECT COUNT(*) FROM chat_messages WHERE thread_id = t.id) AS message_count
+      FROM chat_threads t
+      WHERE t.id = ?
+    `,
+    id
+  );
+
+  res.json({ thread: { ...updatedThread, is_favorite: Boolean(updatedThread.is_favorite) } });
+});
+
+app.delete('/api/chat/threads/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const db = await getDb();
+
+  const thread = await db.get('SELECT id FROM chat_threads WHERE id = ? AND user_id = ?', id, req.user.id);
+  if (!thread) {
+    return res.status(404).json({ message: 'Vlákno nebylo nalezeno.' });
+  }
+
+  await db.run('DELETE FROM chat_messages WHERE thread_id = ?', id);
+  await db.run('DELETE FROM chat_threads WHERE id = ?', id);
+
+  const threads = await loadThreads(db, req.user.id);
+  const activeThreadId = threads[0]?.id || null;
+
+  res.json({ message: 'Vlákno bylo odstraněno.', threads, activeThreadId });
+});
+
+app.delete('/api/chat/threads/:id/messages', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const db = await getDb();
+
+  const thread = await db.get('SELECT id FROM chat_threads WHERE id = ? AND user_id = ?', id, req.user.id);
+  if (!thread) {
+    return res.status(404).json({ message: 'Vlákno nebylo nalezeno.' });
+  }
+
+  await db.run('DELETE FROM chat_messages WHERE thread_id = ?', id);
+  await touchThread(db, id);
+
+  res.json({ message: 'Historie vlákna byla vymazána.' });
+});
+
+app.get('/api/chat/history', authMiddleware, async (req, res) => {
+  const { threadId } = req.query;
+  const db = await getDb();
+
+  const threads = await loadThreads(db, req.user.id);
+  const requestedThreadId = threadId ? Number(threadId) : threads[0]?.id;
+
+  if (!requestedThreadId) {
+    return res.json({ messages: [], threadId: null });
+  }
+
+  const thread = threads.find((t) => t.id === requestedThreadId);
+  if (!thread) {
+    return res.status(404).json({ message: 'Vlákno nebylo nalezeno.' });
+  }
+
+  const messages = await db.all(
+    'SELECT id, role, content, created_at FROM chat_messages WHERE user_id = ? AND thread_id = ? ORDER BY id ASC',
+    req.user.id,
+    requestedThreadId
+  );
+
+  res.json({ messages, threadId: requestedThreadId });
+});
+
+app.delete('/api/chat/history', authMiddleware, async (req, res) => {
+  const db = await getDb();
+  await db.run('DELETE FROM chat_messages WHERE user_id = ?', req.user.id);
+  await db.run('DELETE FROM chat_threads WHERE user_id = ?', req.user.id);
+  await ensureDefaultThread(db, req.user.id);
+  res.json({ message: 'Veškerá historie byla vymazána.' });
 });
 
 app.post('/api/chat', authMiddleware, async (req, res) => {
-  const { message } = req.body || {};
+  const { message, threadId } = req.body || {};
 
   if (!message || !message.trim()) {
     return res.status(400).json({ message: 'Zpráva musí obsahovat text.' });
@@ -99,12 +261,38 @@ app.post('/api/chat', authMiddleware, async (req, res) => {
 
   const db = await getDb();
 
-  await db.run('INSERT INTO chat_messages (user_id, role, content) VALUES (?, ?, ?)', req.user.id, 'user', message.trim());
+  let resolvedThreadId = Number(threadId);
+  if (!resolvedThreadId) {
+    resolvedThreadId = await ensureDefaultThread(db, req.user.id);
+  }
+
+  const thread = await db.get('SELECT id FROM chat_threads WHERE id = ? AND user_id = ?', resolvedThreadId, req.user.id);
+  if (!thread) {
+    return res.status(404).json({ message: 'Vlákno nebylo nalezeno.' });
+  }
+
+  await db.run(
+    'INSERT INTO chat_messages (user_id, thread_id, role, content) VALUES (?, ?, ?, ?)',
+    req.user.id,
+    resolvedThreadId,
+    'user',
+    message.trim()
+  );
 
   const reply = await getBotResponse(message.trim());
-  await db.run('INSERT INTO chat_messages (user_id, role, content) VALUES (?, ?, ?)', req.user.id, 'assistant', reply);
+  await db.run(
+    'INSERT INTO chat_messages (user_id, thread_id, role, content) VALUES (?, ?, ?, ?)',
+    req.user.id,
+    resolvedThreadId,
+    'assistant',
+    reply
+  );
 
-  res.json({ reply });
+  await touchThread(db, resolvedThreadId);
+
+  const updatedThread = await db.get('SELECT updated_at FROM chat_threads WHERE id = ?', resolvedThreadId);
+
+  res.json({ reply, threadId: resolvedThreadId, updated_at: updatedThread?.updated_at });
 });
 
 app.use((err, req, res, next) => {
