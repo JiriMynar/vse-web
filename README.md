@@ -32,7 +32,8 @@ npm run dev
 Konfiguraci lze řídit pomocí souboru `.env` (volitelný). Dostupné proměnné:
 
 - `PORT` – port, na kterém má server poslouchat (výchozí 3000)
-- `JWT_SECRET` – tajný klíč pro podepisování autentizačních tokenů
+- `JWT_SECRET` – tajný klíč pro podepisování autentizačních tokenů (pokud není nastaven, aplikace si vygeneruje bezpečný
+  klíč a uloží ho do `data/jwt_secret`)
 - `CHAT_API_URL` – URL externího chatovacího API (volitelné)
 - `CHAT_API_TOKEN` – token, který se odešle v hlavičce `Authorization` při volání externího API (volitelné)
 

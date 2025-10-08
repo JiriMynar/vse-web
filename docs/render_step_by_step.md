@@ -23,7 +23,8 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
 
 5. **Zadejte Environment Variables**
    - Klikněte na **Add Environment Variable** a zadejte:
-     - `JWT_SECRET`: nastavte libovolný dlouhý řetězec (např. generovaný na [https://www.random.org/strings/](https://www.random.org/strings/)).
+    - `JWT_SECRET`: nastavte libovolný dlouhý řetězec (např. generovaný na [https://www.random.org/strings/](https://www.random.org/strings/)).
+      Pokud proměnnou vynecháte, aplikace si při startu sama vygeneruje bezpečný klíč a uloží ho do souboru `data/jwt_secret`.
      - `OPENAI_API_KEY` nebo jiný klíč podle toho, jaké chatbot API budete používat (volitelné – můžete doplnit později).
    - Ponechte ostatní hodnoty prázdné; aplikace si databázi a logy uloží do `/tmp` automaticky.
 
