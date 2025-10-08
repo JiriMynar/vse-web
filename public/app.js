@@ -1,55 +1,117 @@
+const authWrapper = document.getElementById('auth-wrapper');
+const workspace = document.getElementById('workspace');
+const workspaceUser = document.getElementById('workspace-user');
+const viewTitle = document.getElementById('view-title');
+const viewSubtitle = document.getElementById('view-subtitle');
+const navButtons = document.querySelectorAll('.nav-item');
+const logoutButton = document.getElementById('logout');
+const themeToggle = document.getElementById('theme-toggle');
+
+const tabLogin = document.getElementById('tab-login');
+const tabRegister = document.getElementById('tab-register');
 const loginForm = document.getElementById('login-form');
 const registerForm = document.getElementById('register-form');
-const authSection = document.getElementById('auth-section');
 const authMessage = document.getElementById('auth-message');
-const loginTab = document.getElementById('show-login');
-const registerTab = document.getElementById('show-register');
-const loginSubmitButton = loginForm.querySelector('button[type="submit"]');
-const registerSubmitButton = registerForm.querySelector('button[type="submit"]');
 
-const appShell = document.getElementById('app-shell');
-const userInfo = document.getElementById('user-info');
-const themeToggle = document.getElementById('theme-toggle');
-const newThreadButton = document.getElementById('new-thread');
-const threadListEl = document.getElementById('thread-list');
+const createThreadButton = document.getElementById('create-thread');
+const threadList = document.getElementById('thread-list');
 const threadSearchInput = document.getElementById('thread-search');
-const filterButtons = document.querySelectorAll('.filters .chip');
+const filterButtons = document.querySelectorAll('.chip');
 const exportAllButton = document.getElementById('export-all');
-const logoutButton = document.getElementById('logout-button');
-
-const chatSection = document.getElementById('chat-section');
-const chatHistoryEl = document.getElementById('chat-history');
-const chatEmptyState = document.getElementById('chat-empty-state');
-const chatFeedback = document.getElementById('chat-feedback');
-const messageTemplate = document.getElementById('message-template');
+const clearAllButton = document.getElementById('clear-all');
+const chatHistory = document.getElementById('chat-history');
+const chatEmpty = document.getElementById('chat-empty');
 const chatForm = document.getElementById('chat-form');
 const chatMessageInput = document.getElementById('chat-message');
-const chatSubmitButton = chatForm.querySelector('button[type="submit"]');
+const chatFeedback = document.getElementById('chat-feedback');
 const enterToSendCheckbox = document.getElementById('enter-to-send');
+const messageTemplate = document.getElementById('message-template');
 
-const activeThreadTitle = document.getElementById('active-thread-title');
-const activeThreadMeta = document.getElementById('active-thread-meta');
 const favoriteThreadButton = document.getElementById('favorite-thread');
 const renameThreadButton = document.getElementById('rename-thread');
 const exportThreadButton = document.getElementById('export-thread');
 const clearThreadButton = document.getElementById('clear-thread');
 const deleteThreadButton = document.getElementById('delete-thread');
-const messageCountInsight = document.getElementById('message-count');
-const lastActivityInsight = document.getElementById('last-activity');
-const favoriteStatusInsight = document.getElementById('favorite-status');
+const activeThreadTitle = document.getElementById('active-thread-title');
+const activeThreadMeta = document.getElementById('active-thread-meta');
+const insightMessages = document.getElementById('insight-messages');
+const insightActivity = document.getElementById('insight-activity');
+const insightFavorite = document.getElementById('insight-favorite');
 
-const AUTH_MODE_KEY = 'vse-web-auth-mode';
-const ENTER_TO_SEND_KEY = 'vse-web-enter-to-send';
-const THEME_KEY = 'vse-web-theme';
+const viewChat = document.getElementById('view-chat');
+const viewProjects = document.getElementById('view-projects');
+const viewAutomations = document.getElementById('view-automations');
+const viewHelp = document.getElementById('view-help');
+
+const createProjectButton = document.getElementById('create-project');
+const projectsEmpty = document.getElementById('projects-empty');
+const projectGrid = document.getElementById('project-grid');
+const projectCardTemplate = document.getElementById('project-card-template');
+const projectDialog = document.getElementById('project-dialog');
+const projectForm = document.getElementById('project-form');
+const projectNameInput = document.getElementById('project-name');
+const projectDescriptionInput = document.getElementById('project-description');
+const projectColorInput = document.getElementById('project-color');
+
+const automationProjectSelect = document.getElementById('automation-project');
+const createAutomationButton = document.getElementById('create-automation');
+const automationEmpty = document.getElementById('automation-empty');
+const automationList = document.getElementById('automation-list');
+const automationCardTemplate = document.getElementById('automation-card-template');
+const automationDialog = document.getElementById('automation-dialog');
+const automationForm = document.getElementById('automation-form');
+const automationNameInput = document.getElementById('automation-name');
+const automationTriggerInput = document.getElementById('automation-trigger');
+const automationConfigInput = document.getElementById('automation-config');
+const automationActiveInput = document.getElementById('automation-active');
+const automationEmptyParagraph = automationEmpty.querySelector('p');
+const automationEmptyDefaultText = automationEmptyParagraph ? automationEmptyParagraph.textContent : '';
+
+const helpContent = document.getElementById('help-content');
+const promptDialog = document.getElementById('prompt-dialog');
+const promptTitle = document.getElementById('prompt-title');
+const promptLabel = document.getElementById('prompt-label');
+const promptInput = document.getElementById('prompt-input');
+
+const ENTER_TO_SEND_KEY = 'vse-enter-to-send';
+const THEME_KEY = 'vse-theme';
+const VIEW_TITLES = {
+  chat: {
+    title: 'Chat',
+    subtitle: 'Spravujte konverzace a sledujte odpovědi v reálném čase.'
+  },
+  projects: {
+    title: 'Projekty',
+    subtitle: 'Organizujte si jednotlivé moduly a připravte se na další nástroje.'
+  },
+  automations: {
+    title: 'Automatizace',
+    subtitle: 'Navrhujte workflow, které automatizují vaši práci.'
+  },
+  help: {
+    title: 'Nápověda',
+    subtitle: 'Zjistěte, jak fungují jednotlivé části platformy.'
+  }
+};
 
 const state = {
   user: null,
+  view: 'chat',
   threads: [],
+  filteredThreads: [],
   activeThreadId: null,
-  filter: 'all',
-  search: '',
+  threadFilter: 'all',
+  threadSearch: '',
+  messages: [],
+  threadStream: null,
+  messageStream: null,
+  projects: [],
+  automations: [],
+  selectedProjectId: null,
+  help: null,
   enterToSend: localStorage.getItem(ENTER_TO_SEND_KEY) === 'true',
-  theme: localStorage.getItem(THEME_KEY) || 'dark'
+  theme: localStorage.getItem(THEME_KEY) || 'dark',
+  isLoading: false
 };
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('cs', { numeric: 'auto' });
@@ -60,777 +122,896 @@ const dateTimeFormatter = new Intl.DateTimeFormat('cs-CZ', {
   minute: '2-digit'
 });
 
-loginTab.addEventListener('click', () => toggleForms('login'));
-registerTab.addEventListener('click', () => toggleForms('register'));
-
-loginForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-
-  try {
-    setButtonLoading(loginSubmitButton, true, 'Přihlašuji...');
-    setInputsDisabled(loginForm, true);
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Přihlášení se nezdařilo.');
-    }
-
-    showAuthMessage('Přihlášení proběhlo úspěšně.', 'success');
-    await loadWorkspace();
-  } catch (error) {
-    showAuthMessage(error.message, 'error');
-  } finally {
-    setInputsDisabled(loginForm, false);
-    setButtonLoading(loginSubmitButton, false);
-  }
-});
-
-registerForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const name = document.getElementById('register-name').value.trim();
-  const email = document.getElementById('register-email').value.trim();
-  const password = document.getElementById('register-password').value;
-
-  try {
-    setButtonLoading(registerSubmitButton, true, 'Registruji...');
-    setInputsDisabled(registerForm, true);
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Registrace se nezdařila.');
-    }
-
-    showAuthMessage('Registrace proběhla úspěšně.', 'success');
-    toggleForms('login', { clearMessage: false });
-    await loadWorkspace();
-  } catch (error) {
-    showAuthMessage(error.message, 'error');
-  } finally {
-    setInputsDisabled(registerForm, false);
-    setButtonLoading(registerSubmitButton, false);
-  }
-});
-
-chatForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const message = chatMessageInput.value.trim();
-
-  if (!message || !state.activeThreadId) {
-    if (!state.activeThreadId) {
-      showChatFeedback('Vyberte prosím vlákno nebo založte nové.', 'error');
-    }
-    return;
-  }
-
-  appendMessage('user', message, new Date());
-  chatMessageInput.value = '';
-  resizeComposer();
-  toggleChatForm(true);
-  const typingIndicator = showTypingIndicator();
-
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, threadId: state.activeThreadId })
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Nepodařilo se získat odpověď od bota.');
-    }
-
-    appendMessage('assistant', data.reply, new Date());
-    await refreshThreads(state.activeThreadId, { reloadMessages: false });
-    showChatFeedback('Odpověď byla doručena.');
-  } catch (error) {
-    appendMessage('assistant', error.message, new Date());
-    showChatFeedback(error.message, 'error');
-  } finally {
-    toggleChatForm(false);
-    removeTypingIndicator(typingIndicator);
-  }
-});
-
-chatMessageInput.addEventListener('input', resizeComposer);
-chatMessageInput.addEventListener('keydown', (event) => {
-  if (state.enterToSend && event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();
-    chatForm.requestSubmit();
-  }
-});
-
-enterToSendCheckbox.addEventListener('change', () => {
-  state.enterToSend = enterToSendCheckbox.checked;
-  localStorage.setItem(ENTER_TO_SEND_KEY, String(state.enterToSend));
-});
-
-threadSearchInput.addEventListener('input', () => {
-  state.search = threadSearchInput.value.toLowerCase();
-  renderThreads();
-});
-
-filterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    filterButtons.forEach((btn) => btn.classList.remove('active'));
-    button.classList.add('active');
-    state.filter = button.dataset.filter || 'all';
-    renderThreads();
-  });
-});
-
-threadListEl.addEventListener('click', async (event) => {
-  const target = event.target.closest('button');
-  if (!target) {
-    return;
-  }
-  const threadId = Number(target.dataset.threadId);
-  const action = target.dataset.action;
-
-  if (!threadId && action !== 'create') {
-    return;
-  }
-
-  if (action === 'select') {
-    await setActiveThread(threadId);
-  }
-
-  if (action === 'favorite') {
-    event.stopPropagation();
-    await toggleFavorite(threadId);
-  }
-
-  if (action === 'delete') {
-    event.stopPropagation();
-    await deleteThread(threadId);
-  }
-});
-
-newThreadButton.addEventListener('click', async () => {
-  const desiredTitle = prompt('Jak se bude nové vlákno jmenovat?', 'Nový chat');
-  await createThread(desiredTitle);
-});
-
-favoriteThreadButton.addEventListener('click', async () => {
-  if (!state.activeThreadId) {
-    return;
-  }
-  await toggleFavorite(state.activeThreadId, { toggleFromToolbar: true });
-});
-
-renameThreadButton.addEventListener('click', async () => {
-  if (!state.activeThreadId) {
-    return;
-  }
-  const thread = state.threads.find((t) => t.id === state.activeThreadId);
-  const newTitle = prompt('Upravte název vlákna:', thread?.title || '');
-  if (newTitle === null) {
-    return;
-  }
-  const trimmed = newTitle.trim();
-  if (!trimmed) {
-    showChatFeedback('Název vlákna nesmí být prázdný.', 'error');
-    return;
-  }
-  await updateThread(state.activeThreadId, { title: trimmed });
-});
-
-clearThreadButton.addEventListener('click', async () => {
-  if (!state.activeThreadId) {
-    return;
-  }
-  const confirmation = confirm('Opravdu chcete vymazat všechny zprávy v tomto vláknu?');
-  if (!confirmation) {
-    return;
-  }
-  await clearThread(state.activeThreadId);
-});
-
-deleteThreadButton.addEventListener('click', async () => {
-  if (!state.activeThreadId) {
-    return;
-  }
-  await deleteThread(state.activeThreadId);
-});
-
-exportThreadButton.addEventListener('click', async () => {
-  if (!state.activeThreadId) {
-    return;
-  }
-  await exportThread(state.activeThreadId);
-});
-
-exportAllButton.addEventListener('click', async () => {
-  if (!state.threads.length) {
-    showChatFeedback('Nemáte žádné vlákno k exportu.', 'error');
-    return;
-  }
-  await exportAllThreads();
-});
-
-logoutButton.addEventListener('click', async () => {
-  await fetch('/api/logout', { method: 'POST' });
-  resetWorkspace();
-  showAuthMessage('Byli jste odhlášeni.', 'info');
-});
-
-themeToggle.addEventListener('click', () => {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem(THEME_KEY, state.theme);
-  applyTheme();
-});
-
-initialize();
-
-async function initialize() {
-  applyTheme();
-  enterToSendCheckbox.checked = state.enterToSend;
-
-  const savedMode = localStorage.getItem(AUTH_MODE_KEY);
-  if (savedMode === 'register') {
-    toggleForms('register', { persist: false, clearMessage: false });
-  } else {
-    toggleForms('login', { persist: false, clearMessage: false });
-  }
-
-  await loadWorkspace();
+function applyTheme(theme) {
+  state.theme = theme;
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem(THEME_KEY, theme);
+  themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
 }
 
-async function loadWorkspace() {
-  try {
-    const meResponse = await fetch('/api/me');
-    if (!meResponse.ok) {
-      throw new Error('Nepodařilo se načíst uživatele.');
-    }
-    const meData = await meResponse.json();
-    state.user = meData.user;
-    if (!state.user) {
-      throw new Error('Uživatel nebyl nalezen.');
-    }
-
-    userInfo.textContent = `${state.user.name} • ${state.user.email}`;
-    authSection.classList.add('hidden');
-    appShell.classList.remove('hidden');
-
-    await refreshThreads(undefined, { reloadMessages: true });
-    showChatFeedback('Načteno. Připraveni k práci!');
-  } catch (error) {
-    state.user = null;
-    appShell.classList.add('hidden');
-    authSection.classList.remove('hidden');
-    chatHistoryEl.innerHTML = '';
-    updateChatEmptyState();
-    showAuthMessage(error.message || 'Nepodařilo se načíst relaci, přihlaste se prosím znovu.', 'error');
-  }
-}
-
-async function refreshThreads(preferredActiveId, { reloadMessages = false } = {}) {
-  try {
-    const response = await fetch('/api/chat/threads');
-    if (!response.ok) {
-      throw new Error('Nepodařilo se načíst vlákna.');
-    }
-    const data = await response.json();
-    state.threads = (data.threads || []).map(normalizeThread);
-
-    const fallbackId = state.threads[0]?.id || null;
-    const resolvedId = preferredActiveId && state.threads.some((t) => t.id === preferredActiveId)
-      ? preferredActiveId
-      : data.activeThreadId && state.threads.some((t) => t.id === data.activeThreadId)
-      ? data.activeThreadId
-      : fallbackId;
-
-    state.activeThreadId = resolvedId;
-    renderThreads();
-    updateThreadSummary();
-
-    if (reloadMessages && state.activeThreadId) {
-      await loadMessages(state.activeThreadId);
-    } else {
-      updateChatEmptyState();
-    }
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
-
-async function setActiveThread(threadId) {
-  if (!threadId || state.activeThreadId === threadId) {
-    return;
-  }
-  state.activeThreadId = threadId;
-  renderThreads();
-  updateThreadSummary();
-  await loadMessages(threadId);
-}
-
-function renderThreads() {
-  threadListEl.innerHTML = '';
-  let filteredThreads = [...state.threads];
-
-  if (state.filter === 'favorites') {
-    filteredThreads = filteredThreads.filter((thread) => thread.is_favorite);
-  }
-  if (state.filter === 'recent') {
-    filteredThreads = filteredThreads.slice(0, 5);
-  }
-
-  if (state.search) {
-    filteredThreads = filteredThreads.filter((thread) => thread.title.toLowerCase().includes(state.search));
-  }
-
-  if (!filteredThreads.length) {
-    const empty = document.createElement('p');
-    empty.textContent = state.search ? 'Nic neodpovídá vyhledávání.' : 'Zatím nemáte žádná vlákna.';
-    empty.className = 'thread-empty';
-    threadListEl.appendChild(empty);
-    return;
-  }
-
-  filteredThreads.forEach((thread) => {
-    const item = document.createElement('div');
-    item.className = `thread-item${thread.id === state.activeThreadId ? ' active' : ''}`;
-
-    const selectButton = document.createElement('button');
-    selectButton.className = 'thread-button';
-    selectButton.dataset.threadId = String(thread.id);
-    selectButton.dataset.action = 'select';
-    selectButton.innerHTML = `
-      <h3 class="thread-title">${escapeHtml(thread.title)}</h3>
-      <p class="thread-meta">${formatMessageMeta(thread)}</p>
-    `;
-
-    const actions = document.createElement('div');
-    actions.className = 'thread-actions';
-
-    const favoriteButton = document.createElement('button');
-    favoriteButton.className = 'icon-button';
-    favoriteButton.dataset.threadId = String(thread.id);
-    favoriteButton.dataset.action = 'favorite';
-    favoriteButton.setAttribute('aria-pressed', String(Boolean(thread.is_favorite)));
-    favoriteButton.title = thread.is_favorite ? 'Odebrat z oblíbených' : 'Přidat k oblíbeným';
-    favoriteButton.textContent = thread.is_favorite ? '★' : '☆';
-
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'icon-button';
-    deleteButton.dataset.threadId = String(thread.id);
-    deleteButton.dataset.action = 'delete';
-    deleteButton.title = 'Smazat vlákno';
-    deleteButton.textContent = '✕';
-
-    actions.append(favoriteButton, deleteButton);
-    item.append(selectButton, actions);
-    threadListEl.appendChild(item);
-  });
-}
-
-async function loadMessages(threadId) {
-  try {
-    const response = await fetch(`/api/chat/history?threadId=${threadId}`);
-    if (!response.ok) {
-      throw new Error('Nepodařilo se načíst zprávy.');
-    }
-    const data = await response.json();
-    chatHistoryEl.innerHTML = '';
-    chatMessageInput.value = '';
-    resizeComposer();
-
-    (data.messages || []).forEach((message) => {
-      appendMessage(message.role, message.content, message.created_at);
-    });
-
-    const thread = state.threads.find((t) => t.id === threadId);
-    if (thread) {
-      thread.message_count = data.messages?.length || 0;
-      if (data.messages?.length) {
-        const lastMessage = data.messages[data.messages.length - 1];
-        thread.last_activity = lastMessage.created_at;
-        thread.last_message = lastMessage.content;
-        thread.last_role = lastMessage.role;
-      }
-    }
-
-    updateChatEmptyState();
-    updateThreadSummary();
-    renderThreads();
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
-
-function appendMessage(role, content, createdAt) {
-  const clone = messageTemplate.content.cloneNode(true);
-  const messageEl = clone.querySelector('.chat-message');
-  const metaEl = clone.querySelector('.meta');
-  const bubbleEl = clone.querySelector('.bubble');
-  const avatarEl = clone.querySelector('.avatar');
-
-  messageEl.classList.add(role);
-  bubbleEl.textContent = content;
-  metaEl.textContent = `${role === 'user' ? 'Vy' : 'Bot'} • ${formatDate(createdAt)}`;
-  avatarEl.textContent = role === 'user' ? 'Vy' : 'AI';
-
-  chatHistoryEl.appendChild(clone);
-  scrollToBottom();
-  updateChatEmptyState();
-}
-
-function showTypingIndicator() {
-  const messageEl = document.createElement('div');
-  messageEl.className = 'chat-message assistant typing';
-
-  const avatarEl = document.createElement('div');
-  avatarEl.className = 'avatar';
-  avatarEl.textContent = 'AI';
-
-  const contentEl = document.createElement('div');
-  const metaEl = document.createElement('div');
-  metaEl.className = 'meta';
-  metaEl.textContent = 'Bot právě píše…';
-
-  const bubbleEl = document.createElement('div');
-  bubbleEl.className = 'bubble';
-
-  for (let i = 0; i < 3; i += 1) {
-    const dot = document.createElement('span');
-    dot.className = 'typing-dot';
-    bubbleEl.appendChild(dot);
-  }
-
-  contentEl.append(metaEl, bubbleEl);
-  messageEl.append(avatarEl, contentEl);
-  chatHistoryEl.appendChild(messageEl);
-  scrollToBottom();
-  return messageEl;
-}
-
-function removeTypingIndicator(indicator) {
-  if (indicator && indicator.parentElement) {
-    indicator.remove();
-    updateChatEmptyState();
-  }
-}
-
-function toggleForms(type, { persist = true, clearMessage = true } = {}) {
-  if (type === 'login') {
+function toggleForms(mode) {
+  if (mode === 'login') {
     loginForm.classList.remove('hidden');
     registerForm.classList.add('hidden');
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
   } else {
     loginForm.classList.add('hidden');
     registerForm.classList.remove('hidden');
-    registerTab.classList.add('active');
-    loginTab.classList.remove('active');
+    tabLogin.classList.remove('active');
+    tabRegister.classList.add('active');
   }
-  if (persist) {
-    localStorage.setItem(AUTH_MODE_KEY, type);
-  }
-  if (clearMessage) {
-    showAuthMessage('', '');
-  }
+  authMessage.textContent = '';
 }
 
-function showAuthMessage(message, type) {
+function showAuthMessage(message, type = 'info') {
   authMessage.textContent = message;
-  authMessage.classList.remove('success', 'error', 'info');
-  if (message && type) {
-    authMessage.classList.add(type);
-  }
+  authMessage.className = `message ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`.trim();
 }
 
 function showChatFeedback(message, type = 'info') {
   chatFeedback.textContent = message;
-  chatFeedback.classList.remove('error');
-  if (type === 'error') {
-    chatFeedback.classList.add('error');
+  chatFeedback.className = `message ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`.trim();
+  if (!message) {
+    chatFeedback.classList.add('hidden');
+  } else {
+    chatFeedback.classList.remove('hidden');
   }
 }
 
-function updateChatEmptyState() {
-  const hasMessages = chatHistoryEl.querySelectorAll('.chat-message').length > 0;
-  chatEmptyState.classList.toggle('hidden', hasMessages);
-}
-
-function toggleChatForm(disabled) {
-  setButtonLoading(chatSubmitButton, disabled, disabled ? 'Odesílám...' : undefined);
-  chatMessageInput.disabled = disabled;
-}
-
-function setInputsDisabled(container, disabled) {
-  container.querySelectorAll('input').forEach((input) => {
-    input.disabled = disabled;
+function setInputsDisabled(form, disabled) {
+  Array.from(form.elements).forEach((el) => {
+    el.disabled = disabled;
   });
 }
 
-function setButtonLoading(button, isLoading, loadingLabel) {
-  if (!button) {
+function setButtonLoading(button, loading, text) {
+  if (!button) return;
+  if (!button.dataset.originalText) {
+    button.dataset.originalText = button.textContent;
+  }
+  button.textContent = loading && text ? text : button.dataset.originalText;
+  button.disabled = loading;
+}
+
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    const error = new Error(payload.message || 'Došlo k chybě při komunikaci se serverem.');
+    error.status = response.status;
+    throw error;
+  }
+  if (response.status === 204) {
+    return null;
+  }
+  return response.json();
+}
+
+async function tryRefresh() {
+  try {
+    await apiFetch('/api/auth/refresh', { method: 'POST' });
+  } catch (error) {
+    console.error('Refresh token selhal', error);
+  }
+}
+
+async function loadWorkspace() {
+  try {
+    state.isLoading = true;
+    const [{ user }] = await Promise.all([
+      apiFetch('/api/auth/me')
+    ]);
+    state.user = user;
+    workspaceUser.textContent = `${user.name} (${user.email})`;
+    authWrapper.classList.add('hidden');
+    workspace.classList.remove('hidden');
+    applyTheme(state.theme);
+    enterToSendCheckbox.checked = state.enterToSend;
+    await Promise.all([
+      loadThreads({ subscribe: true }),
+      loadProjects(),
+      loadHelp()
+    ]);
+    setView(state.view);
+  } catch (error) {
+    console.error(error);
+    if (error.status && error.status !== 401) {
+      showAuthMessage('Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
+    }
+    state.user = null;
+    workspace.classList.add('hidden');
+    authWrapper.classList.remove('hidden');
+  } finally {
+    state.isLoading = false;
+  }
+}
+
+async function loadThreads(options = {}) {
+  const { subscribe = false, preserveActive = false } = options;
+  const data = await apiFetch('/api/chat/threads');
+  state.threads = data.threads;
+  if (preserveActive && state.activeThreadId) {
+    const exists = state.threads.some((thread) => thread.id === state.activeThreadId);
+    state.activeThreadId = exists ? state.activeThreadId : data.activeThreadId;
+  } else {
+    state.activeThreadId = data.activeThreadId;
+  }
+  filterThreads();
+  renderThreads();
+  if (state.activeThreadId) {
+    await loadMessages(state.activeThreadId);
+    subscribeToMessages(state.activeThreadId);
+  }
+  if (subscribe) {
+    subscribeToThreads();
+  }
+}
+
+async function loadMessages(threadId) {
+  const data = await apiFetch(`/api/chat/history?threadId=${threadId}`);
+  state.messages = data.messages;
+  state.activeThreadId = data.threadId;
+  renderMessages();
+}
+
+async function sendMessage(message) {
+  const payload = await apiFetch('/api/chat/messages', {
+    method: 'POST',
+    body: JSON.stringify({ message, threadId: state.activeThreadId })
+  });
+  showChatFeedback('Odpověď byla odeslána.');
+  return payload;
+}
+
+function filterThreads() {
+  const query = state.threadSearch.toLowerCase();
+  state.filteredThreads = state.threads.filter((thread) => {
+    const matchesSearch = thread.title.toLowerCase().includes(query) || (thread.last_message || '').toLowerCase().includes(query);
+    if (!matchesSearch) return false;
+    if (state.threadFilter === 'favorites') {
+      return thread.is_favorite;
+    }
+    if (state.threadFilter === 'recent') {
+      if (!thread.last_activity) return false;
+      const diff = Date.now() - new Date(thread.last_activity).getTime();
+      return diff < 1000 * 60 * 60 * 24 * 3;
+    }
+    return true;
+  });
+}
+
+function renderThreads() {
+  threadList.innerHTML = '';
+  if (!state.filteredThreads.length) {
+    const empty = document.createElement('li');
+    empty.className = 'empty';
+    empty.textContent = 'Žádná vlákna neodpovídají hledání.';
+    threadList.appendChild(empty);
     return;
   }
-  if (isLoading) {
-    if (!button.dataset.originalText) {
-      button.dataset.originalText = button.textContent;
+
+  state.filteredThreads.forEach((thread) => {
+    const button = document.createElement('button');
+    button.dataset.threadId = thread.id;
+    button.classList.toggle('active', thread.id === state.activeThreadId);
+
+    const title = document.createElement('span');
+    title.className = 'title';
+    title.textContent = thread.title;
+
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    const parts = [];
+    if (thread.message_count) {
+      parts.push(`${thread.message_count} zpráv`);
     }
-    if (loadingLabel) {
-      button.textContent = loadingLabel;
+    if (thread.last_activity) {
+      parts.push(`Aktualizace ${formatRelativeTime(thread.last_activity)}`);
     }
-    button.setAttribute('aria-busy', 'true');
-    button.disabled = true;
+    if (thread.is_favorite) {
+      parts.push('★ Oblíbené');
+    }
+    meta.textContent = parts.join(' • ');
+
+    const preview = document.createElement('span');
+    preview.className = 'meta';
+    preview.textContent = thread.last_message ? truncate(thread.last_message, 90) : 'Bez zpráv';
+
+    button.append(title, meta, preview);
+    const listItem = document.createElement('li');
+    listItem.appendChild(button);
+    threadList.appendChild(listItem);
+  });
+
+  renderThreadHeader();
+}
+
+function renderMessages() {
+  chatHistory.innerHTML = '';
+  if (!state.messages.length) {
+    chatEmpty.classList.remove('hidden');
   } else {
-    const original = button.dataset.originalText;
-    if (original) {
-      button.textContent = original;
-      delete button.dataset.originalText;
-    }
-    button.removeAttribute('aria-busy');
-    button.disabled = false;
+    chatEmpty.classList.add('hidden');
   }
+
+  state.messages.forEach((message) => {
+    const node = messageTemplate.content.cloneNode(true);
+    const root = node.querySelector('.chat-message');
+    const avatar = root.querySelector('.avatar');
+    const meta = root.querySelector('.meta');
+    const content = root.querySelector('.content');
+    avatar.textContent = message.role === 'user' ? '👤' : '🤖';
+    meta.textContent = `${message.role === 'user' ? 'Vy' : 'Asistent'} • ${dateTimeFormatter.format(new Date(message.created_at))}`;
+    content.textContent = message.content;
+    chatHistory.appendChild(node);
+  });
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+  renderThreadHeader();
 }
 
-function scrollToBottom() {
-  chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
-}
-
-function formatDate(date) {
-  const d = date instanceof Date ? date : new Date(date);
-  return dateTimeFormatter.format(d);
-}
-
-function formatMessageMeta(thread) {
-  const relative = thread.last_activity ? formatRelative(thread.last_activity) : 'Bez aktivit';
-  const count = thread.message_count || 0;
-  return `${relative} • ${count} zpráv`;
-}
-
-function formatRelative(dateLike) {
-  if (!dateLike) {
-    return 'Bez aktivit';
-  }
-  const date = new Date(dateLike);
-  const diffMs = date.getTime() - Date.now();
-  const diffSec = Math.round(diffMs / 1000);
-
-  const ranges = [
-    { unit: 'year', value: 60 * 60 * 24 * 365 },
-    { unit: 'month', value: 60 * 60 * 24 * 30 },
-    { unit: 'week', value: 60 * 60 * 24 * 7 },
-    { unit: 'day', value: 60 * 60 * 24 },
-    { unit: 'hour', value: 60 * 60 },
-    { unit: 'minute', value: 60 },
-    { unit: 'second', value: 1 }
-  ];
-
-  for (const range of ranges) {
-    const delta = Math.round(diffSec / range.value);
-    if (Math.abs(delta) >= 1) {
-      return relativeTimeFormatter.format(delta, range.unit);
-    }
-  }
-  return 'právě teď';
-}
-
-function normalizeThread(thread) {
-  return {
-    ...thread,
-    id: Number(thread.id),
-    is_favorite: Boolean(thread.is_favorite),
-    message_count: Number(thread.message_count) || 0
-  };
-}
-
-function updateThreadSummary() {
+function renderThreadHeader() {
   const thread = state.threads.find((t) => t.id === state.activeThreadId);
   if (!thread) {
-    activeThreadTitle.textContent = 'Vyberte si konverzaci';
+    activeThreadTitle.textContent = 'Vyberte vlákno';
     activeThreadMeta.textContent = '';
+    insightMessages.textContent = '0 zpráv';
+    insightActivity.textContent = 'Žádná aktivita';
+    insightFavorite.textContent = 'Neoblíbené';
     favoriteThreadButton.setAttribute('aria-pressed', 'false');
     favoriteThreadButton.textContent = '☆';
-    messageCountInsight.textContent = '0 zpráv';
-    lastActivityInsight.textContent = 'Žádná aktivita';
-    favoriteStatusInsight.textContent = 'Neoblíbené';
     chatForm.classList.add('hidden');
     return;
   }
 
   chatForm.classList.remove('hidden');
   activeThreadTitle.textContent = thread.title;
-  activeThreadMeta.textContent = `Založeno ${formatDate(thread.created_at)} • ${formatMessageMeta(thread)}`;
-
-  favoriteThreadButton.setAttribute('aria-pressed', String(thread.is_favorite));
+  const parts = [];
+  if (thread.created_at) {
+    parts.push(`Založeno ${dateTimeFormatter.format(new Date(thread.created_at))}`);
+  }
+  if (thread.last_activity) {
+    parts.push(`Naposledy ${formatRelativeTime(thread.last_activity)}`);
+  }
+  activeThreadMeta.textContent = parts.join(' • ');
+  insightMessages.textContent = `${thread.message_count || 0} zpráv`;
+  insightActivity.textContent = thread.last_activity ? `Aktivita ${formatRelativeTime(thread.last_activity)}` : 'Žádná aktivita';
+  insightFavorite.textContent = thread.is_favorite ? 'Oblíbené' : 'Neoblíbené';
+  favoriteThreadButton.setAttribute('aria-pressed', thread.is_favorite ? 'true' : 'false');
   favoriteThreadButton.textContent = thread.is_favorite ? '★' : '☆';
-  favoriteThreadButton.title = thread.is_favorite ? 'Odebrat z oblíbených' : 'Přidat k oblíbeným';
-
-  messageCountInsight.textContent = `${thread.message_count || 0} zpráv`;
-  lastActivityInsight.textContent = thread.last_activity ? formatRelative(thread.last_activity) : 'Žádná aktivita';
-  favoriteStatusInsight.textContent = thread.is_favorite ? 'Oblíbené vlákno' : 'Neoblíbené';
 }
 
-async function createThread(title) {
-  try {
-    setButtonLoading(newThreadButton, true, 'Zakládám...');
-    const response = await fetch('/api/chat/threads', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title })
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Vlákno se nepodařilo vytvořit.');
-    }
-    const newThread = normalizeThread(data.thread);
-    await refreshThreads(newThread.id, { reloadMessages: true });
-    showChatFeedback('Nové vlákno bylo založeno.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  } finally {
-    setButtonLoading(newThreadButton, false);
+function setView(view) {
+  state.view = view;
+  navButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.view === view);
+  });
+
+  const { title, subtitle } = VIEW_TITLES[view];
+  viewTitle.textContent = title;
+  viewSubtitle.textContent = subtitle;
+
+  viewChat.classList.toggle('hidden', view !== 'chat');
+  viewProjects.classList.toggle('hidden', view !== 'projects');
+  viewAutomations.classList.toggle('hidden', view !== 'automations');
+  viewHelp.classList.toggle('hidden', view !== 'help');
+
+  if (view === 'projects') {
+    renderProjects();
+  } else if (view === 'automations') {
+    renderAutomations();
+  } else if (view === 'help') {
+    renderHelp();
   }
 }
 
-async function toggleFavorite(threadId, { toggleFromToolbar = false } = {}) {
-  try {
-    const thread = state.threads.find((t) => t.id === threadId);
-    if (!thread) {
-      return;
+function renderProjects() {
+  projectGrid.innerHTML = '';
+  if (!state.projects.length) {
+    projectsEmpty.classList.remove('hidden');
+    return;
+  }
+  projectsEmpty.classList.add('hidden');
+  state.projects.forEach((project) => {
+    const node = projectCardTemplate.content.cloneNode(true);
+    const card = node.querySelector('.project-card');
+    const badge = card.querySelector('.badge');
+    const title = card.querySelector('.title');
+    const meta = card.querySelector('.meta');
+    const description = card.querySelector('.description');
+    const statAutomations = card.querySelector('.stat.automations');
+    const statRuns = card.querySelector('.stat.runs');
+    const archiveButton = card.querySelector('[data-action="archive"]');
+
+    badge.style.background = project.color || '#3b82f6';
+    title.textContent = project.name;
+    meta.textContent = project.status === 'archived' ? 'Archivováno' : `Aktualizace ${formatRelativeTime(project.updated_at)}`;
+    description.textContent = project.description || 'Bez popisu';
+    statAutomations.textContent = `${project.automation_count} automatizací`;
+    statRuns.textContent = `${project.run_count} běhů`;
+
+    archiveButton.addEventListener('click', async () => {
+      await apiFetch(`/api/projects/${project.id}/archive`, { method: 'POST' });
+      await loadProjects();
+      renderProjects();
+    });
+
+    card.addEventListener('click', (event) => {
+      if (event.target.closest('button')) return;
+      state.selectedProjectId = project.id;
+      setView('automations');
+      renderAutomations();
+    });
+
+    projectGrid.appendChild(node);
+  });
+}
+
+function renderAutomations() {
+  automationProjectSelect.innerHTML = '';
+  const placeholderOption = document.createElement('option');
+  placeholderOption.value = '';
+  placeholderOption.textContent = 'Vyberte projekt';
+  automationProjectSelect.appendChild(placeholderOption);
+
+  state.projects.forEach((project) => {
+    const option = document.createElement('option');
+    option.value = project.id;
+    option.textContent = project.name;
+    if (project.id === state.selectedProjectId) {
+      option.selected = true;
     }
-    const response = await fetch(`/api/chat/threads/${threadId}`, {
+    automationProjectSelect.appendChild(option);
+  });
+
+  if (!state.selectedProjectId) {
+    automationEmpty.classList.remove('hidden');
+    if (automationEmptyParagraph) {
+      automationEmptyParagraph.textContent = automationEmptyDefaultText;
+    }
+    automationList.classList.add('hidden');
+    return;
+  }
+
+  const automations = state.automations.filter((item) => item.project_id === state.selectedProjectId);
+  if (!automations.length) {
+    automationEmpty.classList.remove('hidden');
+    if (automationEmptyParagraph) {
+      automationEmptyParagraph.textContent = 'Pro tento projekt zatím nemáte žádné automatizace.';
+    }
+    automationList.classList.add('hidden');
+    return;
+  }
+
+  automationEmpty.classList.add('hidden');
+  automationList.classList.remove('hidden');
+  automationList.innerHTML = '';
+  automations.forEach((automation) => {
+    const node = automationCardTemplate.content.cloneNode(true);
+    const card = node.querySelector('.automation-card');
+    const title = card.querySelector('.title');
+    const status = card.querySelector('.status');
+    const trigger = card.querySelector('.trigger');
+    const config = card.querySelector('.config');
+    const toggleButton = card.querySelector('[data-action="toggle"]');
+
+    title.textContent = automation.name;
+    status.textContent = automation.status === 'active' ? 'Aktivní' : 'Neaktivní';
+    trigger.textContent = `Spouštěč: ${automation.trigger}`;
+    config.textContent = automation.config ? JSON.stringify(automation.config, null, 2) : 'Bez konfigurace';
+    toggleButton.textContent = automation.status === 'active' ? 'Deaktivovat' : 'Aktivovat';
+
+    toggleButton.addEventListener('click', async () => {
+      const nextStatus = automation.status === 'active' ? 'inactive' : 'active';
+      await apiFetch(`/api/automations/${automation.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus })
+      });
+      await loadAutomations(state.selectedProjectId);
+      renderAutomations();
+    });
+
+    card.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+      await apiFetch(`/api/automations/${automation.id}`, { method: 'DELETE' });
+      await loadAutomations(state.selectedProjectId);
+      renderAutomations();
+    });
+
+    automationList.appendChild(node);
+  });
+}
+
+function renderHelp() {
+  helpContent.innerHTML = '';
+  if (!state.help) {
+    const header = document.createElement('header');
+    header.innerHTML = '<h2>Centrum nápovědy</h2><p>Nepodařilo se načíst obsah.</p>';
+    helpContent.appendChild(header);
+    return;
+  }
+
+  const header = document.createElement('header');
+  header.innerHTML = `<h2>${state.help.title}</h2><p>${state.help.intro}</p>`;
+  helpContent.appendChild(header);
+
+  state.help.sections.forEach((section) => {
+    const sectionEl = document.createElement('section');
+    const title = document.createElement('h3');
+    title.textContent = section.title;
+    const list = document.createElement('ul');
+    section.items.forEach((item) => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      list.appendChild(li);
+    });
+    sectionEl.append(title, list);
+    helpContent.appendChild(sectionEl);
+  });
+}
+
+async function loadProjects() {
+  const data = await apiFetch('/api/projects');
+  state.projects = data.projects;
+}
+
+async function loadAutomations(projectId) {
+  if (!projectId) return;
+  const data = await apiFetch(`/api/automations/project/${projectId}`);
+  const sanitized = data.automations.map((item) => ({ ...item, config: item.config || null, project_id: projectId }));
+  state.automations = state.automations.filter((item) => item.project_id !== projectId).concat(sanitized);
+}
+
+async function loadHelp() {
+  try {
+    const data = await apiFetch('/api/help');
+    state.help = data;
+  } catch (error) {
+    console.error('Nepodařilo se načíst nápovědu', error);
+  }
+}
+
+function subscribeToThreads() {
+  if (state.threadStream) {
+    state.threadStream.close();
+  }
+  const stream = new EventSource('/api/chat/threads/stream', { withCredentials: true });
+  stream.addEventListener('message', async (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (
+        payload.type === 'thread-created' ||
+        payload.type === 'thread-updated' ||
+        payload.type === 'thread-activity' ||
+        payload.type === 'thread-deleted' ||
+        payload.type === 'threads-reset'
+      ) {
+        const currentThreadId = state.activeThreadId;
+        await loadThreads({ subscribe: false, preserveActive: true });
+        if (currentThreadId && currentThreadId === state.activeThreadId) {
+          await loadMessages(currentThreadId);
+          subscribeToMessages(currentThreadId);
+        }
+      }
+    } catch (error) {
+      console.error('Chyba při zpracování streamu vláken', error);
+    }
+  });
+  stream.addEventListener('error', () => {
+    stream.close();
+    setTimeout(subscribeToThreads, 3000);
+  });
+  state.threadStream = stream;
+}
+
+function subscribeToMessages(threadId) {
+  if (state.messageStream) {
+    state.messageStream.close();
+  }
+  if (!threadId) return;
+  const stream = new EventSource(`/api/chat/threads/${threadId}/stream`, { withCredentials: true });
+  stream.addEventListener('message', (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.type === 'message-created') {
+        if (payload.threadId === state.activeThreadId) {
+          state.messages.push({
+            role: payload.message.role,
+            content: payload.message.content,
+            created_at: payload.message.created_at
+          });
+          renderMessages();
+        }
+      }
+      if (payload.type === 'messages-cleared') {
+        if (payload.threadId === state.activeThreadId) {
+          state.messages = [];
+          renderMessages();
+        }
+      }
+    } catch (error) {
+      console.error('Chyba streamu zpráv', error);
+    }
+  });
+  stream.addEventListener('error', () => {
+    stream.close();
+    setTimeout(() => subscribeToMessages(threadId), 3000);
+  });
+  state.messageStream = stream;
+}
+
+function formatRelativeTime(dateString) {
+  const date = new Date(dateString);
+  const diff = date.getTime() - Date.now();
+  const seconds = Math.round(diff / 1000);
+  const minutes = Math.round(seconds / 60);
+  const hours = Math.round(minutes / 60);
+  const days = Math.round(hours / 24);
+  if (Math.abs(seconds) < 60) {
+    return relativeTimeFormatter.format(seconds, 'second');
+  }
+  if (Math.abs(minutes) < 60) {
+    return relativeTimeFormatter.format(minutes, 'minute');
+  }
+  if (Math.abs(hours) < 24) {
+    return relativeTimeFormatter.format(hours, 'hour');
+  }
+  return relativeTimeFormatter.format(days, 'day');
+}
+
+function truncate(text, length) {
+  if (!text) return '';
+  return text.length > length ? `${text.slice(0, length)}…` : text;
+}
+
+function openPrompt({ title, label, defaultValue = '' }) {
+  promptTitle.textContent = title;
+  promptLabel.textContent = label;
+  promptInput.value = defaultValue;
+  promptDialog.returnValue = 'cancel';
+  promptDialog.showModal();
+  promptInput.focus();
+  return new Promise((resolve) => {
+    promptDialog.addEventListener('close', () => {
+      if (promptDialog.returnValue === 'confirm') {
+        resolve(promptInput.value.trim());
+      } else {
+        resolve(null);
+      }
+    }, { once: true });
+  });
+}
+
+function openProjectDialog() {
+  projectForm.reset();
+  projectColorInput.value = '#2F80ED';
+  projectDialog.returnValue = 'cancel';
+  projectDialog.showModal();
+  projectNameInput.focus();
+  return new Promise((resolve) => {
+    projectDialog.addEventListener('close', () => {
+      if (projectDialog.returnValue === 'confirm') {
+        resolve({
+          name: projectNameInput.value.trim(),
+          description: projectDescriptionInput.value.trim(),
+          color: projectColorInput.value
+        });
+      } else {
+        resolve(null);
+      }
+    }, { once: true });
+  });
+}
+
+function openAutomationDialog(defaults = {}) {
+  automationForm.reset();
+  automationNameInput.value = defaults.name || '';
+  automationTriggerInput.value = defaults.trigger || '';
+  automationConfigInput.value = defaults.config ? JSON.stringify(defaults.config, null, 2) : '';
+  automationActiveInput.checked = defaults.status === 'active';
+  automationDialog.returnValue = 'cancel';
+  automationDialog.showModal();
+  automationNameInput.focus();
+  return new Promise((resolve) => {
+    automationDialog.addEventListener('close', () => {
+      if (automationDialog.returnValue === 'confirm') {
+        let config = null;
+        if (automationConfigInput.value.trim()) {
+          try {
+            config = JSON.parse(automationConfigInput.value);
+          } catch (error) {
+            alert('Konfigurace musí být validní JSON.');
+            resolve(null);
+            return;
+          }
+        }
+        resolve({
+          name: automationNameInput.value.trim(),
+          trigger: automationTriggerInput.value.trim(),
+          status: automationActiveInput.checked ? 'active' : 'inactive',
+          config
+        });
+      } else {
+        resolve(null);
+      }
+    }, { once: true });
+  });
+}
+
+function initEventListeners() {
+  tabLogin.addEventListener('click', () => toggleForms('login'));
+  tabRegister.addEventListener('click', () => toggleForms('register'));
+
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      setInputsDisabled(loginForm, true);
+      setButtonLoading(loginForm.querySelector('button[type="submit"]'), true, 'Přihlašuji…');
+      await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      showAuthMessage('Přihlášení proběhlo úspěšně.', 'success');
+      await loadWorkspace();
+    } catch (error) {
+      showAuthMessage(error.message, 'error');
+    } finally {
+      setInputsDisabled(loginForm, false);
+      setButtonLoading(loginForm.querySelector('button[type="submit"]'), false);
+    }
+  });
+
+  registerForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+
+    try {
+      setInputsDisabled(registerForm, true);
+      setButtonLoading(registerForm.querySelector('button[type="submit"]'), true, 'Registruji…');
+      await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password })
+      });
+      showAuthMessage('Registrace proběhla úspěšně.', 'success');
+      toggleForms('login');
+      await loadWorkspace();
+    } catch (error) {
+      showAuthMessage(error.message, 'error');
+    } finally {
+      setInputsDisabled(registerForm, false);
+      setButtonLoading(registerForm.querySelector('button[type="submit"]'), false);
+    }
+  });
+
+  logoutButton.addEventListener('click', async () => {
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+    state.user = null;
+    workspace.classList.add('hidden');
+    authWrapper.classList.remove('hidden');
+    if (state.threadStream) state.threadStream.close();
+    if (state.messageStream) state.messageStream.close();
+  });
+
+  navButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const view = button.dataset.view;
+      if (view === state.view) return;
+      state.view = view;
+      if (view === 'automations' && state.selectedProjectId) {
+        await loadAutomations(state.selectedProjectId);
+      }
+      setView(view);
+    });
+  });
+
+  themeToggle.addEventListener('click', () => {
+    applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+  });
+
+  createThreadButton.addEventListener('click', async () => {
+    const thread = await apiFetch('/api/chat/threads', { method: 'POST', body: JSON.stringify({}) });
+    state.activeThreadId = thread.thread.id;
+    await loadThreads({ preserveActive: true });
+    await loadMessages(state.activeThreadId);
+    subscribeToMessages(state.activeThreadId);
+  });
+
+  threadList.addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const threadId = Number(button.dataset.threadId);
+    state.activeThreadId = threadId;
+    renderThreads();
+    await loadMessages(threadId);
+    subscribeToMessages(threadId);
+  });
+
+  threadSearchInput.addEventListener('input', () => {
+    state.threadSearch = threadSearchInput.value;
+    filterThreads();
+    renderThreads();
+  });
+
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      filterButtons.forEach((btn) => btn.classList.remove('active'));
+      button.classList.add('active');
+      state.threadFilter = button.dataset.filter || 'all';
+      filterThreads();
+      renderThreads();
+    });
+  });
+
+  favoriteThreadButton.addEventListener('click', async () => {
+    if (!state.activeThreadId) return;
+    const thread = state.threads.find((t) => t.id === state.activeThreadId);
+    await apiFetch(`/api/chat/threads/${state.activeThreadId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_favorite: !thread.is_favorite })
     });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Nepodařilo se změnit oblíbenost.');
-    }
-    const updatedThread = normalizeThread(data.thread);
-    state.threads = state.threads.map((t) => (t.id === threadId ? updatedThread : t));
-    if (toggleFromToolbar) {
-      showChatFeedback(updatedThread.is_favorite ? 'Vlákno bylo přidáno k oblíbeným.' : 'Vlákno bylo odebráno z oblíbených.');
-    }
-    renderThreads();
-    updateThreadSummary();
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
+    await loadThreads({ preserveActive: true });
+  });
 
-async function updateThread(threadId, payload) {
-  try {
-    const response = await fetch(`/api/chat/threads/${threadId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Vlákno se nepodařilo aktualizovat.');
+  renameThreadButton.addEventListener('click', async () => {
+    if (!state.activeThreadId) return;
+    const thread = state.threads.find((t) => t.id === state.activeThreadId);
+    const newTitle = await openPrompt({ title: 'Přejmenovat vlákno', label: 'Nový název', defaultValue: thread.title });
+    if (newTitle) {
+      await apiFetch(`/api/chat/threads/${state.activeThreadId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ title: newTitle })
+      });
+      await loadThreads({ preserveActive: true });
     }
-    const updatedThread = normalizeThread(data.thread);
-    state.threads = state.threads.map((t) => (t.id === threadId ? updatedThread : t));
-    renderThreads();
-    updateThreadSummary();
-    showChatFeedback('Vlákno bylo aktualizováno.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
+  });
 
-async function clearThread(threadId) {
-  try {
-    setButtonLoading(clearThreadButton, true, 'Čistím...');
-    const response = await fetch(`/api/chat/threads/${threadId}/messages`, {
-      method: 'DELETE'
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Historii vlákna se nepodařilo vymazat.');
+  exportThreadButton.addEventListener('click', () => {
+    if (!state.activeThreadId) return;
+    const thread = state.threads.find((t) => t.id === state.activeThreadId);
+    const blob = new Blob([
+      JSON.stringify({ thread, messages: state.messages }, null, 2)
+    ], { type: 'application/json' });
+    downloadBlob(blob, `thread-${thread.id}.json`);
+  });
+
+  clearThreadButton.addEventListener('click', async () => {
+    if (!state.activeThreadId) return;
+    await apiFetch(`/api/chat/threads/${state.activeThreadId}/messages`, { method: 'DELETE' });
+    state.messages = [];
+    renderMessages();
+  });
+
+  deleteThreadButton.addEventListener('click', async () => {
+    if (!state.activeThreadId) return;
+    await apiFetch(`/api/chat/threads/${state.activeThreadId}`, { method: 'DELETE' });
+    await loadThreads({ preserveActive: true });
+    if (state.activeThreadId) {
+      await loadMessages(state.activeThreadId);
+      subscribeToMessages(state.activeThreadId);
     }
-    await loadMessages(threadId);
-    await refreshThreads(threadId, { reloadMessages: false });
-    showChatFeedback('Historie vlákna byla odstraněna.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  } finally {
-    setButtonLoading(clearThreadButton, false);
-  }
-}
+  });
 
-async function deleteThread(threadId) {
-  try {
-    const thread = state.threads.find((t) => t.id === threadId);
-    const confirmation = confirm(`Opravdu chcete smazat vlákno "${thread?.title || ''}"? Akce je nevratná.`);
-    if (!confirmation) {
+  exportAllButton.addEventListener('click', () => {
+    const blob = new Blob([
+      JSON.stringify({ threads: state.threads }, null, 2)
+    ], { type: 'application/json' });
+    downloadBlob(blob, 'threads-export.json');
+  });
+
+  clearAllButton.addEventListener('click', async () => {
+    await apiFetch('/api/chat/history', { method: 'DELETE' });
+    await loadThreads();
+    renderMessages();
+  });
+
+  chatForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const message = chatMessageInput.value.trim();
+    if (!message || !state.activeThreadId) {
+      showChatFeedback('Vyberte prosím vlákno a zadejte zprávu.', 'error');
       return;
     }
-    const response = await fetch(`/api/chat/threads/${threadId}`, { method: 'DELETE' });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || 'Vlákno se nepodařilo odstranit.');
+    chatMessageInput.value = '';
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+    try {
+      state.messages.push({ role: 'user', content: message, created_at: new Date().toISOString() });
+      renderMessages();
+      await sendMessage(message);
+    } catch (error) {
+      showChatFeedback(error.message, 'error');
     }
-    await refreshThreads(data.activeThreadId, { reloadMessages: true });
-    showChatFeedback('Vlákno bylo smazáno.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
+  });
+
+  chatMessageInput.addEventListener('keydown', (event) => {
+    if (state.enterToSend && event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      chatForm.requestSubmit();
+    }
+  });
+
+  enterToSendCheckbox.addEventListener('change', () => {
+    state.enterToSend = enterToSendCheckbox.checked;
+    localStorage.setItem(ENTER_TO_SEND_KEY, state.enterToSend);
+  });
+
+  createProjectButton.addEventListener('click', async () => {
+    const result = await openProjectDialog();
+    if (!result || !result.name) return;
+    await apiFetch('/api/projects', {
+      method: 'POST',
+      body: JSON.stringify(result)
+    });
+    await loadProjects();
+    renderProjects();
+  });
+
+  projectDialog.querySelector('[value="cancel"]').addEventListener('click', () => {
+    projectDialog.returnValue = 'cancel';
+    projectDialog.close();
+  });
+
+  automationProjectSelect.addEventListener('change', async () => {
+    const projectId = Number(automationProjectSelect.value);
+    state.selectedProjectId = projectId || null;
+    if (state.selectedProjectId) {
+      await loadAutomations(state.selectedProjectId);
+    }
+    renderAutomations();
+  });
+
+  createAutomationButton.addEventListener('click', async () => {
+    if (!state.selectedProjectId) {
+      alert('Vyberte prosím projekt.');
+      return;
+    }
+    const payload = await openAutomationDialog();
+    if (!payload) return;
+    await apiFetch(`/api/automations/project/${state.selectedProjectId}`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    await loadAutomations(state.selectedProjectId);
+    renderAutomations();
+  });
+
+  automationDialog.querySelector('[value="cancel"]').addEventListener('click', () => {
+    automationDialog.returnValue = 'cancel';
+    automationDialog.close();
+  });
+
+  projectForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    projectDialog.returnValue = 'confirm';
+    projectDialog.close();
+  });
+
+  automationForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    automationDialog.returnValue = 'confirm';
+    automationDialog.close();
+  });
+
+  promptDialog.addEventListener('submit', (event) => {
+    event.preventDefault();
+    promptDialog.returnValue = 'confirm';
+    promptDialog.close();
+  });
+
+  promptDialog.querySelector('[value="cancel"]').addEventListener('click', () => {
+    promptDialog.returnValue = 'cancel';
+    promptDialog.close();
+  });
 }
 
-async function exportThread(threadId) {
-  try {
-    const thread = state.threads.find((t) => t.id === threadId);
-    const response = await fetch(`/api/chat/history?threadId=${threadId}`);
-    if (!response.ok) {
-      throw new Error('Nepodařilo se načíst historii pro export.');
-    }
-    const data = await response.json();
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      thread,
-      messages: data.messages || []
-    };
-    downloadJson(exportData, `vse-chat-${thread?.title || 'vlákno'}-${Date.now()}.json`);
-    showChatFeedback('Vlákno bylo exportováno do souboru.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
-
-async function exportAllThreads() {
-  try {
-    const all = [];
-    for (const thread of state.threads) {
-      const response = await fetch(`/api/chat/history?threadId=${thread.id}`);
-      if (!response.ok) {
-        throw new Error('Export byl přerušen kvůli chybě při načítání historie.');
-      }
-      const data = await response.json();
-      all.push({ thread, messages: data.messages || [] });
-    }
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      user: state.user,
-      threads: all
-    };
-    downloadJson(exportData, `vse-chat-export-${Date.now()}.json`);
-    showChatFeedback('Všechny konverzace byly exportovány.');
-  } catch (error) {
-    showChatFeedback(error.message, 'error');
-  }
-}
-
-function downloadJson(payload, filename) {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -841,36 +1022,12 @@ function downloadJson(payload, filename) {
   URL.revokeObjectURL(url);
 }
 
-function resetWorkspace() {
-  state.threads = [];
-  state.activeThreadId = null;
-  chatHistoryEl.innerHTML = '';
-  appShell.classList.add('hidden');
-  authSection.classList.remove('hidden');
-  renderThreads();
-  updateThreadSummary();
-  updateChatEmptyState();
+async function bootstrap() {
+  applyTheme(state.theme);
+  enterToSendCheckbox.checked = state.enterToSend;
+  initEventListeners();
+  await tryRefresh();
+  await loadWorkspace();
 }
 
-function applyTheme() {
-  document.body.dataset.theme = state.theme;
-  themeToggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
-  themeToggle.title = state.theme === 'dark' ? 'Přepnout na světlý motiv' : 'Přepnout na tmavý motiv';
-}
-
-function resizeComposer() {
-  chatMessageInput.style.height = 'auto';
-  chatMessageInput.style.height = `${chatMessageInput.scrollHeight}px`;
-}
-
-function escapeHtml(input) {
-  if (typeof input !== 'string') {
-    return '';
-  }
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+bootstrap();

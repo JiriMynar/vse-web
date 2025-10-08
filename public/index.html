@@ -3,146 +3,263 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VŠE Chat Bot</title>
+    <title>VŠE Studio</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="layout">
-      <section id="auth-section" class="auth-panel">
-        <div class="auth-card">
-          <div class="auth-copy">
-            <h1>VŠE Chat Studio</h1>
-            <p>Moderní prostředí pro práci s konverzacemi, historii i analytiku na jednom místě.</p>
+    <div class="auth-wrapper" id="auth-wrapper">
+      <section class="auth-card" aria-labelledby="auth-title">
+        <div class="auth-info">
+          <h1 id="auth-title">VŠE Studio</h1>
+          <p>Jedno místo pro chaty, projekty a automatizace s nápovědou na dosah.</p>
+        </div>
+        <div class="auth-forms">
+          <div class="tabs">
+            <button id="tab-login" class="tab active" type="button">Přihlášení</button>
+            <button id="tab-register" class="tab" type="button">Registrace</button>
           </div>
-
-          <div class="auth-forms">
-            <div class="tabs">
-              <button id="show-login" class="tab active" type="button">Přihlášení</button>
-              <button id="show-register" class="tab" type="button">Registrace</button>
-            </div>
-
-            <form id="login-form" class="form" autocomplete="on">
-              <label for="login-email">E-mail</label>
-              <input type="email" id="login-email" placeholder="jmeno@vse.cz" required />
-
-              <label for="login-password">Heslo</label>
-              <input type="password" id="login-password" placeholder="••••••" required />
-
-              <button type="submit" class="primary">Přihlásit se</button>
-            </form>
-
-            <form id="register-form" class="form hidden" autocomplete="on">
-              <label for="register-name">Jméno</label>
-              <input type="text" id="register-name" placeholder="Jan Novák" required />
-
-              <label for="register-email">E-mail</label>
-              <input type="email" id="register-email" placeholder="jmeno@vse.cz" required />
-
-              <label for="register-password">Heslo</label>
-              <input type="password" id="register-password" placeholder="Min. 6 znaků" required minlength="6" />
-
-              <button type="submit" class="primary">Registrovat se</button>
-            </form>
-
-            <div id="auth-message" class="message" role="status" aria-live="polite"></div>
-          </div>
+          <form id="login-form" class="form" autocomplete="on">
+            <label for="login-email">E-mail</label>
+            <input type="email" id="login-email" required placeholder="jmeno@vse.cz" />
+            <label for="login-password">Heslo</label>
+            <input type="password" id="login-password" required placeholder="••••••" />
+            <button type="submit" class="primary">Přihlásit se</button>
+          </form>
+          <form id="register-form" class="form hidden" autocomplete="on">
+            <label for="register-name">Jméno</label>
+            <input type="text" id="register-name" required placeholder="Jan Novák" />
+            <label for="register-email">E-mail</label>
+            <input type="email" id="register-email" required placeholder="jmeno@vse.cz" />
+            <label for="register-password">Heslo</label>
+            <input type="password" id="register-password" required minlength="6" placeholder="Min. 6 znaků" />
+            <button type="submit" class="primary">Registrovat se</button>
+          </form>
+          <div id="auth-message" class="message" role="status" aria-live="polite"></div>
         </div>
       </section>
+    </div>
 
-      <div id="app-shell" class="app-shell hidden">
-        <aside class="sidebar" aria-label="Historie konverzací">
-          <div class="sidebar-header">
-            <div class="brand">
-              <h2>Konverzační panel</h2>
-              <p id="user-info"></p>
-            </div>
-            <button id="theme-toggle" class="icon-button" type="button" aria-label="Přepnout motiv"></button>
+    <div class="workspace hidden" id="workspace">
+      <aside class="workspace-sidebar" aria-label="Hlavní navigace">
+        <header class="workspace-brand">
+          <h2>VŠE Studio</h2>
+          <p id="workspace-user"></p>
+        </header>
+        <nav class="workspace-nav" role="tablist">
+          <button class="nav-item active" data-view="chat" type="button">💬 Chat</button>
+          <button class="nav-item" data-view="projects" type="button">📁 Projekty</button>
+          <button class="nav-item" data-view="automations" type="button">⚙️ Automatizace</button>
+          <button class="nav-item" data-view="help" type="button">❓ Nápověda</button>
+        </nav>
+        <footer class="workspace-footer">
+          <button id="logout" class="ghost" type="button">Odhlásit se</button>
+        </footer>
+      </aside>
+
+      <main class="workspace-main" id="workspace-main">
+        <header class="workspace-toolbar">
+          <div>
+            <h1 id="view-title">Chat</h1>
+            <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
           </div>
-
-          <div class="sidebar-actions">
-            <button id="new-thread" class="primary full" type="button">+ Nový chat</button>
-            <div class="search-field">
-              <input type="search" id="thread-search" placeholder="Hledat konverzaci" />
-              <span class="icon" aria-hidden="true">🔍</span>
-            </div>
-            <div class="filters" role="group" aria-label="Filtr vlákna">
-              <button class="chip active" data-filter="all" type="button">Vše</button>
-              <button class="chip" data-filter="favorites" type="button">Oblíbené</button>
-              <button class="chip" data-filter="recent" type="button">Nedávné</button>
-            </div>
+          <div class="toolbar-actions">
+            <button id="theme-toggle" class="icon-button" type="button" aria-label="Přepnout motiv">🌓</button>
           </div>
+        </header>
 
-          <nav id="thread-list" class="thread-list" role="tablist" aria-label="Seznam konverzací"></nav>
-
-          <footer class="sidebar-footer">
-            <button id="export-all" class="ghost full" type="button">Exportovat vše</button>
-            <button id="logout-button" class="ghost full" type="button">Odhlásit se</button>
-          </footer>
-        </aside>
-
-        <main id="chat-section" class="chat-panel" aria-live="polite">
-          <header class="chat-toolbar">
-            <div class="thread-summary">
-              <h1 id="active-thread-title">Vyberte si konverzaci</h1>
-              <p id="active-thread-meta"></p>
-            </div>
-            <div class="toolbar-actions" role="group" aria-label="Akce vlákna">
-              <button id="favorite-thread" class="icon-button" type="button" aria-pressed="false" title="Přidat k oblíbeným">★</button>
-              <button id="rename-thread" class="ghost" type="button">Přejmenovat</button>
-              <button id="export-thread" class="ghost" type="button">Exportovat</button>
-              <button id="clear-thread" class="ghost" type="button">Vymazat obsah</button>
-              <button id="delete-thread" class="danger" type="button">Smazat</button>
-            </div>
-          </header>
-
-          <section class="insight-bar" aria-live="polite">
-            <div class="insight" id="message-count">0 zpráv</div>
-            <div class="insight" id="last-activity">Žádná aktivita</div>
-            <div class="insight" id="favorite-status">Neoblíbené</div>
-          </section>
-
-          <div id="chat-feedback" class="chat-feedback" role="status" aria-live="polite"></div>
-
-          <div class="chat-history-wrapper">
-            <div id="chat-history" class="chat-history" role="log"></div>
-            <div id="chat-empty-state" class="chat-empty hidden">
-              <h2>Začněte novou konverzaci</h2>
-              <p>Vytvořte si vlákno v postranním panelu a spravujte více paralelních diskusí s přehledem.</p>
-              <ul>
-                <li>Organizujte konverzace do záložek.</li>
-                <li>Přepínejte mezi oblíbenými a nedávnými vlákny.</li>
-                <li>Exportujte důležité chaty jedním kliknutím.</li>
-              </ul>
-            </div>
-          </div>
-
-          <footer class="composer">
-            <form id="chat-form" class="chat-input" autocomplete="off">
-              <label for="chat-message" class="visually-hidden">Zpráva</label>
-              <textarea id="chat-message" rows="1" placeholder="Napište zprávu…" required></textarea>
-              <div class="composer-controls">
-                <label class="toggle">
-                  <input type="checkbox" id="enter-to-send" />
-                  <span>Enter odešle</span>
-                </label>
-                <button type="submit" class="primary">Odeslat</button>
+        <section id="view-chat" class="view-panel">
+          <div class="split">
+            <div class="split-sidebar" aria-label="Seznam vláken">
+              <div class="split-actions">
+                <button id="create-thread" class="primary full" type="button">+ Nový chat</button>
+                <input id="thread-search" type="search" placeholder="Hledat vlákno" />
+                <div class="chips" role="group" aria-label="Filtry vláken">
+                  <button class="chip active" data-filter="all" type="button">Vše</button>
+                  <button class="chip" data-filter="favorites" type="button">Oblíbené</button>
+                  <button class="chip" data-filter="recent" type="button">Nedávné</button>
+                </div>
               </div>
-            </form>
-          </footer>
-        </main>
-      </div>
+              <ul id="thread-list" class="thread-list" role="tablist"></ul>
+              <div class="split-footer">
+                <button id="export-all" class="ghost full" type="button">Exportovat vše</button>
+                <button id="clear-all" class="ghost full" type="button">Vymazat historii</button>
+              </div>
+            </div>
+            <div class="split-main" aria-live="polite">
+              <div class="thread-header">
+                <div>
+                  <h2 id="active-thread-title">Vyberte vlákno</h2>
+                  <p id="active-thread-meta"></p>
+                </div>
+                <div class="thread-actions">
+                  <button id="favorite-thread" class="icon-button" type="button" aria-pressed="false" title="Přidat k oblíbeným">★</button>
+                  <button id="rename-thread" class="ghost" type="button">Přejmenovat</button>
+                  <button id="export-thread" class="ghost" type="button">Exportovat</button>
+                  <button id="clear-thread" class="ghost" type="button">Vymazat</button>
+                  <button id="delete-thread" class="danger" type="button">Smazat</button>
+                </div>
+              </div>
+              <div class="insights">
+                <div id="insight-messages" class="insight">0 zpráv</div>
+                <div id="insight-activity" class="insight">Žádná aktivita</div>
+                <div id="insight-favorite" class="insight">Neoblíbené</div>
+              </div>
+              <div id="chat-feedback" class="message" role="status" aria-live="polite"></div>
+              <div class="chat-history-wrapper">
+                <div id="chat-history" class="chat-history" role="log"></div>
+                <div id="chat-empty" class="empty">
+                  <h3>Žádné zprávy</h3>
+                  <p>Začněte konverzaci ve vybraném vlákně nebo vytvořte nové.</p>
+                </div>
+              </div>
+              <form id="chat-form" class="chat-form" autocomplete="off">
+                <label for="chat-message" class="visually-hidden">Zpráva</label>
+                <textarea id="chat-message" rows="1" placeholder="Napište zprávu…" required></textarea>
+                <div class="chat-controls">
+                  <label class="toggle">
+                    <input type="checkbox" id="enter-to-send" />
+                    <span>Enter odešle</span>
+                  </label>
+                  <button type="submit" class="primary">Odeslat</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-projects" class="view-panel hidden">
+          <div class="panel-header">
+            <div>
+              <h2>Vaše projekty</h2>
+              <p>Seskupujte funkce do samostatných modulů.</p>
+            </div>
+            <button id="create-project" class="primary" type="button">Nový projekt</button>
+          </div>
+          <div id="projects-empty" class="empty hidden">
+            <h3>Zatím žádné projekty</h3>
+            <p>Založte první projekt a přidejte do něj automatizace.</p>
+          </div>
+          <div id="project-grid" class="project-grid"></div>
+        </section>
+
+        <section id="view-automations" class="view-panel hidden">
+          <div class="panel-header">
+            <div>
+              <h2>Automatizace</h2>
+              <p>Spravujte workflow v rámci vybraného projektu.</p>
+            </div>
+            <select id="automation-project" class="select"></select>
+            <button id="create-automation" class="primary" type="button">Nová automatizace</button>
+          </div>
+          <div id="automation-empty" class="empty">
+            <h3>Vyberte projekt</h3>
+            <p>Automatizace se zobrazí po výběru projektu s definovanými workflow.</p>
+          </div>
+          <div id="automation-list" class="automation-list hidden"></div>
+        </section>
+
+        <section id="view-help" class="view-panel hidden">
+          <article class="help-article" id="help-content" aria-live="polite">
+            <header>
+              <h2>Centrum nápovědy</h2>
+              <p>Načítám obsah…</p>
+            </header>
+          </article>
+        </section>
+      </main>
     </div>
 
     <template id="message-template">
       <div class="chat-message">
-        <div class="avatar" aria-hidden="true"></div>
-        <div>
+        <div class="avatar"></div>
+        <div class="bubble">
           <div class="meta"></div>
-          <div class="bubble"></div>
+          <div class="content"></div>
         </div>
       </div>
     </template>
 
-    <script src="/app.js" type="module"></script>
+    <template id="project-card-template">
+      <article class="project-card">
+        <header>
+          <div class="badge"></div>
+          <div>
+            <h3 class="title"></h3>
+            <p class="meta"></p>
+          </div>
+        </header>
+        <p class="description"></p>
+        <footer>
+          <span class="stat automations"></span>
+          <span class="stat runs"></span>
+          <button class="ghost" data-action="archive" type="button">Archivovat</button>
+        </footer>
+      </article>
+    </template>
+
+    <template id="automation-card-template">
+      <article class="automation-card">
+        <header>
+          <h3 class="title"></h3>
+          <span class="status"></span>
+        </header>
+        <p class="trigger"></p>
+        <pre class="config"></pre>
+        <footer>
+          <button class="ghost" data-action="toggle" type="button"></button>
+          <button class="danger" data-action="delete" type="button">Smazat</button>
+        </footer>
+      </article>
+    </template>
+
+    <dialog id="prompt-dialog">
+      <form method="dialog">
+        <h2 id="prompt-title"></h2>
+        <label for="prompt-input" id="prompt-label"></label>
+        <input type="text" id="prompt-input" required />
+        <menu class="dialog-actions">
+          <button value="cancel" type="button">Zrušit</button>
+          <button value="confirm" class="primary" type="submit">Potvrdit</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="project-dialog">
+      <form method="dialog" id="project-form">
+        <h2>Nový projekt</h2>
+        <label for="project-name">Název</label>
+        <input type="text" id="project-name" required />
+        <label for="project-description">Popis</label>
+        <textarea id="project-description" rows="3"></textarea>
+        <label for="project-color">Barva</label>
+        <input type="color" id="project-color" value="#2F80ED" />
+        <menu class="dialog-actions">
+          <button value="cancel" type="button">Zrušit</button>
+          <button value="confirm" class="primary" type="submit">Vytvořit</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="automation-dialog">
+      <form method="dialog" id="automation-form">
+        <h2>Automatizace</h2>
+        <label for="automation-name">Název</label>
+        <input type="text" id="automation-name" required />
+        <label for="automation-trigger">Trigger</label>
+        <input type="text" id="automation-trigger" required />
+        <label for="automation-config">Konfigurace (JSON)</label>
+        <textarea id="automation-config" rows="6" placeholder='{"webhook":"https://..."}'></textarea>
+        <label class="toggle">
+          <input type="checkbox" id="automation-active" />
+          <span>Aktivní</span>
+        </label>
+        <menu class="dialog-actions">
+          <button value="cancel" type="button">Zrušit</button>
+          <button value="confirm" class="primary" type="submit">Uložit</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script type="module" src="/app.js"></script>
   </body>
 </html>

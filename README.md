@@ -1,6 +1,6 @@
-# vse-web
+# VŠE Studio
 
-Kompletní ukázková aplikace s registrací, přihlášením a chatovacím botem připraveným na napojení na externí API.
+Kompletní ukázková aplikace s modulárním workspace rozhraním, které kombinuje chat, správu projektů a automatizace připravené na napojení na externí API.
 
 ## Požadavky
 
@@ -49,27 +49,33 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 ## Struktura
 
-- `server.js` – hlavní Express server, obsluhuje API a statické soubory
-- `db.js` – inicializace SQLite databáze (uživatelé a historie chatu)
-- `auth.js` – pomocné funkce pro práci s JWT tokenem a middleware pro autorizaci
+- `server.js` – vstupní bod, který startuje aplikaci ve složce `src/`
+- `src/app.js` – Express aplikace s bezpečnostními middleware a registrací routerů
+- `src/routes/` – REST API rozdělené na domény (auth, chat, projekty, automatizace, help, health)
+- `src/services/` – obchodní logika, včetně orchestrace vláken chatu, projektů a automatizací
+- `src/lib/eventBus.js` – jednoduchý event bus pro realtime notifikace (SSE)
+- `db.js` – inicializace SQLite databáze a migrace (uživatelé, chat, projekty, automatizace, refresh tokeny)
+- `auth.js` – práce s JWT a refresh tokeny, nastavení cookies
 - `chatService.js` – logika pro získávání odpovědí bota (lokální fallback + volání externí služby)
-- `public/` – statická SPA s registrací, přihlášením a chatovacím rozhraním
+- `public/` – modulární SPA workspace s chatem, projekty, automatizacemi a integrovanou nápovědou
+- `docs/help.json` – obsah centra nápovědy zobrazovaný přímo v aplikaci
 - `logger.js` – konfigurace logování (soubor `logs/app.log`)
 
 ## Funkce
 
-- Registrace uživatelů včetně logování událostí
-- Přihlášení a odhlášení (HTTP-only cookie s JWT)
-- Ověření aktuální relace přes `/api/me`
-- Uložení a načtení historie chatu pro každého uživatele
-- Připravený endpoint `/api/chat` pro napojení na vlastní AI/chat API
+- Registrace, přihlášení a automatické obnovování relace (access + refresh tokeny)
+- Realtime synchronizace vláken a zpráv přes Server-Sent Events (bez nutnosti pollingu)
+- Workspace s přepínáním mezi moduly Chat, Projekty, Automatizace a Nápověda
+- Správa projektů včetně archivace a základních metrik
+- Návrh automatizací s konfigurací ve formátu JSON a možností měnit stav (aktivní/neaktivní)
+- Kompletní help centrum s popisem pracovních postupů přímo v aplikaci
 
 ## Testovací scénář
 
 1. Spusťte `npm install && npm run start`
 2. Otevřete http://localhost:3000
-3. Zaregistrujte se novým e-mailem
-4. Začněte komunikovat s botem
+3. Zaregistrujte se nebo přihlaste
+4. Projděte hlavní moduly (Chat, Projekty, Automatizace) a vyzkoušejte realtime konverzaci s botem
 
 ## Poznámky
 
