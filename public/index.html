@@ -7,66 +7,139 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>Chatovací bot s registrací</h1>
-        <p>Přihlaste se nebo se zaregistrujte a začněte konverzaci s botem.</p>
-      </header>
-
-      <section id="auth-section" class="card">
-        <div class="tabs">
-          <button id="show-login" class="tab active">Přihlášení</button>
-          <button id="show-register" class="tab">Registrace</button>
-        </div>
-
-        <form id="login-form" class="form">
-          <label for="login-email">E-mail</label>
-          <input type="email" id="login-email" required />
-
-          <label for="login-password">Heslo</label>
-          <input type="password" id="login-password" required />
-
-          <button type="submit">Přihlásit se</button>
-        </form>
-
-        <form id="register-form" class="form hidden">
-          <label for="register-name">Jméno</label>
-          <input type="text" id="register-name" required />
-
-          <label for="register-email">E-mail</label>
-          <input type="email" id="register-email" required />
-
-          <label for="register-password">Heslo</label>
-          <input type="password" id="register-password" required minlength="6" />
-
-          <button type="submit">Registrovat se</button>
-        </form>
-
-        <div id="auth-message" class="message"></div>
-      </section>
-
-      <section id="chat-section" class="card hidden">
-        <div class="chat-header">
-          <div>
-            <h2>Konverzace</h2>
-            <p id="user-info"></p>
+    <div class="layout">
+      <section id="auth-section" class="auth-panel">
+        <div class="auth-card">
+          <div class="auth-copy">
+            <h1>VŠE Chat Studio</h1>
+            <p>Moderní prostředí pro práci s konverzacemi, historii i analytiku na jednom místě.</p>
           </div>
-          <button id="logout-button" class="outline">Odhlásit se</button>
+
+          <div class="auth-forms">
+            <div class="tabs">
+              <button id="show-login" class="tab active" type="button">Přihlášení</button>
+              <button id="show-register" class="tab" type="button">Registrace</button>
+            </div>
+
+            <form id="login-form" class="form" autocomplete="on">
+              <label for="login-email">E-mail</label>
+              <input type="email" id="login-email" placeholder="jmeno@vse.cz" required />
+
+              <label for="login-password">Heslo</label>
+              <input type="password" id="login-password" placeholder="••••••" required />
+
+              <button type="submit" class="primary">Přihlásit se</button>
+            </form>
+
+            <form id="register-form" class="form hidden" autocomplete="on">
+              <label for="register-name">Jméno</label>
+              <input type="text" id="register-name" placeholder="Jan Novák" required />
+
+              <label for="register-email">E-mail</label>
+              <input type="email" id="register-email" placeholder="jmeno@vse.cz" required />
+
+              <label for="register-password">Heslo</label>
+              <input type="password" id="register-password" placeholder="Min. 6 znaků" required minlength="6" />
+
+              <button type="submit" class="primary">Registrovat se</button>
+            </form>
+
+            <div id="auth-message" class="message" role="status" aria-live="polite"></div>
+          </div>
         </div>
-
-        <div id="chat-history" class="chat-history"></div>
-
-        <form id="chat-form" class="chat-input">
-          <input type="text" id="chat-message" placeholder="Napište zprávu..." autocomplete="off" required />
-          <button type="submit">Odeslat</button>
-        </form>
       </section>
+
+      <div id="app-shell" class="app-shell hidden">
+        <aside class="sidebar" aria-label="Historie konverzací">
+          <div class="sidebar-header">
+            <div class="brand">
+              <h2>Konverzační panel</h2>
+              <p id="user-info"></p>
+            </div>
+            <button id="theme-toggle" class="icon-button" type="button" aria-label="Přepnout motiv"></button>
+          </div>
+
+          <div class="sidebar-actions">
+            <button id="new-thread" class="primary full" type="button">+ Nový chat</button>
+            <div class="search-field">
+              <input type="search" id="thread-search" placeholder="Hledat konverzaci" />
+              <span class="icon" aria-hidden="true">🔍</span>
+            </div>
+            <div class="filters" role="group" aria-label="Filtr vlákna">
+              <button class="chip active" data-filter="all" type="button">Vše</button>
+              <button class="chip" data-filter="favorites" type="button">Oblíbené</button>
+              <button class="chip" data-filter="recent" type="button">Nedávné</button>
+            </div>
+          </div>
+
+          <nav id="thread-list" class="thread-list" role="tablist" aria-label="Seznam konverzací"></nav>
+
+          <footer class="sidebar-footer">
+            <button id="export-all" class="ghost full" type="button">Exportovat vše</button>
+            <button id="logout-button" class="ghost full" type="button">Odhlásit se</button>
+          </footer>
+        </aside>
+
+        <main id="chat-section" class="chat-panel" aria-live="polite">
+          <header class="chat-toolbar">
+            <div class="thread-summary">
+              <h1 id="active-thread-title">Vyberte si konverzaci</h1>
+              <p id="active-thread-meta"></p>
+            </div>
+            <div class="toolbar-actions" role="group" aria-label="Akce vlákna">
+              <button id="favorite-thread" class="icon-button" type="button" aria-pressed="false" title="Přidat k oblíbeným">★</button>
+              <button id="rename-thread" class="ghost" type="button">Přejmenovat</button>
+              <button id="export-thread" class="ghost" type="button">Exportovat</button>
+              <button id="clear-thread" class="ghost" type="button">Vymazat obsah</button>
+              <button id="delete-thread" class="danger" type="button">Smazat</button>
+            </div>
+          </header>
+
+          <section class="insight-bar" aria-live="polite">
+            <div class="insight" id="message-count">0 zpráv</div>
+            <div class="insight" id="last-activity">Žádná aktivita</div>
+            <div class="insight" id="favorite-status">Neoblíbené</div>
+          </section>
+
+          <div id="chat-feedback" class="chat-feedback" role="status" aria-live="polite"></div>
+
+          <div class="chat-history-wrapper">
+            <div id="chat-history" class="chat-history" role="log"></div>
+            <div id="chat-empty-state" class="chat-empty hidden">
+              <h2>Začněte novou konverzaci</h2>
+              <p>Vytvořte si vlákno v postranním panelu a spravujte více paralelních diskusí s přehledem.</p>
+              <ul>
+                <li>Organizujte konverzace do záložek.</li>
+                <li>Přepínejte mezi oblíbenými a nedávnými vlákny.</li>
+                <li>Exportujte důležité chaty jedním kliknutím.</li>
+              </ul>
+            </div>
+          </div>
+
+          <footer class="composer">
+            <form id="chat-form" class="chat-input" autocomplete="off">
+              <label for="chat-message" class="visually-hidden">Zpráva</label>
+              <textarea id="chat-message" rows="1" placeholder="Napište zprávu…" required></textarea>
+              <div class="composer-controls">
+                <label class="toggle">
+                  <input type="checkbox" id="enter-to-send" />
+                  <span>Enter odešle</span>
+                </label>
+                <button type="submit" class="primary">Odeslat</button>
+              </div>
+            </form>
+          </footer>
+        </main>
+      </div>
     </div>
 
     <template id="message-template">
       <div class="chat-message">
-        <div class="meta"></div>
-        <div class="bubble"></div>
+        <div class="avatar" aria-hidden="true"></div>
+        <div>
+          <div class="meta"></div>
+          <div class="bubble"></div>
+        </div>
       </div>
     </template>
 
