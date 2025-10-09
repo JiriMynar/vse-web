@@ -113,6 +113,105 @@ export async function resetUserPassword({ actorId, targetId }) {
   return password;
 }
 
+const updateUserRoleSchema = z.object({
+  actorId: z.number().positive(),
+  targetId: z.number().positive(),
+  role: z.enum(['user', 'admin'])
+});
+
+export async function updateUserRole({ actorId, targetId, role }) {
+  const { actorId: adminId, targetId: userId, role: desiredRole } = updateUserRoleSchema.parse({
+    actorId,
+    targetId,
+    role
+  });
+
+  if (adminId === userId && desiredRole !== 'admin') {
+    const error = new Error('Nelze odebrat administrátorská oprávnění vlastnímu účtu.');
+    error.status = 400;
+    throw error;
+  }
+
+  const db = await getDb();
+  const user = await db.get('SELECT id, email, name, is_admin, created_at FROM users WHERE id = ?', userId);
+  if (!user) {
+    const error = new Error('Uživatel nebyl nalezen.');
+    error.status = 404;
+    throw error;
+  }
+
+  const makeAdmin = desiredRole === 'admin' ? 1 : 0;
+  if (Number(user.is_admin) !== makeAdmin) {
+    await db.run('UPDATE users SET is_admin = ? WHERE id = ?', makeAdmin, userId);
+  }
+
+  const updated = await db.get(
+    'SELECT id, email, name, is_admin, created_at FROM users WHERE id = ?',
+    userId
+  );
+  return toUserPayload(updated);
+}
+
+const resetDatabaseSchema = z.object({
+  actorId: z.number().positive()
+});
+
+export async function resetUserDatabase({ actorId }) {
+  const { actorId: adminId } = resetDatabaseSchema.parse({ actorId });
+  const db = await getDb();
+
+  const actor = await db.get('SELECT * FROM users WHERE id = ?', adminId);
+  if (!actor) {
+    const error = new Error('Administrátorský účet nebyl nalezen.');
+    error.status = 404;
+    throw error;
+  }
+
+  if (!actor.is_admin) {
+    const error = new Error('Tuto akci může provést pouze administrátor.');
+    error.status = 403;
+    throw error;
+  }
+
+  await db.exec('BEGIN IMMEDIATE TRANSACTION;');
+  try {
+    const tablesToClear = [
+      'automation_runs',
+      'automations',
+      'project_members',
+      'projects',
+      'chat_messages',
+      'chat_threads',
+      'refresh_tokens'
+    ];
+
+    for (const table of tablesToClear) {
+      await db.run(`DELETE FROM ${table}`);
+    }
+
+    await db.run('DELETE FROM users');
+
+    await db.run(
+      'INSERT INTO users (id, email, password_hash, name, is_admin, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      actor.id,
+      actor.email,
+      actor.password_hash,
+      actor.name,
+      1,
+      actor.created_at
+    );
+
+    await db.exec(
+      "DELETE FROM sqlite_sequence WHERE name IN ('users','chat_messages','chat_threads','projects','project_members','automations','automation_runs','refresh_tokens')"
+    );
+
+    await db.exec('COMMIT;');
+  } catch (error) {
+    await db.exec('ROLLBACK;');
+    throw error;
+  }
+}
+
 function generatePassword() {
   return randomBytes(9)
     .toString('base64')
