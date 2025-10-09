@@ -94,6 +94,7 @@
                   <p id="active-thread-meta"></p>
                 </div>
                 <div class="thread-actions">
+                  <button id="chat-api-settings" class="ghost" type="button">API nastavení</button>
                   <button id="favorite-thread" class="icon-button" type="button" aria-pressed="false" title="Přidat k oblíbeným">★</button>
                   <button id="rename-thread" class="ghost" type="button">Přejmenovat</button>
                   <button id="export-thread" class="ghost" type="button">Exportovat</button>
@@ -266,6 +267,41 @@
           <button class="danger" data-action="delete" type="button">Smazat</button>
         </footer>
       </article>
+    </template>
+
+    <dialog id="chat-api-dialog">
+      <article class="chat-api-settings">
+        <header>
+          <h2>Nastavení chat API</h2>
+          <p>Propojte svůj chat s externími službami pomocí vlastního API klíče.</p>
+        </header>
+        <div id="chat-api-message" class="message hidden" role="status" aria-live="polite"></div>
+        <div id="chat-api-connector-list" class="chat-api-connectors"></div>
+        <menu class="dialog-actions">
+          <button type="button" class="ghost" id="chat-api-close">Zavřít</button>
+        </menu>
+      </article>
+    </dialog>
+
+    <template id="chat-api-connector-template">
+      <section class="api-connector card">
+        <div class="connector-header">
+          <div>
+            <h3 class="connector-name"></h3>
+            <p class="connector-description"></p>
+          </div>
+          <span class="connector-status"></span>
+        </div>
+        <form class="form connector-form" autocomplete="off">
+          <label>API klíč</label>
+          <input type="password" name="apiKey" required placeholder="Zadejte API klíč" autocomplete="off" />
+          <p class="form-hint">Klíč je uložen šifrovaně a nikdy se nezobrazuje v plné podobě.</p>
+          <div class="connector-feedback message hidden" role="status" aria-live="polite"></div>
+          <div class="connector-actions">
+            <button type="submit" class="primary">Uložit</button>
+          </div>
+        </form>
+      </section>
     </template>
 
     <dialog id="prompt-dialog">

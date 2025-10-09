@@ -610,13 +610,79 @@ button:active:not(:disabled) {
 
 #prompt-dialog,
 #project-dialog,
-#automation-dialog {
+#automation-dialog,
+#chat-api-dialog {
   border: none;
   border-radius: 20px;
   padding: 2rem;
   max-width: 420px;
   background: rgba(15, 23, 42, 0.95);
   color: var(--text);
+}
+
+#chat-api-dialog {
+  max-width: 560px;
+}
+
+.chat-api-settings {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.chat-api-settings header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.chat-api-settings header p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.chat-api-connectors {
+  display: grid;
+  gap: 1rem;
+}
+
+.api-connector {
+  gap: 1rem;
+}
+
+.connector-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.connector-header h3 {
+  margin: 0;
+}
+
+.connector-header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.connector-status {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.connector-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.connector-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.connector-feedback {
+  margin: 0;
 }
 
 .visually-hidden {

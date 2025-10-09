@@ -11,6 +11,7 @@ import {
   messageChannel
 } from '../services/chatService.js';
 import { subscribe } from '../lib/eventBus.js';
+import { listChatApiSettings, upsertChatApiKey } from '../services/chatApiService.js';
 
 export async function listThreadsController(req, res, next) {
   try {
@@ -80,6 +81,24 @@ export async function createMessageController(req, res, next) {
   try {
     const payload = await createMessage(req.user.id, req.body);
     res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listChatApiSettingsController(req, res, next) {
+  try {
+    const connectors = await listChatApiSettings(req.user.id);
+    res.json({ connectors });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function upsertChatApiKeyController(req, res, next) {
+  try {
+    const connector = await upsertChatApiKey(req.user.id, req.body);
+    res.json({ message: 'API klíč byl uložen.', connector });
   } catch (error) {
     next(error);
   }
