@@ -385,6 +385,11 @@ async function sendMessage(message) {
     method: 'POST',
     body: JSON.stringify({ message, threadId: state.activeThreadId })
   });
+  const targetThreadId = payload.threadId || state.activeThreadId;
+  if (targetThreadId) {
+    await loadMessages(targetThreadId);
+    subscribeToMessages(targetThreadId);
+  }
   showChatFeedback('Odpověď byla odeslána.');
   return payload;
 }
@@ -953,11 +958,30 @@ function subscribeToMessages(threadId) {
       const payload = JSON.parse(event.data);
       if (payload.type === 'message-created') {
         if (payload.threadId === state.activeThreadId) {
-          state.messages.push({
-            role: payload.message.role,
-            content: payload.message.content,
-            created_at: payload.message.created_at
-          });
+          const messagePayload = payload.message;
+          if (!messagePayload) {
+            return;
+          }
+          if (typeof messagePayload.id !== 'undefined') {
+            const exists = state.messages.some((item) => item.id === messagePayload.id);
+            if (exists) {
+              return;
+            }
+          }
+          const incoming = { ...messagePayload };
+          if (typeof incoming.id !== 'undefined') {
+            const numericId = Number(incoming.id);
+            incoming.id = Number.isNaN(numericId) ? incoming.id : numericId;
+          }
+          state.messages.push(incoming);
+          if (incoming.id) {
+            state.messages.sort((a, b) => {
+              if (a.id && b.id) {
+                return a.id - b.id;
+              }
+              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            });
+          }
           renderMessages();
         }
       }

@@ -22,6 +22,12 @@ export function ensureWritableDir({ envVar, defaultSubdir }) {
     candidates.push(path.join(process.cwd(), defaultSubdir));
   }
 
+  const homeDir = os.homedir();
+  if (homeDir) {
+    const homeBase = path.join(homeDir, '.vse-web');
+    candidates.push(defaultSubdir ? path.join(homeBase, defaultSubdir) : homeBase);
+  }
+
   const tmpBase = path.join(os.tmpdir(), 'vse-web');
   const tmpDir = defaultSubdir ? path.join(tmpBase, defaultSubdir) : tmpBase;
   candidates.push(tmpDir);
