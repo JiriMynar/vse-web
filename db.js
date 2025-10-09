@@ -4,7 +4,12 @@ import { open } from 'sqlite';
 
 import { ensureWritableDir } from './pathUtils.js';
 
-const dataDir = ensureWritableDir({ envVar: 'DATA_DIR', defaultSubdir: 'data' });
+const dataDir = ensureWritableDir({
+  envVar: 'DATA_DIR',
+  defaultSubdir: 'data',
+  requireEnv: true,
+  purpose: 'databázi'
+});
 
 const dbPromise = open({
   filename: path.join(dataDir, 'app.db'),

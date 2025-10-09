@@ -11,11 +11,34 @@ function isWritable(directory) {
   }
 }
 
-export function ensureWritableDir({ envVar, defaultSubdir }) {
+export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, purpose }) {
   const candidates = [];
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
-  if (envVar && process.env[envVar]) {
-    candidates.push(path.resolve(process.env[envVar]));
+  const configuredValue = envVar && process.env[envVar] ? path.resolve(process.env[envVar]) : null;
+  if (configuredValue) {
+    candidates.push(configuredValue);
+  }
+
+  const needsPersistentWarning = Boolean(requireEnv && envVar && !configuredValue && isProduction);
+
+  const warnAboutFallback = (resolvedPath) => {
+    if (needsPersistentWarning && !configuredValue) {
+      console.warn(
+        `V produkčním prostředí by měla být proměnná ${envVar} nastavena na perzistentní úložiště pro ${
+          purpose || 'aplikaci'
+        }. ` +
+          `Používám fallbackový adresář ${resolvedPath}.`
+      );
+    }
+  };
+
+  const renderDiskRoots = [process.env.RENDER_DISK_ROOT, '/var/data', '/data'].filter(Boolean);
+  for (const root of renderDiskRoots) {
+    const resolved = defaultSubdir ? path.join(root, defaultSubdir) : root;
+    if (!candidates.includes(resolved)) {
+      candidates.push(resolved);
+    }
   }
 
   if (defaultSubdir) {
@@ -36,6 +59,7 @@ export function ensureWritableDir({ envVar, defaultSubdir }) {
     try {
       fs.mkdirSync(candidate, { recursive: true });
       if (isWritable(candidate)) {
+        warnAboutFallback(candidate);
         return candidate;
       }
     } catch (error) {
@@ -43,9 +67,18 @@ export function ensureWritableDir({ envVar, defaultSubdir }) {
         continue;
       }
       if (error.code === 'EEXIST' && isWritable(candidate)) {
+        warnAboutFallback(candidate);
         return candidate;
       }
     }
+  }
+
+  if (needsPersistentWarning && !configuredValue) {
+    throw new Error(
+      `V produkčním prostředí musí být proměnná ${envVar} nastavena na cestu k perzistentnímu úložišti pro ${
+        purpose || 'aplikaci'
+      }.`
+    );
   }
 
   throw new Error(`Nebylo možné vytvořit zapisovatelný adresář pro ${defaultSubdir || envVar || 'aplikaci'}`);

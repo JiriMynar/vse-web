@@ -2,7 +2,7 @@ services:
   - type: web
     name: vse-web
     env: node
-    plan: free
+    plan: starter
     region: frankfurt
     branch: main
     rootDir: .
