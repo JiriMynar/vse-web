@@ -142,6 +142,18 @@ const migrations = [
 
       await db.exec('CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);');
     }
+  },
+  {
+    version: 4,
+    async up(db) {
+      const columns = await db.all('PRAGMA table_info(users);');
+      const hasIsAdmin = columns.some((column) => column.name === 'is_admin');
+      if (!hasIsAdmin) {
+        await db.exec(
+          "ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1));"
+        );
+      }
+    }
   }
 ];
 

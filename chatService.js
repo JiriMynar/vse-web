@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
 
 const DEFAULT_PROMPTS = [
-  'Ahoj! Jak vám mohu pomoci?',
-  'Můžete mi říct více o tom, co potřebujete?',
-  'Jsem pouze ukázkový bot – odpovídám zjednodušeně.'
+  'Dobrý den, jsem virtuální asistent VŠE Studia. Jak vám mohu pomoci s projekty nebo správou účtu?',
+  'Potřebujete poradit se správou uživatelů, úpravou profilu nebo možnostmi chatu?',
+  'Jsem ukázkový bot – odpovědi mají informační charakter a vychází z aktuální konfigurace aplikace.'
 ];
 
 export async function getBotResponse(message) {

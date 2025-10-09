@@ -37,13 +37,13 @@ export async function registerUser(payload) {
 
   const passwordHash = await bcrypt.hash(password, 12);
   const result = await db.run(
-    'INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)',
+    'INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 0)',
     normalizedEmail,
     passwordHash,
     name.trim()
   );
 
-  const user = { id: result.lastID, email: normalizedEmail, name: name.trim() };
+  const user = { id: result.lastID, email: normalizedEmail, name: name.trim(), is_admin: 0 };
   return issueTokensForUser(user);
 }
 
@@ -79,7 +79,7 @@ export async function refreshSession(req) {
 
   const { userId, token, expiresAt } = await rotateRefreshToken(currentToken);
   const db = await getDb();
-  const user = await db.get('SELECT id, email, name FROM users WHERE id = ?', userId);
+  const user = await db.get('SELECT id, email, name, is_admin FROM users WHERE id = ?', userId);
   if (!user) {
     const error = new Error('Uživatel již neexistuje.');
     error.status = 404;
@@ -87,12 +87,16 @@ export async function refreshSession(req) {
   }
 
   const accessToken = signToken({ id: user.id, email: user.email, name: user.name });
-  return { user, accessToken, refreshToken: token, refreshExpiresAt: expiresAt };
+  return { user: normalizeUser(user), accessToken, refreshToken: token, refreshExpiresAt: expiresAt };
 }
 
 export async function getSessionUser(userId) {
   const db = await getDb();
-  return db.get('SELECT id, email, name, created_at FROM users WHERE id = ?', userId);
+  const user = await db.get('SELECT id, email, name, is_admin, created_at FROM users WHERE id = ?', userId);
+  if (!user) {
+    return null;
+  }
+  return { ...normalizeUser(user), createdAt: user.created_at };
 }
 
 export function attachAuthCookies(res, authPayload) {
@@ -115,14 +119,29 @@ async function revokeToken(token) {
   }
 }
 
+function normalizeUser(row) {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    isAdmin: Boolean(row.is_admin)
+  };
+}
+
 function issueTokensForUser(user) {
-  const payload = { id: user.id, email: user.email, name: user.name };
+  const normalized = normalizeUser(user);
+  const payload = {
+    id: normalized.id,
+    email: normalized.email,
+    name: normalized.name,
+    isAdmin: normalized.isAdmin
+  };
   const accessToken = signToken(payload, '15m');
   const refreshToken = randomBytes(40).toString('hex');
   const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   return persistRefreshToken(user.id, refreshToken, refreshExpiresAt).then(() => ({
-    user: { id: user.id, email: user.email, name: user.name },
+    user: normalized,
     accessToken,
     refreshToken,
     refreshExpiresAt

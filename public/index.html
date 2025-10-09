@@ -49,7 +49,9 @@
           <button class="nav-item active" data-view="chat" type="button">💬 Chat</button>
           <button class="nav-item" data-view="projects" type="button">📁 Projekty</button>
           <button class="nav-item" data-view="automations" type="button">⚙️ Automatizace</button>
+          <button class="nav-item" data-view="profile" type="button">👤 Profil</button>
           <button class="nav-item" data-view="help" type="button">❓ Nápověda</button>
+          <button id="nav-admin" class="nav-item hidden" data-view="admin" type="button">🛡️ Administrace</button>
         </nav>
         <footer class="workspace-footer">
           <button id="logout" class="ghost" type="button">Odhlásit se</button>
@@ -165,6 +167,60 @@
               <p>Načítám obsah…</p>
             </header>
           </article>
+        </section>
+
+        <section id="view-profile" class="view-panel hidden">
+          <div class="panel-header">
+            <div>
+              <h2>Osobní nastavení</h2>
+              <p>Upravte si zobrazované jméno a zabezpečte svůj účet.</p>
+            </div>
+          </div>
+          <div id="profile-message" class="message hidden" role="status" aria-live="polite"></div>
+          <div class="profile-grid">
+            <form id="profile-name-form" class="card form" autocomplete="off">
+              <h3>Změna jména</h3>
+              <label for="profile-name">Zobrazované jméno</label>
+              <input type="text" id="profile-name" required minlength="2" maxlength="120" />
+              <button type="submit" class="primary">Uložit změny</button>
+            </form>
+            <form id="profile-password-form" class="card form" autocomplete="off">
+              <h3>Změna hesla</h3>
+              <label for="profile-current-password">Aktuální heslo</label>
+              <input type="password" id="profile-current-password" required />
+              <label for="profile-new-password">Nové heslo</label>
+              <input type="password" id="profile-new-password" required minlength="6" />
+              <label for="profile-confirm-password">Potvrzení hesla</label>
+              <input type="password" id="profile-confirm-password" required minlength="6" />
+              <p class="form-hint">Nové heslo musí mít alespoň 6 znaků.</p>
+              <button type="submit" class="primary">Změnit heslo</button>
+            </form>
+          </div>
+        </section>
+
+        <section id="view-admin" class="view-panel hidden" aria-labelledby="admin-title">
+          <div class="panel-header">
+            <div>
+              <h2 id="admin-title">Správa uživatelů</h2>
+              <p>Sledujte registrované účty, resetujte hesla a odstraňujte přístupy.</p>
+            </div>
+          </div>
+          <div id="admin-message" class="message hidden" role="status" aria-live="polite"></div>
+          <div class="table-wrapper">
+            <table class="data-table" id="admin-users-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Jméno</th>
+                  <th>E-mail</th>
+                  <th>Role</th>
+                  <th>Vytvořeno</th>
+                  <th>Akce</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </section>
       </main>
     </div>
