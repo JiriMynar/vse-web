@@ -95,5 +95,7 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 - Logy se nacházejí v `logs/app.log` (nebo v `/tmp/vse-web/logs/app.log`)
 - Na hostingu s ephemerním souborovým systémem (Render, Railway apod.) přidejte Persistent Disk a přesměrujte proměnné `DATA_DIR`
-  a `LOG_DIR` na připojenou cestu (např. `/var/data`); pouze tak zůstane databáze zachovaná mezi deployi
+  a `LOG_DIR` na připojenou cestu (např. `/var/data` nebo `/data` podle zvoleného mount pathu); pouze tak zůstane databáze
+  zachovaná mezi deployi. Pokud potřebujete podrobný návod krok za krokem pro Render, podívejte se na dokument
+  [`docs/render-persistent-disk-setup.md`](docs/render-persistent-disk-setup.md).
 - V produkčním prostředí nezapomeňte nastavit silný `JWT_SECRET` a používat HTTPS
