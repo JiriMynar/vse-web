@@ -18,7 +18,12 @@ let secretFilePath;
 
 function resolveSecretFilePath() {
   if (!secretFilePath) {
-    const dir = ensureWritableDir({ envVar: 'DATA_DIR', defaultSubdir: 'data' });
+    const dir = ensureWritableDir({
+      envVar: 'DATA_DIR',
+      defaultSubdir: 'data',
+      requireEnv: true,
+      purpose: 'tajné klíče'
+    });
     secretFilePath = path.join(dir, SECRET_FILE_NAME);
   }
   return secretFilePath;
