@@ -13,6 +13,7 @@ function isWritable(directory) {
 
 export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, purpose }) {
   const candidates = [];
+
   const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
   const configuredValue = envVar && process.env[envVar] ? path.resolve(process.env[envVar]) : null;
@@ -39,14 +40,7 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
     if (!candidates.includes(resolved)) {
       candidates.push(resolved);
     }
-  }
 
-  if (requireEnv && envVar && !process.env[envVar] && isProduction) {
-    throw new Error(
-      `V produkčním prostředí musí být proměnná ${envVar} nastavena na cestu k perzistentnímu úložišti pro ${
-        purpose || 'aplikaci'
-      }.`
-    );
   }
 
   if (defaultSubdir) {
@@ -67,14 +61,20 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
     try {
       fs.mkdirSync(candidate, { recursive: true });
       if (isWritable(candidate)) {
+
         warnAboutFallback(candidate);
         return candidate;
       }
     } catch (error) {
-      if (error.code === 'EROFS' || error.code === 'EACCES') {
+      candidateErrors.set(candidate, { code: error.code || 'UNKNOWN', message: error.message });
+      if (configuredValue && candidate === configuredValue) {
+        candidateErrors.set(configuredValue, { code: error.code || 'UNKNOWN', message: error.message });
+      }
+      if (error.code === 'EROFS' || error.code === 'EACCES' || error.code === 'EPERM') {
         continue;
       }
       if (error.code === 'EEXIST' && isWritable(candidate)) {
+
         warnAboutFallback(candidate);
         return candidate;
       }
