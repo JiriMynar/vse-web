@@ -30,7 +30,7 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
    - Klikněte na **Add Environment Variable** a zadejte:
     - `JWT_SECRET`: nastavte libovolný dlouhý řetězec (např. generovaný na [https://www.random.org/strings/](https://www.random.org/strings/)).
       Pokud proměnnou vynecháte, aplikace si při startu sama vygeneruje bezpečný klíč a uloží ho do souboru `data/jwt_secret`.
-    - `DATA_DIR`: nastavte na `/var/data` (nebo jinou cestu, kde máte připojen Persistent Disk). Pokud proměnná chybí **nebo ukazuje na nedostupnou cestu**, aplikace vypíše důvod do logu, automaticky přepne na zapisovatelný fallback (např. `/tmp/vse-web/data`) a současně si tuto hodnotu uloží do `process.env.DATA_DIR`, aby ji používaly i další části systému – přesto je ruční nastavení na trvalý disk spolehlivější.
+
     - `LOG_DIR`: (volitelné) nastavte na `/var/data/logs`, pokud chcete mít logy také na disku.
     - `OPENAI_API_KEY` nebo jiný klíč podle toho, jaké chatbot API budete používat (volitelné – můžete doplnit později).
    - Bez Persistent Disku se data ukládají do `/tmp`, což je na Renderu ephemerní úložiště – po každém redeployi nebo restartu se vymaže, a to i pokud se použil fallback mount point bez skutečně připojeného disku.

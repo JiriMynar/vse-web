@@ -13,7 +13,7 @@ function isWritable(directory) {
 
 export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, purpose }) {
   const candidates = [];
-  const candidateErrors = new Map();
+
   const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
   const configuredValue = envVar && process.env[envVar] ? path.resolve(process.env[envVar]) : null;
@@ -40,6 +40,7 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
     if (!candidates.includes(resolved)) {
       candidates.push(resolved);
     }
+
   }
 
   if (defaultSubdir) {
@@ -60,19 +61,7 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
     try {
       fs.mkdirSync(candidate, { recursive: true });
       if (isWritable(candidate)) {
-        const usedFallback = configuredValue && path.resolve(candidate) !== configuredValue;
-        const lastError = candidateErrors.get(configuredValue);
-        if (usedFallback && lastError) {
-          console.warn(
-            `Adresář ${configuredValue} nebyl použit pro ${purpose || 'aplikaci'} (${lastError.code}: ${
-              lastError.message
-            }). ` +
-              `Pokračuji s ${candidate}.`
-          );
-        }
-        if (envVar && (!configuredValue || usedFallback)) {
-          process.env[envVar] = candidate;
-        }
+
         warnAboutFallback(candidate);
         return candidate;
       }
@@ -85,19 +74,7 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
         continue;
       }
       if (error.code === 'EEXIST' && isWritable(candidate)) {
-        const usedFallback = configuredValue && path.resolve(candidate) !== configuredValue;
-        const lastError = candidateErrors.get(configuredValue);
-        if (usedFallback && lastError) {
-          console.warn(
-            `Adresář ${configuredValue} nebyl použit pro ${purpose || 'aplikaci'} (${lastError.code}: ${
-              lastError.message
-            }). ` +
-              `Pokračuji s ${candidate}.`
-          );
-        }
-        if (envVar && (!configuredValue || usedFallback)) {
-          process.env[envVar] = candidate;
-        }
+
         warnAboutFallback(candidate);
         return candidate;
       }
