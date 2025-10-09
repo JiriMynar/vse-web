@@ -9,6 +9,10 @@ services:
     buildCommand: npm install
     startCommand: npm run start
     autoDeploy: true
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: JWT_SECRET
         sync: false
@@ -16,3 +20,5 @@ services:
         sync: false
       - key: CHAT_API_TOKEN
         sync: false
+      - key: DATA_DIR
+        value: /var/data
