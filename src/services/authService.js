@@ -86,8 +86,14 @@ export async function refreshSession(req) {
     throw error;
   }
 
-  const accessToken = signToken({ id: user.id, email: user.email, name: user.name });
-  return { user: normalizeUser(user), accessToken, refreshToken: token, refreshExpiresAt: expiresAt };
+  const normalizedUser = normalizeUser(user);
+  const accessToken = signToken({
+    id: normalizedUser.id,
+    email: normalizedUser.email,
+    name: normalizedUser.name,
+    isAdmin: normalizedUser.isAdmin
+  });
+  return { user: normalizedUser, accessToken, refreshToken: token, refreshExpiresAt: expiresAt };
 }
 
 export async function getSessionUser(userId) {
