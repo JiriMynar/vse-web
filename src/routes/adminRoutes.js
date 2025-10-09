@@ -5,7 +5,9 @@ import { requireAdmin } from '../middleware/authorization.js';
 import {
   listUsersController,
   deleteUserController,
-  resetUserPasswordController
+  resetUserPasswordController,
+  updateUserRoleController,
+  resetUserDatabaseController
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -14,5 +16,7 @@ router.use(authMiddleware, requireAdmin);
 router.get('/users', listUsersController);
 router.delete('/users/:id', deleteUserController);
 router.post('/users/:id/reset-password', resetUserPasswordController);
+router.patch('/users/:id/role', updateUserRoleController);
+router.post('/users/reset', resetUserDatabaseController);
 
 export { router };
