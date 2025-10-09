@@ -79,15 +79,6 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 - Požadavkem `POST /api/admin/users/reset` lze vymazat všechny účty a související data (kromě aktuálně přihlášeného administrátora).
 - Všichni uživatelé musí po resetu databáze znovu projít registrací a přihlášením.
 
-### Hromadné vymazání z příkazové řádky
-
-Pokud potřebujete smazat všechny registrované účty bez přímého volání API, použijte skript:
-
-```bash
-npm run reset:users [email_administratora]
-```
-
-Bez parametru se použije výchozí účet `j.mynar93@seznam.cz`. Skript zachová daného administrátora v databázi a odstraní všechny ostatní účty, relace i související data.
 
 ## Testovací scénář
 
