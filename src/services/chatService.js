@@ -260,7 +260,8 @@ export async function createMessage(userId, payload) {
   const credential = await resolveChatApiCredential(userId);
   const reply = await getBotResponse(message, {
     apiKey: credential?.apiKey,
-    provider: credential?.provider
+    provider: credential?.provider,
+    config: credential?.config
   });
   const assistantInsert = await db.run(
     'INSERT INTO chat_messages (user_id, thread_id, role, content) VALUES (?, ?, ?, ?)',

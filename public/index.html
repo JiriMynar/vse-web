@@ -286,16 +286,20 @@
     <template id="chat-api-connector-template">
       <section class="api-connector card">
         <div class="connector-header">
-          <div>
+          <div class="connector-info">
             <h3 class="connector-name"></h3>
             <p class="connector-description"></p>
           </div>
-          <span class="connector-status"></span>
+          <div class="connector-meta">
+            <label class="connector-active">
+              <input type="radio" name="chat-api-active" />
+              <span>Aktivní konektor</span>
+            </label>
+            <span class="connector-status"></span>
+          </div>
         </div>
         <form class="form connector-form" autocomplete="off">
-          <label>API klíč</label>
-          <input type="password" name="apiKey" required placeholder="Zadejte API klíč" autocomplete="off" />
-          <p class="form-hint">Klíč je uložen šifrovaně a nikdy se nezobrazuje v plné podobě.</p>
+          <div class="connector-fields"></div>
           <div class="connector-feedback message hidden" role="status" aria-live="polite"></div>
           <div class="connector-actions">
             <button type="submit" class="primary">Uložit</button>

@@ -490,70 +490,169 @@ function renderChatApiSettings() {
     return;
   }
 
-  setChatApiMessage('');
   state.chatApiConnectors.forEach((connector) => {
     const fragment = chatApiConnectorTemplate.content.cloneNode(true);
+    const section = fragment.querySelector('.api-connector');
     const nameEl = fragment.querySelector('.connector-name');
     const descriptionEl = fragment.querySelector('.connector-description');
     const statusEl = fragment.querySelector('.connector-status');
+    const activeRadio = fragment.querySelector('.connector-active input');
     const form = fragment.querySelector('.connector-form');
-    const input = form.querySelector('input[name="apiKey"]');
-    const label = form.querySelector('label');
+    const fieldsContainer = fragment.querySelector('.connector-fields');
     const submitButton = form.querySelector('button[type="submit"]');
     const feedback = fragment.querySelector('.connector-feedback');
 
+    section.dataset.provider = connector.provider;
     nameEl.textContent = connector.name;
     descriptionEl.textContent = connector.description;
 
     const sanitizedProvider = connector.provider.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
-    const inputId = `chat-api-key-${sanitizedProvider || 'connector'}`;
-    input.id = inputId;
-    if (label) {
-      label.setAttribute('for', inputId);
-    }
 
     const updateStatus = () => {
       if (!statusEl) return;
-      if (connector.hasKey) {
-        const parts = ['Klíč uložen'];
-        if (connector.keyPreview) {
-          parts.push(`…${connector.keyPreview}`);
-        }
-        if (connector.updatedAt) {
-          parts.push(`aktualizováno ${formatRelativeTime(connector.updatedAt)}`);
-        }
-        statusEl.textContent = parts.join(' • ');
-      } else {
-        statusEl.textContent = 'Klíč není uložen';
+      const parts = [];
+      if (connector.isActive) {
+        parts.push('Aktivní');
       }
+      if (connector.hasKey) {
+        const keyParts = ['Klíč uložen'];
+        if (connector.keyPreview) {
+          keyParts.push(`…${connector.keyPreview}`);
+        }
+        parts.push(keyParts.join(' '));
+      } else {
+        parts.push('Klíč není uložen');
+      }
+      if (connector.updatedAt) {
+        parts.push(`aktualizováno ${formatRelativeTime(connector.updatedAt)}`);
+      }
+      statusEl.textContent = parts.join(' • ');
     };
 
     updateStatus();
 
+    if (activeRadio) {
+      activeRadio.value = connector.provider;
+      activeRadio.checked = Boolean(connector.isActive);
+      activeRadio.disabled = !connector.hasKey;
+      activeRadio.title = connector.hasKey
+        ? 'Používat tento konektor pro odpovědi asistenta.'
+        : 'Nejprve uložte konfiguraci, poté jej můžete aktivovat.';
+
+      activeRadio.addEventListener('change', async () => {
+        if (!activeRadio.checked) {
+          return;
+        }
+        if (!connector.hasKey) {
+          activeRadio.checked = false;
+          setChatApiMessage('Nejprve uložte konfiguraci vybraného konektoru.', 'error');
+          return;
+        }
+        try {
+          activeRadio.disabled = true;
+          const response = await apiFetch('/api/chat/api-settings', {
+            method: 'POST',
+            body: JSON.stringify({ provider: connector.provider, isActive: true })
+          });
+          if (response?.connectors) {
+            state.chatApiConnectors = response.connectors;
+            renderChatApiSettings();
+          }
+          if (response?.message) {
+            setChatApiMessage(response.message, 'success');
+          }
+        } catch (error) {
+          activeRadio.checked = Boolean(connector.isActive);
+          setChatApiMessage(error.message, 'error');
+        } finally {
+          if (document.body.contains(activeRadio)) {
+            activeRadio.disabled = false;
+          }
+        }
+      });
+    }
+
+    if (fieldsContainer) {
+      fieldsContainer.innerHTML = '';
+      (connector.fields || []).forEach((field) => {
+        const fieldWrapper = document.createElement('div');
+        fieldWrapper.className = 'connector-field';
+
+        const label = document.createElement('label');
+        const fieldId = `chat-api-${sanitizedProvider}-${field.name}`;
+        label.setAttribute('for', fieldId);
+        label.textContent = field.label || field.name;
+
+        const input = document.createElement('input');
+        input.id = fieldId;
+        input.name = field.name;
+        input.type = field.secret ? 'password' : field.type === 'url' ? 'url' : 'text';
+        input.placeholder = field.placeholder || '';
+        input.autocomplete = field.secret ? 'off' : 'on';
+        if (field.required && !connector.hasKey) {
+          input.required = true;
+        }
+
+        const existingValue = connector.config ? connector.config[field.name] : undefined;
+        if (field.secret) {
+          input.value = '';
+        } else if (existingValue !== undefined && existingValue !== null) {
+          input.value = String(existingValue);
+        }
+
+        fieldWrapper.appendChild(label);
+        fieldWrapper.appendChild(input);
+
+        const hintText = field.hint || (field.secret
+          ? 'Údaj je uložen šifrovaně a nebude nikdy zobrazen v plné podobě.'
+          : '');
+        if (hintText) {
+          const hint = document.createElement('p');
+          hint.className = 'connector-field-hint';
+          hint.textContent = hintText;
+          fieldWrapper.appendChild(hint);
+        }
+
+        fieldsContainer.appendChild(fieldWrapper);
+      });
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const apiKey = input.value.trim();
-      if (!apiKey) {
-        feedback.textContent = 'Zadejte platný API klíč.';
-        feedback.className = 'connector-feedback message error';
-        feedback.classList.remove('hidden');
-        return;
-      }
+      if (!feedback) return;
       feedback.textContent = '';
       feedback.classList.add('hidden');
+
+      const formData = new FormData(form);
+      const payload = { provider: connector.provider, isActive: Boolean(activeRadio?.checked) };
+
+      (connector.fields || []).forEach((field) => {
+        const raw = formData.get(field.name);
+        if (typeof raw !== 'string') {
+          return;
+        }
+        const trimmed = raw.trim();
+        if (trimmed) {
+          payload[field.name] = trimmed;
+        } else if (!field.secret && connector.config && connector.config[field.name] !== undefined) {
+          payload[field.name] = '';
+        }
+      });
+
       try {
         setInputsDisabled(form, true);
         setButtonLoading(submitButton, true, 'Ukládám…');
-        const { connector: updated } = await apiFetch('/api/chat/api-settings', {
+        const response = await apiFetch('/api/chat/api-settings', {
           method: 'POST',
-          body: JSON.stringify({ provider: connector.provider, apiKey })
+          body: JSON.stringify(payload)
         });
-        Object.assign(connector, updated);
-        updateStatus();
-        input.value = '';
-        feedback.textContent = 'API klíč byl uložen.';
-        feedback.className = 'connector-feedback message success';
-        feedback.classList.remove('hidden');
+        if (response?.connectors) {
+          state.chatApiConnectors = response.connectors;
+          renderChatApiSettings();
+        }
+        if (response?.message) {
+          setChatApiMessage(response.message, 'success');
+        }
       } catch (error) {
         feedback.textContent = error.message;
         feedback.className = 'connector-feedback message error';
@@ -568,17 +667,24 @@ function renderChatApiSettings() {
   });
 }
 
-async function loadChatApiSettings() {
+async function loadChatApiSettings(options = {}) {
   if (!chatApiConnectorList) return;
+  const { silent = false } = options;
   try {
-    setChatApiMessage('Načítám nastavení…');
+    if (!silent) {
+      setChatApiMessage('Načítám nastavení…');
+    }
     const { connectors } = await apiFetch('/api/chat/api-settings');
     state.chatApiConnectors = connectors;
     renderChatApiSettings();
+    if (!silent) {
+      setChatApiMessage('');
+    }
   } catch (error) {
     state.chatApiConnectors = [];
     chatApiConnectorList.innerHTML = '';
     setChatApiMessage(error.message, 'error');
+    throw error;
   }
 }
 
@@ -1210,7 +1316,11 @@ function initEventListeners() {
       }
       state.chatApiConnectors = [];
       setChatApiMessage('Načítám nastavení…');
-      await loadChatApiSettings();
+      try {
+        await loadChatApiSettings();
+      } catch (error) {
+        console.error('Načtení nastavení konektorů selhalo:', error);
+      }
     });
   }
 
