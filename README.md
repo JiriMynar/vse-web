@@ -70,6 +70,14 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 - Správa projektů včetně archivace a základních metrik
 - Návrh automatizací s konfigurací ve formátu JSON a možností měnit stav (aktivní/neaktivní)
 - Kompletní help centrum s popisem pracovních postupů přímo v aplikaci
+- Administrátorské rozhraní pro správu účtů (reset hesla, přidělení role, hromadné vymazání)
+
+## Správa administrátora
+
+- Výchozí administrátorský účet je automaticky vytvořen při startu aplikace (`j.mynar93@seznam.cz`).
+- Administrátor může pomocí `PATCH /api/admin/users/:id/role` přepínat role mezi `user` a `admin`.
+- Požadavkem `POST /api/admin/users/reset` lze vymazat všechny účty a související data (kromě aktuálně přihlášeného administrátora).
+- Všichni uživatelé musí po resetu databáze znovu projít registrací a přihlášením.
 
 ## Testovací scénář
 
