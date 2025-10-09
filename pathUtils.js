@@ -41,6 +41,14 @@ export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, p
     }
   }
 
+  if (requireEnv && envVar && !process.env[envVar] && isProduction) {
+    throw new Error(
+      `V produkčním prostředí musí být proměnná ${envVar} nastavena na cestu k perzistentnímu úložišti pro ${
+        purpose || 'aplikaci'
+      }.`
+    );
+  }
+
   if (defaultSubdir) {
     candidates.push(path.join(process.cwd(), defaultSubdir));
   }
