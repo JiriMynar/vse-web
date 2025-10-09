@@ -188,12 +188,6 @@ export async function resetUserDatabase({ actorId }) {
     throw error;
   }
 
-  if (!actor.is_admin) {
-    const error = new Error('Tuto akci může provést pouze administrátor.');
-    error.status = 403;
-    throw error;
-  }
-
   await db.exec('BEGIN IMMEDIATE TRANSACTION;');
   try {
     const tablesToClear = [

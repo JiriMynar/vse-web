@@ -74,45 +74,12 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 ## Správa administrátora
 
-- Výchozí administrátorský účet je automaticky vytvořen při startu aplikace (`admin@admintes.cz` / heslo `admintes`).
+
 - Administrátor může pomocí `PATCH /api/admin/users/:id/role` přepínat role mezi `user` a `admin`.
 - Požadavkem `POST /api/admin/users/reset` lze vymazat všechny účty a související data (kromě aktuálně přihlášeného administrátora).
 - Všichni uživatelé musí po resetu databáze znovu projít registrací a přihlášením.
 
-### Konfigurace výchozího administrátora
 
-Proměnné prostředí umožňují přizpůsobit, který účet má být při startu aplikace zachován nebo vytvořen:
-
-- `ADMIN_EMAIL` – e-mail účtu, který se má udržovat jako administrátor (výchozí `admin@admintes.cz`).
-- `ADMIN_NAME` – zobrazované jméno nově vytvořeného administrátora (výchozí `Admin`).
-- `ADMIN_PASSWORD` – volitelné statické heslo; pokud není uvedeno, použije se heslo `admintes`.
-
-### Hromadné vymazání z příkazové řádky
-
-Pokud potřebujete smazat všechny registrované účty bez přímého volání API, použijte skript:
-
-```bash
-npm run reset:users [email_administratora]
-```
-
-Bez parametru se použije hodnota `ADMIN_EMAIL` (nebo výchozí účet `admin@admintes.cz`). Skript před provedením resetu zajistí, že daný e-mail existuje s rolí administrátora – pokud ne, automaticky ho vytvoří (s heslem `admintes`). Poté zachová uvedeného administrátora v databázi a odstraní všechny ostatní účty, relace i související data.
-
-Praktický postup:
-
-1. Ověřte, že máte nainstalované závislosti (`npm install`).
-2. Spusťte `npm run reset:users` (volitelně s e-mailem administrátora).
-3. Přihlaste se pomocí zachovaného nebo nově vytvořeného administrátora a začněte znovu zakládat účty.
-
-### Reset přes API
-
-Reset lze provést také z aplikace nebo integrace odesláním požadavku:
-
-```http
-POST /api/admin/users/reset
-Authorization: Bearer <token_admina>
-```
-
-Endpoint odstraní všechny účty a data spojená s uživateli a ponechá pouze aktuálně přihlášeného administrátora, který akci spouští.
 
 ## Testovací scénář
 
