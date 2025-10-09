@@ -19,6 +19,14 @@
       ]
     },
     {
+      "title": "Integrace agentů",
+      "items": [
+        "V dialogu \"Nastavení chat API\" vyberte požadovaný konektor (OpenAI nebo AI Foundry) a vyplňte požadovaná pole.",
+        "U OpenAI stačí zadat API klíč, volitelně model a případnou vlastní URL. Pokud pole necháte prázdné, použije se výchozí model gpt-4o-mini a oficiální endpoint.",
+        "Pro AI Foundry doplňte API klíč, základní URL služby a ID agenta. Přepínačem \"Aktivní konektor\" určíte, který poskytovatel bude chat používat."
+      ]
+    },
+    {
       "title": "Projekty",
       "items": [
         "Projekty slouží jako složky pro skupiny chatů a automatizací. Každý projekt má barvu, popis a stav.",

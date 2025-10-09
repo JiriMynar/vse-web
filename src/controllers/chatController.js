@@ -97,8 +97,12 @@ export async function listChatApiSettingsController(req, res, next) {
 
 export async function upsertChatApiKeyController(req, res, next) {
   try {
-    const connector = await upsertChatApiKey(req.user.id, req.body);
-    res.json({ message: 'API klíč byl uložen.', connector });
+    const result = await upsertChatApiKey(req.user.id, req.body);
+    res.json({
+      message: result.message || 'Nastavení konektoru bylo uloženo.',
+      connector: result.connector,
+      connectors: result.connectors
+    });
   } catch (error) {
     next(error);
   }

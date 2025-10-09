@@ -164,17 +164,55 @@ const migrations = [
           user_id INTEGER NOT NULL,
           provider TEXT NOT NULL,
           encrypted_key TEXT NOT NULL,
+          encrypted_config TEXT,
+          is_active INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0, 1)),
           key_preview TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(user_id, provider),
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-        );
+      );
       `);
 
       await db.exec(
         'CREATE INDEX IF NOT EXISTS idx_chat_api_credentials_user ON chat_api_credentials(user_id)'
       );
+    }
+  },
+  {
+    version: 6,
+    async up(db) {
+      const columns = await db.all('PRAGMA table_info(chat_api_credentials);');
+      const hasEncryptedConfig = columns.some((column) => column.name === 'encrypted_config');
+      const hasIsActive = columns.some((column) => column.name === 'is_active');
+
+      if (!hasEncryptedConfig) {
+        await db.exec('ALTER TABLE chat_api_credentials ADD COLUMN encrypted_config TEXT;');
+      }
+
+      if (!hasIsActive) {
+        await db.exec(
+          'ALTER TABLE chat_api_credentials ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0 CHECK (is_active IN (0, 1));'
+        );
+      }
+
+      await db.exec("UPDATE chat_api_credentials SET provider = 'openai-chat' WHERE provider = 'vse-chat'");
+
+      if (!hasIsActive) {
+        await db.exec(`
+          UPDATE chat_api_credentials
+          SET is_active = 1
+          WHERE id IN (
+            SELECT c.id
+            FROM chat_api_credentials c
+            WHERE c.updated_at = (
+              SELECT MAX(updated_at)
+              FROM chat_api_credentials c2
+              WHERE c2.user_id = c.user_id
+            )
+          );
+        `);
+      }
     }
   }
 ];
