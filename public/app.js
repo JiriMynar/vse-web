@@ -82,6 +82,16 @@ const promptDialog = document.getElementById('prompt-dialog');
 const promptTitle = document.getElementById('prompt-title');
 const promptLabel = document.getElementById('prompt-label');
 const promptInput = document.getElementById('prompt-input');
+const profileMessage = document.getElementById('profile-message');
+const profileNameForm = document.getElementById('profile-name-form');
+const profileNameInput = document.getElementById('profile-name');
+const profilePasswordForm = document.getElementById('profile-password-form');
+const profileCurrentPasswordInput = document.getElementById('profile-current-password');
+const profileNewPasswordInput = document.getElementById('profile-new-password');
+const profileConfirmPasswordInput = document.getElementById('profile-confirm-password');
+const adminMessage = document.getElementById('admin-message');
+const adminUsersTable = document.getElementById('admin-users-table');
+const adminUsersTableBody = adminUsersTable ? adminUsersTable.querySelector('tbody') : null;
 
 const ENTER_TO_SEND_KEY = 'vse-enter-to-send';
 const THEME_KEY = 'vse-theme';
@@ -1509,14 +1519,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-const profileMessage = document.getElementById('profile-message');
-const profileNameForm = document.getElementById('profile-name-form');
-const profileNameInput = document.getElementById('profile-name');
-const profilePasswordForm = document.getElementById('profile-password-form');
-const profileCurrentPasswordInput = document.getElementById('profile-current-password');
-const profileNewPasswordInput = document.getElementById('profile-new-password');
-const profileConfirmPasswordInput = document.getElementById('profile-confirm-password');
-
-const adminMessage = document.getElementById('admin-message');
-const adminUsersTable = document.getElementById('admin-users-table');
-const adminUsersTableBody = adminUsersTable ? adminUsersTable.querySelector('tbody') : null;
