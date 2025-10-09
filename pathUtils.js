@@ -11,11 +11,20 @@ function isWritable(directory) {
   }
 }
 
-export function ensureWritableDir({ envVar, defaultSubdir }) {
+export function ensureWritableDir({ envVar, defaultSubdir, requireEnv = false, purpose }) {
   const candidates = [];
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
   if (envVar && process.env[envVar]) {
     candidates.push(path.resolve(process.env[envVar]));
+  }
+
+  if (requireEnv && envVar && !process.env[envVar] && isProduction) {
+    throw new Error(
+      `V produkčním prostředí musí být proměnná ${envVar} nastavena na cestu k perzistentnímu úložišti pro ${
+        purpose || 'aplikaci'
+      }.`
+    );
   }
 
   if (defaultSubdir) {
