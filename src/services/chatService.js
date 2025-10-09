@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { getDb } from '../../db.js';
 import { getBotResponse } from '../../chatService.js';
+import { resolveChatApiCredential } from './chatApiService.js';
 import { emitEvent } from '../lib/eventBus.js';
 
 const threadUpdateChannel = (userId) => `threads:${userId}`;
@@ -204,7 +205,11 @@ export async function createMessage(userId, payload) {
     message: { role: 'user', content: message, created_at: new Date().toISOString() }
   });
 
-  const reply = await getBotResponse(message);
+  const credential = await resolveChatApiCredential(userId);
+  const reply = await getBotResponse(message, {
+    apiKey: credential?.apiKey,
+    provider: credential?.provider
+  });
   await db.run(
     'INSERT INTO chat_messages (user_id, thread_id, role, content) VALUES (?, ?, ?, ?)',
     userId,

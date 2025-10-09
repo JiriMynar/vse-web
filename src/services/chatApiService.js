@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { getDb } from '../../db.js';
-import { encryptSecret } from '../lib/crypto.js';
+import { encryptSecret, decryptSecret } from '../lib/crypto.js';
 
 const connectors = [
   {
@@ -86,4 +86,33 @@ export async function upsertChatApiKey(userId, payload) {
     keyPreview: record?.key_preview || null,
     updatedAt: record?.updated_at || null
   };
+}
+
+export async function resolveChatApiCredential(userId) {
+  const db = await getDb();
+  const record = await db.get(
+    'SELECT provider, encrypted_key FROM chat_api_credentials WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1',
+    userId
+  );
+
+  if (!record?.provider || !record?.encrypted_key) {
+    return null;
+  }
+
+  const connector = getConnectorDefinition(record.provider);
+  if (!connector) {
+    return null;
+  }
+
+  try {
+    const apiKey = decryptSecret(record.encrypted_key);
+    if (!apiKey) {
+      return null;
+    }
+
+    return { provider: record.provider, apiKey };
+  } catch (error) {
+    console.error('Nepodařilo se dešifrovat uložený API klíč:', error.message);
+    return null;
+  }
 }
