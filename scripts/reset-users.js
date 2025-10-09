@@ -1,17 +1,6 @@
 #!/usr/bin/env node
 import process from 'node:process';
 
-import { getDb } from '../db.js';
-import { ensureAdminUser, resetUserDatabase } from '../src/services/adminService.js';
-
-async function main() {
-  const emailArg = process.argv[2];
-  const adminEmail = emailArg || process.env.ADMIN_EMAIL || 'j.mynar93@seznam.cz';
-
-  const created = await ensureAdminUser();
-  if (created) {
-    console.log(
-      `Byl vytvořen výchozí administrátor ${created.email} s dočasným heslem ${created.password}.`
     );
   }
 

@@ -5,7 +5,23 @@ import { z } from 'zod';
 import { getDb } from '../../db.js';
 import { logger } from '../../logger.js';
 
-const ADMIN_EMAIL = 'j.mynar93@seznam.cz';
+function normalizeEmail(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : value;
+}
+
+function resolveAdminConfig(options = {}) {
+  const fallbackEmail = options.email ?? process.env.ADMIN_EMAIL ?? 'admin@admintes.cz';
+  const email = normalizeEmail(fallbackEmail);
+
+  if (!email) {
+    throw new Error('Administrátorský e-mail není nastaven.');
+  }
+
+  const name = options.name ?? process.env.ADMIN_NAME ?? 'Admin';
+  const password = options.password ?? process.env.ADMIN_PASSWORD ?? 'admintes';
+
+  return { email, name, password };
+}
 
 function toUserPayload(row) {
   return {
@@ -17,32 +33,37 @@ function toUserPayload(row) {
   };
 }
 
-export async function ensureAdminUser() {
+export async function ensureAdminUser(options = {}) {
+  const { email, name, password: predefinedPassword } = resolveAdminConfig(options);
   const db = await getDb();
-  const existing = await db.get('SELECT * FROM users WHERE email = ?', ADMIN_EMAIL);
+  const existing = await db.get('SELECT * FROM users WHERE email = ?', email);
 
   if (existing) {
     if (!existing.is_admin) {
       await db.run('UPDATE users SET is_admin = 1 WHERE id = ?', existing.id);
-      logger.info(`Aktualizován administrátorský účet ${ADMIN_EMAIL}.`);
+      logger.info(`Aktualizován administrátorský účet ${email}.`);
     }
     return null;
   }
 
-  const password = generatePassword();
+  const password = predefinedPassword || generatePassword();
   const passwordHash = await bcrypt.hash(password, 12);
-  const name = 'Administrátor';
   const result = await db.run(
     'INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 1)',
-    ADMIN_EMAIL,
+    email,
     passwordHash,
     name
   );
 
+  if (predefinedPassword) {
+    logger.warn(`Vytvořen administrátorský účet ${email} (ID ${result.lastID}).`);
+    return null;
+  }
+
   logger.warn(
-    `Vytvořen nový administrátorský účet ${ADMIN_EMAIL} (ID ${result.lastID}). Dočasné heslo: ${password}`
+    `Vytvořen nový administrátorský účet ${email} (ID ${result.lastID}). Dočasné heslo: ${password}`
   );
-  return { email: ADMIN_EMAIL, password };
+  return { email, password };
 }
 
 export async function listAllUsers() {
