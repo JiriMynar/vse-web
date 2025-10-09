@@ -30,10 +30,10 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
    - Klikněte na **Add Environment Variable** a zadejte:
     - `JWT_SECRET`: nastavte libovolný dlouhý řetězec (např. generovaný na [https://www.random.org/strings/](https://www.random.org/strings/)).
       Pokud proměnnou vynecháte, aplikace si při startu sama vygeneruje bezpečný klíč a uloží ho do souboru `data/jwt_secret`.
-    - `DATA_DIR`: nastavte na `/var/data` (nebo jinou cestu, kde máte připojen Persistent Disk). Tato hodnota zajistí, že databáze zůstane zachována i po redeployi.
+    - `DATA_DIR`: nastavte na `/var/data` (nebo jinou cestu, kde máte připojen Persistent Disk). Pokud proměnnou vynecháte, aplikace se pokusí použít typické mount pointy (`/var/data`, `/data`) a zároveň vypíše varování do logu – explicitní nastavení je ale spolehlivější.
     - `LOG_DIR`: (volitelné) nastavte na `/var/data/logs`, pokud chcete mít logy také na disku.
     - `OPENAI_API_KEY` nebo jiný klíč podle toho, jaké chatbot API budete používat (volitelné – můžete doplnit později).
-   - Bez Persistent Disku se data ukládají do `/tmp`, což je na Renderu ephemerní úložiště – po každém redeployi nebo restartu se vymaže.
+   - Bez Persistent Disku se data ukládají do `/tmp`, což je na Renderu ephemerní úložiště – po každém redeployi nebo restartu se vymaže, a to i pokud se použil fallback mount point bez skutečně připojeného disku.
 
 7. **Spusťte nasazení**
    - Klikněte na tlačítko **Create Web Service**.
@@ -50,5 +50,5 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
 ## Časté problémy
 
 - **Chyba s `requirements.txt`**: znamená, že byla omylem zvolena Python služba. Zastavte službu, klikněte na **Settings → Delete Web Service** a založte ji znovu s runtime `Node`.
-- **Chyba `EROFS` nebo `SQLITE_CANTOPEN`**: vznikala, když aplikace chtěla zapisovat do read-only adresáře. Aktuální verze aplikace ukládá data do `/tmp`, takže se chyba už neobjeví. Pokud chcete trvalé úložiště, vytvořte v Renderu *Persistent Disk* a hodnoty `DATA_DIR`/`LOG_DIR` nastavte na připojenou cestu.
+- **Chyba `EROFS` nebo `SQLITE_CANTOPEN`**: vznikala, když aplikace chtěla zapisovat do read-only adresáře. Aktuální verze aplikace preferuje mount pointy `/var/data`/`/data` a jinak ukládá data do `/tmp`, takže se chyba už neobjeví. Pokud chcete trvalé úložiště, vytvořte v Renderu *Persistent Disk* a hodnoty `DATA_DIR`/`LOG_DIR` nastavte na připojenou cestu.
 
