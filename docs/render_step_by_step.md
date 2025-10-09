@@ -21,22 +21,29 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
    - **Build Command**: `npm install` (Render jej doplní automaticky).
    - **Start Command**: `npm start` (také se doplní automaticky, případně zadejte ručně).
 
-5. **Zadejte Environment Variables**
+5. **Připojte trvalé úložiště (doporučeno)**
+   - V průvodci nasazením otevřete sekci **Advanced** a klikněte na **Add Disk**.
+   - Zadejte alespoň 1 GB, název například `data` a **Mount Path** nastavte na `/var/data`.
+   - Po vytvoření služby lze disk přidat i zpětně v záložce **Disks**.
+
+6. **Zadejte Environment Variables**
    - Klikněte na **Add Environment Variable** a zadejte:
     - `JWT_SECRET`: nastavte libovolný dlouhý řetězec (např. generovaný na [https://www.random.org/strings/](https://www.random.org/strings/)).
       Pokud proměnnou vynecháte, aplikace si při startu sama vygeneruje bezpečný klíč a uloží ho do souboru `data/jwt_secret`.
-     - `OPENAI_API_KEY` nebo jiný klíč podle toho, jaké chatbot API budete používat (volitelné – můžete doplnit později).
-   - Ponechte ostatní hodnoty prázdné; aplikace si databázi a logy uloží do `/tmp` automaticky.
+    - `DATA_DIR`: nastavte na `/var/data` (nebo jinou cestu, kde máte připojen Persistent Disk). Tato hodnota zajistí, že databáze zůstane zachována i po redeployi.
+    - `LOG_DIR`: (volitelné) nastavte na `/var/data/logs`, pokud chcete mít logy také na disku.
+    - `OPENAI_API_KEY` nebo jiný klíč podle toho, jaké chatbot API budete používat (volitelné – můžete doplnit později).
+   - Bez Persistent Disku se data ukládají do `/tmp`, což je na Renderu ephemerní úložiště – po každém redeployi nebo restartu se vymaže.
 
-6. **Spusťte nasazení**
+7. **Spusťte nasazení**
    - Klikněte na tlačítko **Create Web Service**.
    - Render spustí build (`npm install`) a následně start služby (`npm start`). Na stránce služby sledujte logy. Úspěšné nasazení končí hláškou `Server listening on port 10000` (nebo na portu, který Render přidělí).
 
-7. **Otestujte aplikaci**
+8. **Otestujte aplikaci**
    - Po dokončení nasazení klikněte na tlačítko **Open in Browser**.
    - Otevře se stránka s přihlášením/registrací. Vytvořte si první účet, přihlaste se a zkuste odeslat zprávu v chatu. Bez API klíče se odpovědi bota nezobrazí, ale historie zpráv se uloží.
 
-8. **Aktualizace a nové deploye**
+9. **Aktualizace a nové deploye**
    - Při každém pushi na vybranou větev (např. `main`) Render automaticky spustí nový build a nasazení.
    - Pokud potřebujete změnit proměnné prostředí, najdete je v záložce **Environment** na stránce služby. Po změně klikněte na **Save Changes** a poté na **Manual Deploy → Deploy Latest Commit**.
 

@@ -36,6 +36,8 @@ Konfiguraci lze řídit pomocí souboru `.env` (volitelný). Dostupné proměnn�
   klíč a uloží ho do `data/jwt_secret`)
 - `CHAT_API_URL` – URL externího chatovacího API (volitelné)
 - `CHAT_API_TOKEN` – token, který se odešle v hlavičce `Authorization` při volání externího API (volitelné)
+- `DATA_DIR` – cesta k adresáři, kam se ukládá SQLite databáze (pro produkci nastavte na trvalý disk, např. `/var/data` na Renderu)
+- `LOG_DIR` – cesta k adresáři pro logy aplikace (doporučeno nastavit na stejný trvalý disk jako `DATA_DIR`)
 
 Příklad souboru `.env`:
 
@@ -92,4 +94,6 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 - Databáze SQLite se ukládá do adresáře `data/` (pokud není zapisovatelný, automaticky se použije `/tmp/vse-web/data`)
 - Logy se nacházejí v `logs/app.log` (nebo v `/tmp/vse-web/logs/app.log`)
+- Na hostingu s ephemerním souborovým systémem (Render, Railway apod.) přidejte Persistent Disk a přesměrujte proměnné `DATA_DIR`
+  a `LOG_DIR` na připojenou cestu (např. `/var/data`); pouze tak zůstane databáze zachovaná mezi deployi
 - V produkčním prostředí nezapomeňte nastavit silný `JWT_SECRET` a používat HTTPS
