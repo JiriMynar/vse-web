@@ -4,6 +4,7 @@ const workspaceUser = document.getElementById('workspace-user');
 const viewTitle = document.getElementById('view-title');
 const viewSubtitle = document.getElementById('view-subtitle');
 const navButtons = document.querySelectorAll('.nav-item');
+const navAdminButton = document.getElementById('nav-admin');
 const logoutButton = document.getElementById('logout');
 const themeToggle = document.getElementById('theme-toggle');
 
@@ -42,6 +43,8 @@ const viewChat = document.getElementById('view-chat');
 const viewProjects = document.getElementById('view-projects');
 const viewAutomations = document.getElementById('view-automations');
 const viewHelp = document.getElementById('view-help');
+const viewProfile = document.getElementById('view-profile');
+const viewAdmin = document.getElementById('view-admin');
 
 const createProjectButton = document.getElementById('create-project');
 const projectsEmpty = document.getElementById('projects-empty');
@@ -91,6 +94,14 @@ const VIEW_TITLES = {
   help: {
     title: 'Nápověda',
     subtitle: 'Zjistěte, jak fungují jednotlivé části platformy.'
+  },
+  profile: {
+    title: 'Profil',
+    subtitle: 'Spravujte své osobní údaje a zabezpečení účtu.'
+  },
+  admin: {
+    title: 'Administrace',
+    subtitle: 'Dozorujte uživatelské účty a obnovujte přístupy.'
   }
 };
 
@@ -111,7 +122,8 @@ const state = {
   help: null,
   enterToSend: localStorage.getItem(ENTER_TO_SEND_KEY) === 'true',
   theme: localStorage.getItem(THEME_KEY) || 'dark',
-  isLoading: false
+  isLoading: false,
+  adminUsers: []
 };
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('cs', { numeric: 'auto' });
@@ -156,6 +168,32 @@ function showChatFeedback(message, type = 'info') {
     chatFeedback.classList.add('hidden');
   } else {
     chatFeedback.classList.remove('hidden');
+  }
+}
+
+function showProfileMessage(message, type = 'info') {
+  if (!profileMessage) return;
+  profileMessage.textContent = message;
+  profileMessage.className = `message ${
+    type === 'error' ? 'error' : type === 'success' ? 'success' : ''
+  }`.trim();
+  if (!message) {
+    profileMessage.classList.add('hidden');
+  } else {
+    profileMessage.classList.remove('hidden');
+  }
+}
+
+function showAdminMessage(message, type = 'info') {
+  if (!adminMessage) return;
+  adminMessage.textContent = message;
+  adminMessage.className = `message ${
+    type === 'error' ? 'error' : type === 'success' ? 'success' : ''
+  }`.trim();
+  if (!message) {
+    adminMessage.classList.add('hidden');
+  } else {
+    adminMessage.classList.remove('hidden');
   }
 }
 
@@ -207,7 +245,15 @@ async function loadWorkspace() {
       apiFetch('/api/auth/me')
     ]);
     state.user = user;
-    workspaceUser.textContent = `${user.name} (${user.email})`;
+    const roleLabel = user.isAdmin ? ' • Administrátor' : '';
+    workspaceUser.textContent = `${user.name} (${user.email})${roleLabel}`;
+    if (navAdminButton) {
+      navAdminButton.classList.toggle('hidden', !user.isAdmin);
+    }
+    if (!user.isAdmin && state.view === 'admin') {
+      state.view = 'chat';
+    }
+    renderProfile();
     authWrapper.classList.add('hidden');
     workspace.classList.remove('hidden');
     applyTheme(state.theme);
@@ -217,6 +263,9 @@ async function loadWorkspace() {
       loadProjects(),
       loadHelp()
     ]);
+    if (state.user.isAdmin && state.view === 'admin') {
+      await loadAdminUsers();
+    }
     setView(state.view);
   } catch (error) {
     console.error(error);
@@ -224,8 +273,14 @@ async function loadWorkspace() {
       showAuthMessage('Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
     }
     state.user = null;
+    state.adminUsers = [];
     workspace.classList.add('hidden');
     authWrapper.classList.remove('hidden');
+    if (navAdminButton) {
+      navAdminButton.classList.add('hidden');
+    }
+    showProfileMessage('');
+    showAdminMessage('');
   } finally {
     state.isLoading = false;
   }
@@ -386,12 +441,21 @@ function renderThreadHeader() {
 }
 
 function setView(view) {
+  if (view === 'admin' && (!state.user || !state.user.isAdmin)) {
+    view = 'chat';
+  }
+
   state.view = view;
   navButtons.forEach((button) => {
-    button.classList.toggle('active', button.dataset.view === view);
+    const targetView = button.dataset.view;
+    if (targetView === 'admin') {
+      button.classList.toggle('hidden', !state.user || !state.user.isAdmin);
+    }
+    button.classList.toggle('active', targetView === view);
   });
 
-  const { title, subtitle } = VIEW_TITLES[view];
+  const meta = VIEW_TITLES[view] || VIEW_TITLES.chat;
+  const { title, subtitle } = meta;
   viewTitle.textContent = title;
   viewSubtitle.textContent = subtitle;
 
@@ -399,6 +463,12 @@ function setView(view) {
   viewProjects.classList.toggle('hidden', view !== 'projects');
   viewAutomations.classList.toggle('hidden', view !== 'automations');
   viewHelp.classList.toggle('hidden', view !== 'help');
+  if (viewProfile) {
+    viewProfile.classList.toggle('hidden', view !== 'profile');
+  }
+  if (viewAdmin) {
+    viewAdmin.classList.toggle('hidden', view !== 'admin');
+  }
 
   if (view === 'projects') {
     renderProjects();
@@ -406,6 +476,10 @@ function setView(view) {
     renderAutomations();
   } else if (view === 'help') {
     renderHelp();
+  } else if (view === 'profile') {
+    renderProfile();
+  } else if (view === 'admin') {
+    renderAdminUsers();
   }
 }
 
@@ -525,6 +599,83 @@ function renderAutomations() {
   });
 }
 
+function renderProfile() {
+  if (!state.user || !profileNameInput) return;
+  profileNameInput.value = state.user.name || '';
+  showProfileMessage('');
+}
+
+function renderAdminUsers() {
+  if (!adminUsersTableBody) return;
+  adminUsersTableBody.innerHTML = '';
+
+  if (!state.adminUsers.length) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 6;
+    cell.textContent = 'Žádní uživatelé k zobrazení.';
+    cell.style.textAlign = 'center';
+    row.appendChild(cell);
+    adminUsersTableBody.appendChild(row);
+    return;
+  }
+
+  state.adminUsers.forEach((user) => {
+    const row = document.createElement('tr');
+
+    const idCell = document.createElement('td');
+    idCell.textContent = user.id;
+    row.appendChild(idCell);
+
+    const nameCell = document.createElement('td');
+    nameCell.textContent = user.name;
+    row.appendChild(nameCell);
+
+    const emailCell = document.createElement('td');
+    emailCell.textContent = user.email;
+    row.appendChild(emailCell);
+
+    const roleCell = document.createElement('td');
+    roleCell.textContent = user.isAdmin ? 'Administrátor' : 'Uživatel';
+    row.appendChild(roleCell);
+
+    const createdCell = document.createElement('td');
+    createdCell.textContent = user.createdAt
+      ? dateTimeFormatter.format(new Date(user.createdAt))
+      : '—';
+    row.appendChild(createdCell);
+
+    const actionsCell = document.createElement('td');
+    if (user.isAdmin) {
+      actionsCell.textContent = '—';
+    } else {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'actions';
+
+      const resetButton = document.createElement('button');
+      resetButton.type = 'button';
+      resetButton.className = 'ghost';
+      resetButton.dataset.action = 'reset';
+      resetButton.dataset.userId = user.id;
+      resetButton.textContent = 'Reset hesla';
+
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'danger';
+      deleteButton.dataset.action = 'delete';
+      deleteButton.dataset.userId = user.id;
+      deleteButton.textContent = 'Smazat účet';
+
+      wrapper.appendChild(resetButton);
+      wrapper.appendChild(deleteButton);
+      actionsCell.appendChild(wrapper);
+    }
+    row.appendChild(actionsCell);
+
+    adminUsersTableBody.appendChild(row);
+  });
+}
+
 function renderHelp() {
   helpContent.innerHTML = '';
   if (!state.help) {
@@ -563,6 +714,22 @@ async function loadAutomations(projectId) {
   const data = await apiFetch(`/api/automations/project/${projectId}`);
   const sanitized = data.automations.map((item) => ({ ...item, config: item.config || null, project_id: projectId }));
   state.automations = state.automations.filter((item) => item.project_id !== projectId).concat(sanitized);
+}
+
+async function loadAdminUsers() {
+  if (!state.user || !state.user.isAdmin) return;
+  try {
+    const data = await apiFetch('/api/admin/users');
+    state.adminUsers = data.users || [];
+    renderAdminUsers();
+    if (state.adminUsers.length) {
+      showAdminMessage('');
+    } else {
+      showAdminMessage('Žádní uživatelé zatím nejsou registrovaní.');
+    }
+  } catch (error) {
+    showAdminMessage(error.message, 'error');
+  }
 }
 
 async function loadHelp() {
@@ -794,8 +961,14 @@ function initEventListeners() {
   logoutButton.addEventListener('click', async () => {
     await apiFetch('/api/auth/logout', { method: 'POST' });
     state.user = null;
+    state.adminUsers = [];
     workspace.classList.add('hidden');
     authWrapper.classList.remove('hidden');
+    if (navAdminButton) {
+      navAdminButton.classList.add('hidden');
+    }
+    showProfileMessage('');
+    showAdminMessage('');
     if (state.threadStream) state.threadStream.close();
     if (state.messageStream) state.messageStream.close();
   });
@@ -804,9 +977,15 @@ function initEventListeners() {
     button.addEventListener('click', async () => {
       const view = button.dataset.view;
       if (view === state.view) return;
-      state.view = view;
+      if (view === 'admin' && (!state.user || !state.user.isAdmin)) return;
       if (view === 'automations' && state.selectedProjectId) {
         await loadAutomations(state.selectedProjectId);
+      }
+      if (view === 'admin') {
+        await loadAdminUsers();
+      }
+      if (view === 'profile') {
+        renderProfile();
       }
       setView(view);
     });
@@ -898,6 +1077,122 @@ function initEventListeners() {
       subscribeToMessages(state.activeThreadId);
     }
   });
+
+  if (profileNameForm) {
+    profileNameForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!state.user) return;
+      const name = profileNameInput.value.trim();
+      if (!name) {
+        showProfileMessage('Jméno nemůže být prázdné.', 'error');
+        return;
+      }
+      try {
+        setInputsDisabled(profileNameForm, true);
+        setButtonLoading(
+          profileNameForm.querySelector('button[type="submit"]'),
+          true,
+          'Ukládám…'
+        );
+        const { user } = await apiFetch('/api/users/me', {
+          method: 'PUT',
+          body: JSON.stringify({ name })
+        });
+        state.user = user;
+        const roleLabel = user.isAdmin ? ' • Administrátor' : '';
+        workspaceUser.textContent = `${user.name} (${user.email})${roleLabel}`;
+        renderProfile();
+        showProfileMessage('Jméno bylo úspěšně aktualizováno.', 'success');
+      } catch (error) {
+        showProfileMessage(error.message, 'error');
+      } finally {
+        setInputsDisabled(profileNameForm, false);
+        setButtonLoading(profileNameForm.querySelector('button[type="submit"]'), false);
+      }
+    });
+  }
+
+  if (profilePasswordForm) {
+    profilePasswordForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!state.user) return;
+      const currentPassword = profileCurrentPasswordInput.value;
+      const newPassword = profileNewPasswordInput.value;
+      const confirmPassword = profileConfirmPasswordInput.value;
+      if (newPassword !== confirmPassword) {
+        showProfileMessage('Nové heslo se neshoduje s potvrzením.', 'error');
+        return;
+      }
+
+      try {
+        setInputsDisabled(profilePasswordForm, true);
+        setButtonLoading(
+          profilePasswordForm.querySelector('button[type="submit"]'),
+          true,
+          'Ukládám…'
+        );
+        await apiFetch('/api/users/me/password', {
+          method: 'POST',
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        profilePasswordForm.reset();
+        showProfileMessage('Heslo bylo úspěšně změněno.', 'success');
+      } catch (error) {
+        showProfileMessage(error.message, 'error');
+      } finally {
+        setInputsDisabled(profilePasswordForm, false);
+        setButtonLoading(profilePasswordForm.querySelector('button[type="submit"]'), false);
+      }
+    });
+  }
+
+  if (adminUsersTableBody) {
+    adminUsersTableBody.addEventListener('click', async (event) => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const { action, userId } = button.dataset;
+      const numericId = Number(userId);
+      if (!numericId) return;
+      const targetUser = state.adminUsers.find((user) => user.id === numericId);
+
+      const resetConfirmMessage = 'Opravdu chcete vygenerovat nové heslo pro tento účet?';
+      const deleteConfirmMessage = 'Opravdu chcete smazat tento účet? Tuto akci nelze vrátit.';
+
+      if (action === 'reset' && !confirm(resetConfirmMessage)) {
+        return;
+      }
+      if (action === 'delete' && !confirm(deleteConfirmMessage)) {
+        return;
+      }
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Probíhá…';
+
+      try {
+        if (action === 'reset') {
+          const { temporaryPassword } = await apiFetch(`/api/admin/users/${numericId}/reset-password`, {
+            method: 'POST'
+          });
+          await loadAdminUsers();
+          const name = targetUser ? targetUser.name : 'uživatele';
+          showAdminMessage(
+            `Nové dočasné heslo pro ${name} je: ${temporaryPassword}. Pošlete ho uživateli bezpečným kanálem.`,
+            'success'
+          );
+        } else if (action === 'delete') {
+          await apiFetch(`/api/admin/users/${numericId}`, { method: 'DELETE' });
+          await loadAdminUsers();
+          showAdminMessage('Uživatelský účet byl smazán.', 'success');
+        }
+      } catch (error) {
+        showAdminMessage(error.message, 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    });
+  }
 
   exportAllButton.addEventListener('click', () => {
     const blob = new Blob([
@@ -1031,3 +1326,14 @@ async function bootstrap() {
 }
 
 bootstrap();
+const profileMessage = document.getElementById('profile-message');
+const profileNameForm = document.getElementById('profile-name-form');
+const profileNameInput = document.getElementById('profile-name');
+const profilePasswordForm = document.getElementById('profile-password-form');
+const profileCurrentPasswordInput = document.getElementById('profile-current-password');
+const profileNewPasswordInput = document.getElementById('profile-new-password');
+const profileConfirmPasswordInput = document.getElementById('profile-confirm-password');
+
+const adminMessage = document.getElementById('admin-message');
+const adminUsersTable = document.getElementById('admin-users-table');
+const adminUsersTableBody = adminUsersTable ? adminUsersTable.querySelector('tbody') : null;

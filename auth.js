@@ -145,7 +145,7 @@ export function authMiddleware(req, res, next) {
 
   try {
     const data = verifyToken(token);
-    req.user = data;
+    req.user = { ...data, isAdmin: Boolean(data.isAdmin) };
     return next();
   } catch (err) {
     return res.status(401).json({ message: 'Neplatný nebo expirovaný token.' });

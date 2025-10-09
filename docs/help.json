@@ -39,6 +39,8 @@
       "items": [
         "Všechna API volání jsou chráněna pomocí krátkodobých access tokenů a obnovitelných refresh tokenů.",
         "Účet můžete kdykoliv odhlásit. Při podezřelé aktivitě se staré refresh tokeny automaticky zneplatní.",
+        "V sekci Profil snadno změníte své zobrazované jméno a heslo.",
+        "Administrátor má k dispozici dedikovanou stránku pro správu uživatelů, reset hesel a mazání účtů.",
         "V části \"Nastavení\" (připravujeme) bude možné aktivovat dvoufázové ověření a řídit týmová oprávnění."
       ]
     }
