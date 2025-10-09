@@ -18,8 +18,6 @@ const createThreadButton = document.getElementById('create-thread');
 const threadList = document.getElementById('thread-list');
 const threadSearchInput = document.getElementById('thread-search');
 const filterButtons = document.querySelectorAll('.chip');
-const exportAllButton = document.getElementById('export-all');
-const clearAllButton = document.getElementById('clear-all');
 const chatHistory = document.getElementById('chat-history');
 const chatEmpty = document.getElementById('chat-empty');
 const chatForm = document.getElementById('chat-form');
@@ -28,11 +26,6 @@ const chatFeedback = document.getElementById('chat-feedback');
 const enterToSendCheckbox = document.getElementById('enter-to-send');
 const messageTemplate = document.getElementById('message-template');
 
-const favoriteThreadButton = document.getElementById('favorite-thread');
-const renameThreadButton = document.getElementById('rename-thread');
-const exportThreadButton = document.getElementById('export-thread');
-const clearThreadButton = document.getElementById('clear-thread');
-const deleteThreadButton = document.getElementById('delete-thread');
 const chatApiSettingsButton = document.getElementById('chat-api-settings');
 const activeThreadTitle = document.getElementById('active-thread-title');
 const activeThreadMeta = document.getElementById('active-thread-meta');
@@ -696,8 +689,6 @@ function renderThreadHeader() {
     insightMessages.textContent = '0 zpráv';
     insightActivity.textContent = 'Žádná aktivita';
     insightFavorite.textContent = 'Neoblíbené';
-    favoriteThreadButton.setAttribute('aria-pressed', 'false');
-    favoriteThreadButton.textContent = '☆';
     chatForm.classList.add('hidden');
     return;
   }
@@ -715,8 +706,6 @@ function renderThreadHeader() {
   insightMessages.textContent = `${thread.message_count || 0} zpráv`;
   insightActivity.textContent = thread.last_activity ? `Aktivita ${formatRelativeTime(thread.last_activity)}` : 'Žádná aktivita';
   insightFavorite.textContent = thread.is_favorite ? 'Oblíbené' : 'Neoblíbené';
-  favoriteThreadButton.setAttribute('aria-pressed', thread.is_favorite ? 'true' : 'false');
-  favoriteThreadButton.textContent = thread.is_favorite ? '★' : '☆';
 }
 
 function setView(view) {
@@ -1356,55 +1345,6 @@ function initEventListeners() {
     });
   });
 
-  favoriteThreadButton.addEventListener('click', async () => {
-    if (!state.activeThreadId) return;
-    const thread = state.threads.find((t) => t.id === state.activeThreadId);
-    await apiFetch(`/api/chat/threads/${state.activeThreadId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ is_favorite: !thread.is_favorite })
-    });
-    await loadThreads({ preserveActive: true });
-  });
-
-  renameThreadButton.addEventListener('click', async () => {
-    if (!state.activeThreadId) return;
-    const thread = state.threads.find((t) => t.id === state.activeThreadId);
-    const newTitle = await openPrompt({ title: 'Přejmenovat vlákno', label: 'Nový název', defaultValue: thread.title });
-    if (newTitle) {
-      await apiFetch(`/api/chat/threads/${state.activeThreadId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ title: newTitle })
-      });
-      await loadThreads({ preserveActive: true });
-    }
-  });
-
-  exportThreadButton.addEventListener('click', () => {
-    if (!state.activeThreadId) return;
-    const thread = state.threads.find((t) => t.id === state.activeThreadId);
-    const blob = new Blob([
-      JSON.stringify({ thread, messages: state.messages }, null, 2)
-    ], { type: 'application/json' });
-    downloadBlob(blob, `thread-${thread.id}.json`);
-  });
-
-  clearThreadButton.addEventListener('click', async () => {
-    if (!state.activeThreadId) return;
-    await apiFetch(`/api/chat/threads/${state.activeThreadId}/messages`, { method: 'DELETE' });
-    state.messages = [];
-    renderMessages();
-  });
-
-  deleteThreadButton.addEventListener('click', async () => {
-    if (!state.activeThreadId) return;
-    await apiFetch(`/api/chat/threads/${state.activeThreadId}`, { method: 'DELETE' });
-    await loadThreads({ preserveActive: true });
-    if (state.activeThreadId) {
-      await loadMessages(state.activeThreadId);
-      subscribeToMessages(state.activeThreadId);
-    }
-  });
-
   if (profileNameForm) {
     profileNameForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -1521,19 +1461,6 @@ function initEventListeners() {
     });
   }
 
-  exportAllButton.addEventListener('click', () => {
-    const blob = new Blob([
-      JSON.stringify({ threads: state.threads }, null, 2)
-    ], { type: 'application/json' });
-    downloadBlob(blob, 'threads-export.json');
-  });
-
-  clearAllButton.addEventListener('click', async () => {
-    await apiFetch('/api/chat/history', { method: 'DELETE' });
-    await loadThreads();
-    renderMessages();
-  });
-
   chatForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const message = chatMessageInput.value.trim();
@@ -1631,17 +1558,6 @@ function initEventListeners() {
     promptDialog.returnValue = 'cancel';
     promptDialog.close();
   });
-}
-
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
 }
 
 async function bootstrap() {
