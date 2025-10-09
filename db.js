@@ -154,6 +154,28 @@ const migrations = [
         );
       }
     }
+  },
+  {
+    version: 5,
+    async up(db) {
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS chat_api_credentials (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          provider TEXT NOT NULL,
+          encrypted_key TEXT NOT NULL,
+          key_preview TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, provider),
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+      `);
+
+      await db.exec(
+        'CREATE INDEX IF NOT EXISTS idx_chat_api_credentials_user ON chat_api_credentials(user_id)'
+      );
+    }
   }
 ];
 

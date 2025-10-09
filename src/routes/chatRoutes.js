@@ -11,7 +11,9 @@ import {
   listMessagesController,
   createMessageController,
   streamThreadsController,
-  streamMessagesController
+  streamMessagesController,
+  listChatApiSettingsController,
+  upsertChatApiKeyController
 } from '../controllers/chatController.js';
 
 const router = express.Router();
@@ -28,5 +30,7 @@ router.delete('/history', deleteAllController);
 router.get('/history', listMessagesController);
 router.post('/messages', createMessageController);
 router.get('/threads/:id/stream', streamMessagesController);
+router.get('/api-settings', listChatApiSettingsController);
+router.post('/api-settings', upsertChatApiKeyController);
 
 export { router };

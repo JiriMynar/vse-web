@@ -33,11 +33,18 @@ const renameThreadButton = document.getElementById('rename-thread');
 const exportThreadButton = document.getElementById('export-thread');
 const clearThreadButton = document.getElementById('clear-thread');
 const deleteThreadButton = document.getElementById('delete-thread');
+const chatApiSettingsButton = document.getElementById('chat-api-settings');
 const activeThreadTitle = document.getElementById('active-thread-title');
 const activeThreadMeta = document.getElementById('active-thread-meta');
 const insightMessages = document.getElementById('insight-messages');
 const insightActivity = document.getElementById('insight-activity');
 const insightFavorite = document.getElementById('insight-favorite');
+
+const chatApiDialog = document.getElementById('chat-api-dialog');
+const chatApiCloseButton = document.getElementById('chat-api-close');
+const chatApiMessage = document.getElementById('chat-api-message');
+const chatApiConnectorList = document.getElementById('chat-api-connector-list');
+const chatApiConnectorTemplate = document.getElementById('chat-api-connector-template');
 
 const viewChat = document.getElementById('view-chat');
 const viewProjects = document.getElementById('view-projects');
@@ -123,7 +130,8 @@ const state = {
   enterToSend: localStorage.getItem(ENTER_TO_SEND_KEY) === 'true',
   theme: localStorage.getItem(THEME_KEY) || 'dark',
   isLoading: false,
-  adminUsers: []
+  adminUsers: [],
+  chatApiConnectors: []
 };
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('cs', { numeric: 'auto' });
@@ -169,6 +177,17 @@ function showChatFeedback(message, type = 'info') {
   } else {
     chatFeedback.classList.remove('hidden');
   }
+}
+
+function setChatApiMessage(message, type = 'info') {
+  if (!chatApiMessage) return;
+  if (!message) {
+    chatApiMessage.textContent = '';
+    chatApiMessage.className = 'message hidden';
+    return;
+  }
+  chatApiMessage.textContent = message;
+  chatApiMessage.className = `message ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`.trim();
 }
 
 function showProfileMessage(message, type = 'info') {
@@ -407,6 +426,108 @@ function renderMessages() {
   });
   chatHistory.scrollTop = chatHistory.scrollHeight;
   renderThreadHeader();
+}
+
+function renderChatApiSettings() {
+  if (!chatApiConnectorList || !chatApiConnectorTemplate) {
+    return;
+  }
+  chatApiConnectorList.innerHTML = '';
+  if (!state.chatApiConnectors.length) {
+    setChatApiMessage('Žádné konektory nejsou dostupné.', 'info');
+    return;
+  }
+
+  setChatApiMessage('');
+  state.chatApiConnectors.forEach((connector) => {
+    const fragment = chatApiConnectorTemplate.content.cloneNode(true);
+    const nameEl = fragment.querySelector('.connector-name');
+    const descriptionEl = fragment.querySelector('.connector-description');
+    const statusEl = fragment.querySelector('.connector-status');
+    const form = fragment.querySelector('.connector-form');
+    const input = form.querySelector('input[name="apiKey"]');
+    const label = form.querySelector('label');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const feedback = fragment.querySelector('.connector-feedback');
+
+    nameEl.textContent = connector.name;
+    descriptionEl.textContent = connector.description;
+
+    const sanitizedProvider = connector.provider.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+    const inputId = `chat-api-key-${sanitizedProvider || 'connector'}`;
+    input.id = inputId;
+    if (label) {
+      label.setAttribute('for', inputId);
+    }
+
+    const updateStatus = () => {
+      if (!statusEl) return;
+      if (connector.hasKey) {
+        const parts = ['Klíč uložen'];
+        if (connector.keyPreview) {
+          parts.push(`…${connector.keyPreview}`);
+        }
+        if (connector.updatedAt) {
+          parts.push(`aktualizováno ${formatRelativeTime(connector.updatedAt)}`);
+        }
+        statusEl.textContent = parts.join(' • ');
+      } else {
+        statusEl.textContent = 'Klíč není uložen';
+      }
+    };
+
+    updateStatus();
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const apiKey = input.value.trim();
+      if (!apiKey) {
+        feedback.textContent = 'Zadejte platný API klíč.';
+        feedback.className = 'connector-feedback message error';
+        feedback.classList.remove('hidden');
+        return;
+      }
+      feedback.textContent = '';
+      feedback.classList.add('hidden');
+      try {
+        setInputsDisabled(form, true);
+        setButtonLoading(submitButton, true, 'Ukládám…');
+        const { connector: updated } = await apiFetch('/api/chat/api-settings', {
+          method: 'POST',
+          body: JSON.stringify({ provider: connector.provider, apiKey })
+        });
+        Object.assign(connector, updated);
+        updateStatus();
+        input.value = '';
+        feedback.textContent = 'API klíč byl uložen.';
+        feedback.className = 'connector-feedback message success';
+        feedback.classList.remove('hidden');
+      } catch (error) {
+        feedback.textContent = error.message;
+        feedback.className = 'connector-feedback message error';
+        feedback.classList.remove('hidden');
+      } finally {
+        setInputsDisabled(form, false);
+        setButtonLoading(submitButton, false);
+      }
+    });
+
+    chatApiConnectorList.appendChild(fragment);
+  });
+}
+
+async function loadChatApiSettings() {
+  if (!chatApiConnectorList) return;
+  try {
+    setChatApiMessage('Načítám nastavení…');
+    const { connectors } = await apiFetch('/api/chat/api-settings');
+    state.chatApiConnectors = connectors;
+    renderChatApiSettings();
+  } catch (error) {
+    state.chatApiConnectors = [];
+    chatApiConnectorList.innerHTML = '';
+    setChatApiMessage(error.message, 'error');
+  }
 }
 
 function renderThreadHeader() {
@@ -962,6 +1083,7 @@ function initEventListeners() {
     await apiFetch('/api/auth/logout', { method: 'POST' });
     state.user = null;
     state.adminUsers = [];
+    state.chatApiConnectors = [];
     workspace.classList.add('hidden');
     authWrapper.classList.remove('hidden');
     if (navAdminButton) {
@@ -971,6 +1093,11 @@ function initEventListeners() {
     showAdminMessage('');
     if (state.threadStream) state.threadStream.close();
     if (state.messageStream) state.messageStream.close();
+    if (chatApiDialog?.open) chatApiDialog.close();
+    if (chatApiConnectorList) {
+      chatApiConnectorList.innerHTML = '';
+    }
+    setChatApiMessage('');
   });
 
   navButtons.forEach((button) => {
@@ -1002,6 +1129,25 @@ function initEventListeners() {
     await loadMessages(state.activeThreadId);
     subscribeToMessages(state.activeThreadId);
   });
+
+  if (chatApiSettingsButton) {
+    chatApiSettingsButton.addEventListener('click', async () => {
+      if (!chatApiDialog) return;
+      chatApiDialog.showModal();
+      if (chatApiConnectorList) {
+        chatApiConnectorList.innerHTML = '';
+      }
+      state.chatApiConnectors = [];
+      setChatApiMessage('Načítám nastavení…');
+      await loadChatApiSettings();
+    });
+  }
+
+  if (chatApiCloseButton && chatApiDialog) {
+    chatApiCloseButton.addEventListener('click', () => {
+      chatApiDialog.close();
+    });
+  }
 
   threadList.addEventListener('click', async (event) => {
     const button = event.target.closest('button');
