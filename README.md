@@ -21,7 +21,7 @@ npm run start
 
 Server se spustí na adrese http://localhost:3000 a zároveň bude k dispozici API pod `/api/*`.
 
-Pro snadnější vývoj můžete použít automatický restart serveru:
+Pro snadnější vývoj můžete využít vestavěný watcher Node.js, který je dostupný přes skript `npm run dev` (vyžaduje Node.js 18+):
 
 ```bash
 npm run dev
