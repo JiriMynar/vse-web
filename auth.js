@@ -157,28 +157,7 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-function resolveCookieSettings(req) {
-  const override = process.env.COOKIE_SECURE?.toLowerCase();
-  if (override === 'true') {
-    return { secure: true, sameSite: 'none' };
-  }
-  if (override === 'false') {
-    return { secure: false, sameSite: 'lax' };
-  }
 
-  const forwardedProtoHeader = req?.headers?.['x-forwarded-proto'];
-  const forwardedProto = Array.isArray(forwardedProtoHeader)
-    ? forwardedProtoHeader[0]
-    : forwardedProtoHeader;
-  const isForwardedSecure = typeof forwardedProto === 'string' && forwardedProto.split(',')[0].trim().toLowerCase() === 'https';
-  const isRequestSecure = Boolean(req?.secure || isForwardedSecure);
-  const secure = isRequestSecure || process.env.NODE_ENV === 'production';
-  const sameSite = secure ? 'none' : 'lax';
-  return { secure, sameSite };
-}
-
-export function attachTokenCookies(req, res, accessToken, refreshToken, refreshExpiresAt) {
-  const { secure, sameSite } = resolveCookieSettings(req);
   res.cookie(TOKEN_COOKIE, accessToken, {
     httpOnly: true,
     secure,
@@ -193,8 +172,7 @@ export function attachTokenCookies(req, res, accessToken, refreshToken, refreshE
   });
 }
 
-export function clearTokenCookies(req, res) {
-  const { secure, sameSite } = resolveCookieSettings(req);
+
   res.clearCookie(TOKEN_COOKIE, {
     httpOnly: true,
     secure,
