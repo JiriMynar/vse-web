@@ -158,32 +158,36 @@ export function authMiddleware(req, res, next) {
 }
 
 export function attachTokenCookies(res, accessToken, refreshToken, refreshExpiresAt) {
-  const secure = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const secure = isProduction;
+  const sameSite = secure ? 'none' : 'lax';
   res.cookie(TOKEN_COOKIE, accessToken, {
     httpOnly: true,
     secure,
-    sameSite: secure ? 'strict' : 'lax',
+    sameSite,
     maxAge: 15 * 60 * 1000
   });
   res.cookie(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
     secure,
-    sameSite: secure ? 'strict' : 'lax',
+    sameSite,
     maxAge: refreshExpiresAt.getTime() - Date.now()
   });
 }
 
 export function clearTokenCookies(res) {
-  const secure = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const secure = isProduction;
+  const sameSite = secure ? 'none' : 'lax';
   res.clearCookie(TOKEN_COOKIE, {
     httpOnly: true,
     secure,
-    sameSite: secure ? 'strict' : 'lax'
+    sameSite
   });
   res.clearCookie(REFRESH_COOKIE, {
     httpOnly: true,
     secure,
-    sameSite: secure ? 'strict' : 'lax'
+    sameSite
   });
 }
 
