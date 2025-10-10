@@ -105,12 +105,12 @@ export async function getSessionUser(userId) {
   return { ...normalizeUser(user), createdAt: user.created_at };
 }
 
-export function attachAuthCookies(res, authPayload) {
-  attachTokenCookies(res, authPayload.accessToken, authPayload.refreshToken, authPayload.refreshExpiresAt);
+export function attachAuthCookies(req, res, authPayload) {
+  attachTokenCookies(req, res, authPayload.accessToken, authPayload.refreshToken, authPayload.refreshExpiresAt);
 }
 
-export function logoutUser(res, refreshToken) {
-  clearTokenCookies(res);
+export function logoutUser(req, res, refreshToken) {
+  clearTokenCookies(req, res);
   if (refreshToken) {
     revokeToken(refreshToken).catch(() => {});
   }
