@@ -157,10 +157,7 @@ export function authMiddleware(req, res, next) {
   }
 }
 
-export function attachTokenCookies(res, accessToken, refreshToken, refreshExpiresAt) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const secure = isProduction;
-  const sameSite = secure ? 'none' : 'lax';
+
   res.cookie(TOKEN_COOKIE, accessToken, {
     httpOnly: true,
     secure,
@@ -175,10 +172,7 @@ export function attachTokenCookies(res, accessToken, refreshToken, refreshExpire
   });
 }
 
-export function clearTokenCookies(res) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const secure = isProduction;
-  const sameSite = secure ? 'none' : 'lax';
+
   res.clearCookie(TOKEN_COOKIE, {
     httpOnly: true,
     secure,
