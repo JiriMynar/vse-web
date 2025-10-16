@@ -157,6 +157,16 @@ export function authMiddleware(req, res, next) {
   }
 }
 
+function resolveCookieSecurity(req) {
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const isForwardedSecure = typeof forwardedProto === 'string' && forwardedProto.split(',')[0].trim() === 'https';
+  const secure = Boolean(req.secure || isForwardedSecure);
+  const sameSite = secure ? 'none' : 'lax';
+  return { secure, sameSite };
+}
+
+export function attachTokenCookies(req, res, accessToken, refreshToken, refreshExpiresAt) {
+  const { secure, sameSite } = resolveCookieSecurity(req);
 
   res.cookie(TOKEN_COOKIE, accessToken, {
     httpOnly: true,
@@ -164,14 +174,22 @@ export function authMiddleware(req, res, next) {
     sameSite,
     maxAge: 15 * 60 * 1000
   });
+
+  const defaultRefreshMaxAge = 7 * 24 * 60 * 60 * 1000;
+  const refreshMaxAge = refreshExpiresAt instanceof Date
+    ? Math.max(0, refreshExpiresAt.getTime() - Date.now())
+    : defaultRefreshMaxAge;
+
   res.cookie(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
     secure,
     sameSite,
-    maxAge: refreshExpiresAt.getTime() - Date.now()
+    maxAge: refreshMaxAge
   });
 }
 
+export function clearTokenCookies(req, res) {
+  const { secure, sameSite } = resolveCookieSecurity(req);
 
   res.clearCookie(TOKEN_COOKIE, {
     httpOnly: true,
