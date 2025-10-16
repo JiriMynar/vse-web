@@ -1,0 +1,31 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="profileGradient" x1="88" y1="64" x2="720" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" />
+      <stop offset="1" stop-color="#6366F1" />
+    </linearGradient>
+    <filter id="profileShadow" x="0" y="0" width="800" height="450" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="18" />
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur" />
+      <feBlend in="SourceGraphic" in2="effect1_backgroundBlur" result="shape" />
+    </filter>
+  </defs>
+  <rect x="40" y="44" width="720" height="362" rx="34" fill="url(#profileGradient)" opacity="0.95" />
+  <g filter="url(#profileShadow)">
+    <circle cx="244" cy="210" r="72" fill="#0F172A" fill-opacity="0.5" />
+    <circle cx="244" cy="186" r="34" fill="#F8FAFC" fill-opacity="0.85" />
+    <path d="M244 228C270.51 228 292 249.49 292 276H196C196 249.49 217.49 228 244 228Z" fill="#38BDF8" fill-opacity="0.6" />
+  </g>
+  <g filter="url(#profileShadow)">
+    <rect x="356" y="150" width="244" height="176" rx="28" fill="#0F172A" fill-opacity="0.42" />
+    <rect x="384" y="182" width="188" height="18" rx="9" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="384" y="214" width="164" height="12" rx="6" fill="#DBEAFE" fill-opacity="0.65" />
+    <rect x="384" y="238" width="152" height="12" rx="6" fill="#A855F7" fill-opacity="0.6" />
+    <rect x="384" y="270" width="96" height="12" rx="6" fill="#38BDF8" fill-opacity="0.6" />
+    <rect x="384" y="294" width="160" height="12" rx="6" fill="#C7D2FE" fill-opacity="0.55" />
+  </g>
+  <circle cx="600" cy="130" r="32" fill="#A855F7" fill-opacity="0.24" />
+  <circle cx="192" cy="124" r="28" fill="#FBBF24" fill-opacity="0.22" />
+  <circle cx="608" cy="320" r="28" fill="#38BDF8" fill-opacity="0.18" />
+</svg>

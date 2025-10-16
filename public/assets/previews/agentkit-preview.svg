@@ -1,0 +1,33 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="agentGradient" x1="120" y1="80" x2="680" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9" />
+      <stop offset="1" stop-color="#4F46E5" />
+    </linearGradient>
+    <filter id="agentShadow" x="0" y="0" width="800" height="450" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="18" />
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur" />
+      <feBlend in="SourceGraphic" in2="effect1_backgroundBlur" result="shape" />
+    </filter>
+  </defs>
+  <rect x="40" y="44" width="720" height="362" rx="34" fill="url(#agentGradient)" opacity="0.94" />
+  <g filter="url(#agentShadow)">
+    <rect x="140" y="132" width="520" height="68" rx="22" fill="#0F172A" fill-opacity="0.5" />
+    <rect x="164" y="156" width="128" height="20" rx="10" fill="#F8FAFC" fill-opacity="0.9" />
+    <rect x="310" y="150" width="84" height="32" rx="16" fill="#38BDF8" fill-opacity="0.9" />
+    <rect x="410" y="150" width="84" height="32" rx="16" fill="#F8FAFC" fill-opacity="0.18" />
+    <rect x="510" y="150" width="84" height="32" rx="16" fill="#A855F7" fill-opacity="0.9" />
+  </g>
+  <g filter="url(#agentShadow)">
+    <rect x="188" y="220" width="424" height="120" rx="28" fill="#0F172A" fill-opacity="0.45" />
+    <rect x="220" y="252" width="180" height="16" rx="8" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="220" y="280" width="120" height="12" rx="6" fill="#94A3B8" fill-opacity="0.6" />
+    <rect x="220" y="304" width="96" height="12" rx="6" fill="#22D3EE" fill-opacity="0.7" />
+    <circle cx="548" cy="278" r="28" fill="#38BDF8" fill-opacity="0.4" />
+    <path d="M544 270L560 278L544 286V270Z" fill="#0EA5E9" fill-opacity="0.6" />
+  </g>
+  <circle cx="644" cy="126" r="30" fill="#22D3EE" fill-opacity="0.28" />
+  <circle cx="188" cy="116" r="26" fill="#7C3AED" fill-opacity="0.24" />
+  <circle cx="640" cy="332" r="38" fill="#38BDF8" fill-opacity="0.16" />
+</svg>
