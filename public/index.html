@@ -47,7 +47,7 @@
         </header>
         <nav class="workspace-nav" role="tablist">
           <button class="nav-item active" data-view="chat" type="button">💬 Chat</button>
-          <button class="nav-item" data-view="projects" type="button">📁 Projekty</button>
+          <button class="nav-item" data-view="agentkit" type="button">🤖 Agentkit</button>
           <button class="nav-item" data-view="automations" type="button">⚙️ Automatizace</button>
           <button class="nav-item" data-view="profile" type="button">👤 Profil</button>
           <button class="nav-item" data-view="help" type="button">❓ Nápověda</button>
@@ -119,6 +119,26 @@
               </form>
             </div>
           </div>
+        </section>
+
+        <section id="view-agentkit" class="view-panel hidden">
+          <div class="agentkit-header">
+            <div>
+              <h2>Agentkit chat</h2>
+              <p>Propojte vlastní workflow s Agentkitem a veďte konverzace v reálném čase.</p>
+            </div>
+            <div class="agentkit-actions">
+              <span id="agentkit-save-message" class="agentkit-save-message hidden" role="status" aria-live="polite"></span>
+              <button id="agentkit-settings-button" class="ghost" type="button">Nastavení</button>
+            </div>
+          </div>
+          <div id="agentkit-message" class="message hidden" role="status" aria-live="polite"></div>
+          <div id="agentkit-placeholder" class="agentkit-placeholder">
+            <h3>Připojte Agentkit</h3>
+            <p>Zadejte workflow ID a OPENAI_API_KEY v nastavení a následně začněte chatovat.</p>
+            <button id="agentkit-open-settings" class="primary" type="button">Otevřít nastavení</button>
+          </div>
+          <div id="agentkit-chat-container" class="agentkit-chat hidden" aria-live="polite"></div>
         </section>
 
         <section id="view-projects" class="view-panel hidden">
@@ -272,6 +292,26 @@
           <button type="button" class="ghost" id="chat-api-close">Zavřít</button>
         </menu>
       </article>
+    </dialog>
+
+    <dialog id="agentkit-settings-dialog">
+      <form id="agentkit-settings-form" method="dialog" class="agentkit-settings">
+        <header>
+          <h2>Nastavení Agentkit chatu</h2>
+          <p>Zadejte údaje potřebné pro vytvoření sezení a uložte je pouze do tohoto zařízení.</p>
+        </header>
+        <label for="agentkit-workflow-id">Workflow ID</label>
+        <input id="agentkit-workflow-id" name="workflowId" type="text" placeholder="např. user_agentkit_workflow_id" required />
+        <label for="agentkit-openai-key">OPENAI_API_KEY</label>
+        <input id="agentkit-openai-key" name="openaiApiKey" type="password" placeholder="např. sk-..." required />
+        <label for="agentkit-chatkit-base">Volitelná základní URL (CHATKIT_API_BASE)</label>
+        <input id="agentkit-chatkit-base" name="chatkitApiBase" type="text" placeholder="např. https://api.openai.com/v1/agentkit" />
+        <p class="agentkit-settings-hint">Pokud pole ponecháte prázdné, použije se výchozí hodnota https://api.openai.com/v1/agentkit.</p>
+        <menu class="dialog-actions">
+          <button value="cancel" type="button" class="ghost">Zrušit</button>
+          <button value="confirm" type="submit" class="primary">Uložit</button>
+        </menu>
+      </form>
     </dialog>
 
     <template id="chat-api-connector-template">
