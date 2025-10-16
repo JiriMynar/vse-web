@@ -152,6 +152,23 @@
   gap: var(--space-4);
 }
 
+.view-preview,
+.auth-layout__preview {
+  margin: 0;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  background: var(--color-surface);
+}
+
+.view-preview img,
+.auth-layout__preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

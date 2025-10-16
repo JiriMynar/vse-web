@@ -1,0 +1,31 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="chatGradient" x1="80" y1="60" x2="720" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" />
+      <stop offset="1" stop-color="#0EA5E9" />
+    </linearGradient>
+    <filter id="chatShadow" x="0" y="0" width="800" height="450" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="16" />
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur" />
+      <feBlend in="SourceGraphic" in2="effect1_backgroundBlur" result="shape" />
+    </filter>
+  </defs>
+  <rect x="36" y="32" width="728" height="386" rx="36" fill="url(#chatGradient)" opacity="0.95" />
+  <g filter="url(#chatShadow)">
+    <rect x="132" y="108" width="224" height="120" rx="28" fill="#0F172A" fill-opacity="0.55" />
+    <rect x="160" y="136" width="160" height="20" rx="10" fill="#F8FAFC" fill-opacity="0.9" />
+    <rect x="160" y="168" width="120" height="12" rx="6" fill="#C7D2FE" fill-opacity="0.7" />
+    <path d="M132 204L152 204L132 224V204Z" fill="#0F172A" fill-opacity="0.55" />
+  </g>
+  <g filter="url(#chatShadow)">
+    <rect x="352" y="200" width="316" height="140" rx="32" fill="#F8FAFC" fill-opacity="0.15" />
+    <rect x="384" y="232" width="224" height="18" rx="9" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="384" y="264" width="180" height="12" rx="6" fill="#DBEAFE" fill-opacity="0.65" />
+    <rect x="384" y="292" width="140" height="12" rx="6" fill="#A855F7" fill-opacity="0.6" />
+    <path d="M668 284H648L668 264V284Z" fill="#F8FAFC" fill-opacity="0.15" />
+  </g>
+  <circle cx="244" cy="296" r="30" fill="#38BDF8" fill-opacity="0.22" />
+  <circle cx="604" cy="140" r="26" fill="#F59E0B" fill-opacity="0.22" />
+  <circle cx="188" cy="164" r="22" fill="#22D3EE" fill-opacity="0.18" />
+</svg>

@@ -1,0 +1,36 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="projectsGradient" x1="96" y1="64" x2="704" y2="368" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5" />
+      <stop offset="1" stop-color="#38BDF8" />
+    </linearGradient>
+    <filter id="projectsShadow" x="0" y="0" width="800" height="450" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="18" />
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur" />
+      <feBlend in="SourceGraphic" in2="effect1_backgroundBlur" result="shape" />
+    </filter>
+  </defs>
+  <rect x="44" y="40" width="712" height="370" rx="34" fill="url(#projectsGradient)" opacity="0.95" />
+  <g filter="url(#projectsShadow)">
+    <rect x="140" y="132" width="168" height="200" rx="24" fill="#0F172A" fill-opacity="0.5" />
+    <rect x="160" y="156" width="128" height="18" rx="9" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="160" y="186" width="108" height="12" rx="6" fill="#A855F7" fill-opacity="0.65" />
+    <rect x="160" y="246" width="128" height="80" rx="18" fill="#0F172A" fill-opacity="0.3" />
+  </g>
+  <g filter="url(#projectsShadow)">
+    <rect x="340" y="132" width="168" height="200" rx="24" fill="#0F172A" fill-opacity="0.4" />
+    <rect x="360" y="156" width="128" height="18" rx="9" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="360" y="186" width="108" height="12" rx="6" fill="#38BDF8" fill-opacity="0.7" />
+    <rect x="360" y="246" width="128" height="80" rx="18" fill="#0F172A" fill-opacity="0.26" />
+  </g>
+  <g filter="url(#projectsShadow)">
+    <rect x="540" y="132" width="168" height="200" rx="24" fill="#0F172A" fill-opacity="0.35" />
+    <rect x="560" y="156" width="128" height="18" rx="9" fill="#F8FAFC" fill-opacity="0.85" />
+    <rect x="560" y="186" width="108" height="12" rx="6" fill="#FBBF24" fill-opacity="0.7" />
+    <rect x="560" y="246" width="128" height="80" rx="18" fill="#0F172A" fill-opacity="0.2" />
+  </g>
+  <circle cx="208" cy="108" r="28" fill="#C084FC" fill-opacity="0.3" />
+  <circle cx="400" cy="320" r="36" fill="#22D3EE" fill-opacity="0.22" />
+  <circle cx="592" cy="112" r="32" fill="#F59E0B" fill-opacity="0.24" />
+</svg>

@@ -19,8 +19,13 @@
 
 .auth-layout__info {
   display: grid;
-  align-content: center;
+  align-content: start;
   gap: var(--space-4);
+}
+
+.auth-layout__preview {
+  width: min(320px, 100%);
+  justify-self: start;
 }
 
 .auth-layout__info p {
@@ -380,6 +385,11 @@
     padding: var(--space-6);
   }
 
+  .auth-layout__preview {
+    width: 100%;
+    justify-self: stretch;
+  }
+
   .workspace {
     grid-template-columns: 1fr;
   }
@@ -424,6 +434,10 @@
 
   .auth-layout__card {
     padding: var(--space-5);
+  }
+
+  .auth-layout__preview {
+    margin-top: var(--space-4);
   }
 
   .workspace__topbar {
