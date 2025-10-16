@@ -7,6 +7,11 @@ const navButtons = document.querySelectorAll('.nav-item');
 const navAdminButton = document.getElementById('nav-admin');
 const logoutButton = document.getElementById('logout');
 const themeToggle = document.getElementById('theme-toggle');
+const themeToggleIcon = themeToggle ? themeToggle.querySelector('.icon') : null;
+const workspaceSidebar = document.querySelector('.workspace-sidebar');
+const workspaceMenuToggle = document.getElementById('workspace-menu-toggle');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+const sidebarCloseButton = document.getElementById('sidebar-close');
 
 const tabLogin = document.getElementById('tab-login');
 const tabRegister = document.getElementById('tab-register');
@@ -108,6 +113,8 @@ const DEFAULT_CHATKIT_BASE = 'https://api.openai.com/v1/agentkit';
 const CREATE_SESSION_ENDPOINT = '/api/create-session';
 
 let agentkitSaveMessageTimeoutId = null;
+const mobileSidebarMedia = window.matchMedia('(max-width: 1080px)');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const VIEW_TITLES = {
   chat: {
     title: 'Chat',
@@ -187,7 +194,64 @@ function applyTheme(theme) {
   state.theme = theme;
   document.documentElement.dataset.theme = theme;
   localStorage.setItem(THEME_KEY, theme);
-  themeToggle.textContent = theme === 'dark' ? '🌙' : '☀️';
+  const isDark = theme === 'dark';
+  const icon = isDark ? '🌙' : '☀️';
+  const label = isDark ? 'Přepnout na světlý motiv' : 'Přepnout na tmavý motiv';
+  if (themeToggleIcon) {
+    themeToggleIcon.textContent = icon;
+  } else if (themeToggle) {
+    themeToggle.textContent = icon;
+  }
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-label', label);
+    themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    themeToggle.title = label;
+  }
+}
+
+// Responsivní navigace: správa mobilního menu a uzamčení pozadí během otevření.
+function syncSidebarState(isOpen) {
+  if (!workspace) return;
+  workspace.classList.toggle('sidebar-open', isOpen);
+  if (workspaceSidebar) {
+    workspaceSidebar.setAttribute('data-open', isOpen ? 'true' : 'false');
+  }
+  if (sidebarBackdrop) {
+    sidebarBackdrop.hidden = !isOpen;
+  }
+  if (workspaceMenuToggle) {
+    workspaceMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+  document.body.classList.toggle('lock-scroll', isOpen);
+}
+
+function openSidebar() {
+  if (!mobileSidebarMedia.matches) return;
+  syncSidebarState(true);
+}
+
+function closeSidebar({ restoreFocus = false } = {}) {
+  syncSidebarState(false);
+  if (restoreFocus && workspaceMenuToggle) {
+    workspaceMenuToggle.focus();
+  }
+}
+
+function toggleSidebar() {
+  if (!workspace) return;
+  const isOpen = workspace.classList.contains('sidebar-open');
+  if (isOpen) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+function handleSidebarBreakpointChange(event) {
+  if (!event.matches) {
+    // Návrat na desktop – vždy zavřeme overlay a obnovíme posun.
+    closeSidebar();
+  }
 }
 
 function toggleForms(mode) {
@@ -513,12 +577,16 @@ function renderMessages() {
     const avatar = root.querySelector('.avatar');
     const meta = root.querySelector('.meta');
     const content = root.querySelector('.content');
+    if (root) {
+      root.dataset.role = message.role;
+    }
     avatar.textContent = message.role === 'user' ? '👤' : '🤖';
     meta.textContent = `${message.role === 'user' ? 'Vy' : 'Asistent'} • ${dateTimeFormatter.format(new Date(message.created_at))}`;
     content.textContent = message.content;
     chatHistory.appendChild(node);
   });
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+  const behavior = prefersReducedMotion.matches ? 'auto' : 'smooth';
+  chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior });
   renderThreadHeader();
 }
 
@@ -769,6 +837,7 @@ function setView(view) {
       button.classList.toggle('hidden', !state.user || !state.user.isAdmin);
     }
     button.classList.toggle('active', targetView === view);
+    button.setAttribute('aria-current', targetView === view ? 'page' : 'false');
   });
 
   const meta = VIEW_TITLES[view] || VIEW_TITLES.chat;
@@ -806,6 +875,10 @@ function setView(view) {
 
   if (view !== 'agentkit') {
     setAgentkitStatus('');
+  }
+
+  if (mobileSidebarMedia.matches) {
+    closeSidebar();
   }
 }
 
@@ -1538,6 +1611,33 @@ function initEventListeners() {
   tabLogin.addEventListener('click', () => toggleForms('login'));
   tabRegister.addEventListener('click', () => toggleForms('register'));
 
+  if (workspaceMenuToggle) {
+    workspaceMenuToggle.addEventListener('click', toggleSidebar);
+  }
+
+  if (sidebarCloseButton) {
+    sidebarCloseButton.addEventListener('click', () => closeSidebar({ restoreFocus: true }));
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', () => closeSidebar());
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && workspace && workspace.classList.contains('sidebar-open')) {
+      closeSidebar({ restoreFocus: true });
+    }
+  });
+
+  const mediaListener = (event) => handleSidebarBreakpointChange(event);
+  if (typeof mobileSidebarMedia.addEventListener === 'function') {
+    mobileSidebarMedia.addEventListener('change', mediaListener);
+  } else if (typeof mobileSidebarMedia.addListener === 'function') {
+    mobileSidebarMedia.addListener(mediaListener);
+  }
+
+  syncSidebarState(false);
+
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('login-email').value.trim();
@@ -1589,6 +1689,7 @@ function initEventListeners() {
     state.user = null;
     state.adminUsers = [];
     state.chatApiConnectors = [];
+    closeSidebar();
     workspace.classList.add('hidden');
     authWrapper.classList.remove('hidden');
     if (navAdminButton) {
@@ -1611,7 +1712,12 @@ function initEventListeners() {
   navButtons.forEach((button) => {
     button.addEventListener('click', async () => {
       const view = button.dataset.view;
-      if (view === state.view) return;
+      if (view === state.view) {
+        if (mobileSidebarMedia.matches) {
+          closeSidebar();
+        }
+        return;
+      }
       if (view === 'admin' && (!state.user || !state.user.isAdmin)) return;
       if (view === 'automations' && state.selectedProjectId) {
         await loadAutomations(state.selectedProjectId);
@@ -1854,7 +1960,8 @@ function initEventListeners() {
       return;
     }
     chatMessageInput.value = '';
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    const behavior = prefersReducedMotion.matches ? 'auto' : 'smooth';
+    chatHistory.scrollTo({ top: chatHistory.scrollHeight, behavior });
     try {
       state.messages.push({ role: 'user', content: message, created_at: new Date().toISOString() });
       renderMessages();
