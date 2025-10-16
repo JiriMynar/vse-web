@@ -676,7 +676,8 @@ button:active:not(:disabled) {
 #prompt-dialog,
 #project-dialog,
 #automation-dialog,
-#chat-api-dialog {
+#chat-api-dialog,
+#agentkit-settings-dialog {
   border: 1px solid var(--surface-border);
   border-radius: 20px;
   padding: 2rem;
@@ -688,6 +689,82 @@ button:active:not(:disabled) {
 
 #chat-api-dialog {
   max-width: 560px;
+}
+
+#agentkit-settings-dialog {
+  max-width: 480px;
+}
+
+.agentkit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.agentkit-header h2 {
+  margin: 0 0 0.35rem;
+}
+
+.agentkit-header p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.agentkit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.agentkit-save-message {
+  color: var(--success);
+  font-size: 0.9rem;
+}
+
+.agentkit-placeholder {
+  margin-top: 1.5rem;
+  padding: 2rem;
+  border-radius: 18px;
+  border: 1px dashed var(--empty-border);
+  background: var(--muted-contrast);
+  display: grid;
+  gap: 0.75rem;
+  max-width: 520px;
+}
+
+.agentkit-placeholder p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.agentkit-chat {
+  margin-top: 1.5rem;
+  border-radius: 20px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-strong);
+  min-height: 520px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.agentkit-settings {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.agentkit-settings header {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.agentkit-settings header p,
+.agentkit-settings-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .chat-api-settings {

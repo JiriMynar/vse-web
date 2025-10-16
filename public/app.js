@@ -40,11 +40,24 @@ const chatApiConnectorList = document.getElementById('chat-api-connector-list');
 const chatApiConnectorTemplate = document.getElementById('chat-api-connector-template');
 
 const viewChat = document.getElementById('view-chat');
+const viewAgentkit = document.getElementById('view-agentkit');
 const viewProjects = document.getElementById('view-projects');
 const viewAutomations = document.getElementById('view-automations');
 const viewHelp = document.getElementById('view-help');
 const viewProfile = document.getElementById('view-profile');
 const viewAdmin = document.getElementById('view-admin');
+
+const agentkitMessage = document.getElementById('agentkit-message');
+const agentkitPlaceholder = document.getElementById('agentkit-placeholder');
+const agentkitChatContainer = document.getElementById('agentkit-chat-container');
+const agentkitSettingsButton = document.getElementById('agentkit-settings-button');
+const agentkitOpenSettingsButton = document.getElementById('agentkit-open-settings');
+const agentkitSettingsDialog = document.getElementById('agentkit-settings-dialog');
+const agentkitSettingsForm = document.getElementById('agentkit-settings-form');
+const agentkitWorkflowInput = document.getElementById('agentkit-workflow-id');
+const agentkitOpenaiKeyInput = document.getElementById('agentkit-openai-key');
+const agentkitChatkitBaseInput = document.getElementById('agentkit-chatkit-base');
+const agentkitSaveMessage = document.getElementById('agentkit-save-message');
 
 const createProjectButton = document.getElementById('create-project');
 const projectsEmpty = document.getElementById('projects-empty');
@@ -88,10 +101,21 @@ const adminUsersTableBody = adminUsersTable ? adminUsersTable.querySelector('tbo
 
 const ENTER_TO_SEND_KEY = 'vse-enter-to-send';
 const THEME_KEY = 'vse-theme';
+const AGENTKIT_WORKFLOW_KEY = 'user_agentkit_workflow_id';
+const AGENTKIT_OPENAI_KEY = 'user_openai_api_key';
+const AGENTKIT_CHATKIT_BASE_KEY = 'user_chatkit_api_base';
+const DEFAULT_CHATKIT_BASE = 'https://api.openai.com/v1/agentkit';
+const CREATE_SESSION_ENDPOINT = '/api/create-session';
+
+let agentkitSaveMessageTimeoutId = null;
 const VIEW_TITLES = {
   chat: {
     title: 'Chat',
     subtitle: 'Spravujte konverzace a sledujte odpovědi v reálném čase.'
+  },
+  agentkit: {
+    title: 'Agentkit',
+    subtitle: 'Propojte Agentkit workflow a chatujte s vlastním agentem.'
   },
   projects: {
     title: 'Projekty',
@@ -115,6 +139,10 @@ const VIEW_TITLES = {
   }
 };
 
+const storedAgentkitWorkflow = (localStorage.getItem(AGENTKIT_WORKFLOW_KEY) || '').trim();
+const storedAgentkitOpenaiKey = (localStorage.getItem(AGENTKIT_OPENAI_KEY) || '').trim();
+const storedAgentkitBase = (localStorage.getItem(AGENTKIT_CHATKIT_BASE_KEY) || '').trim();
+
 const state = {
   user: null,
   view: 'chat',
@@ -134,7 +162,17 @@ const state = {
   theme: localStorage.getItem(THEME_KEY) || 'dark',
   isLoading: false,
   adminUsers: [],
-  chatApiConnectors: []
+  chatApiConnectors: [],
+  agentkit: {
+    workflowId: storedAgentkitWorkflow,
+    openaiApiKey: storedAgentkitOpenaiKey,
+    chatkitApiBase: storedAgentkitBase,
+    isMounted: false,
+    isInitializing: false,
+    instance: null,
+    unmount: null,
+    scriptPromise: null
+  }
 };
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('cs', { numeric: 'auto' });
@@ -191,6 +229,17 @@ function setChatApiMessage(message, type = 'info') {
   }
   chatApiMessage.textContent = message;
   chatApiMessage.className = `message ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`.trim();
+}
+
+function setAgentkitStatus(message, type = 'info') {
+  if (!agentkitMessage) return;
+  if (!message) {
+    agentkitMessage.textContent = '';
+    agentkitMessage.className = 'message hidden';
+    return;
+  }
+  agentkitMessage.textContent = message;
+  agentkitMessage.className = `message ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`.trim();
 }
 
 function showProfileMessage(message, type = 'info') {
@@ -728,6 +777,9 @@ function setView(view) {
   viewSubtitle.textContent = subtitle;
 
   viewChat.classList.toggle('hidden', view !== 'chat');
+  if (viewAgentkit) {
+    viewAgentkit.classList.toggle('hidden', view !== 'agentkit');
+  }
   viewProjects.classList.toggle('hidden', view !== 'projects');
   viewAutomations.classList.toggle('hidden', view !== 'automations');
   viewHelp.classList.toggle('hidden', view !== 'help');
@@ -738,7 +790,9 @@ function setView(view) {
     viewAdmin.classList.toggle('hidden', view !== 'admin');
   }
 
-  if (view === 'projects') {
+  if (view === 'agentkit') {
+    renderAgentkit();
+  } else if (view === 'projects') {
     renderProjects();
   } else if (view === 'automations') {
     renderAutomations();
@@ -748,6 +802,291 @@ function setView(view) {
     renderProfile();
   } else if (view === 'admin') {
     renderAdminUsers();
+  }
+
+  if (view !== 'agentkit') {
+    setAgentkitStatus('');
+  }
+}
+
+function hasAgentkitConfig() {
+  return Boolean(state.agentkit.workflowId && state.agentkit.openaiApiKey);
+}
+
+function persistAgentkitConfig(config) {
+  localStorage.setItem(AGENTKIT_WORKFLOW_KEY, config.workflowId);
+  localStorage.setItem(AGENTKIT_OPENAI_KEY, config.openaiApiKey);
+  if (config.chatkitApiBase) {
+    localStorage.setItem(AGENTKIT_CHATKIT_BASE_KEY, config.chatkitApiBase);
+  } else {
+    localStorage.removeItem(AGENTKIT_CHATKIT_BASE_KEY);
+  }
+}
+
+function showAgentkitSaveFeedback(message) {
+  if (!agentkitSaveMessage) return;
+  if (agentkitSaveMessageTimeoutId) {
+    clearTimeout(agentkitSaveMessageTimeoutId);
+    agentkitSaveMessageTimeoutId = null;
+  }
+  if (!message) {
+    agentkitSaveMessage.textContent = '';
+    agentkitSaveMessage.classList.add('hidden');
+    return;
+  }
+  agentkitSaveMessage.textContent = message;
+  agentkitSaveMessage.classList.remove('hidden');
+  agentkitSaveMessageTimeoutId = window.setTimeout(() => {
+    if (agentkitSaveMessage) {
+      agentkitSaveMessage.textContent = '';
+      agentkitSaveMessage.classList.add('hidden');
+    }
+  }, 3000);
+}
+
+function fillAgentkitSettingsForm() {
+  if (!agentkitWorkflowInput || !agentkitOpenaiKeyInput || !agentkitChatkitBaseInput) return;
+  agentkitWorkflowInput.value = state.agentkit.workflowId || '';
+  agentkitOpenaiKeyInput.value = state.agentkit.openaiApiKey || '';
+  agentkitChatkitBaseInput.value = state.agentkit.chatkitApiBase || '';
+}
+
+function teardownAgentkit() {
+  if (state.agentkit.unmount) {
+    try {
+      state.agentkit.unmount();
+    } catch (error) {
+      console.error('Agentkit unmount failed', error);
+    }
+  } else if (state.agentkit.instance) {
+    try {
+      if (typeof state.agentkit.instance.destroy === 'function') {
+        state.agentkit.instance.destroy();
+      } else if (typeof state.agentkit.instance.unmount === 'function') {
+        state.agentkit.instance.unmount();
+      }
+    } catch (error) {
+      console.error('Agentkit instance cleanup failed', error);
+    }
+  }
+  state.agentkit.unmount = null;
+  state.agentkit.instance = null;
+  state.agentkit.isMounted = false;
+  if (agentkitChatContainer) {
+    agentkitChatContainer.innerHTML = '';
+  }
+}
+
+function resolveAgentkitAdapter() {
+  if (window.ChatKitUI && typeof window.ChatKitUI.mount === 'function') {
+    return {
+      mount: (container, options) => window.ChatKitUI.mount(container, options)
+    };
+  }
+  if (window.ChatKit && typeof window.ChatKit.mount === 'function') {
+    return {
+      mount: (container, options) => window.ChatKit.mount(container, options)
+    };
+  }
+  if (window.ChatKit && typeof window.ChatKit.createChatKit === 'function') {
+    return {
+      mount: (container, options) => window.ChatKit.createChatKit({ ...options, element: container })
+    };
+  }
+  return null;
+}
+
+async function ensureChatKitLibrary() {
+  if (resolveAgentkitAdapter()) {
+    return;
+  }
+  if (state.agentkit.scriptPromise) {
+    return state.agentkit.scriptPromise;
+  }
+  state.agentkit.scriptPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector('script[data-agentkit-script="true"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', resolve, { once: true });
+      existingScript.addEventListener('error', () => {
+        state.agentkit.scriptPromise = null;
+        reject(new Error('Nepodařilo se načíst knihovnu ChatKit.'));
+      }, { once: true });
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@openai/chatkit@latest/dist/chatkit.umd.js';
+    script.async = true;
+    script.dataset.agentkitScript = 'true';
+    script.onload = () => resolve();
+    script.onerror = () => {
+      state.agentkit.scriptPromise = null;
+      reject(new Error('Nepodařilo se načíst knihovnu ChatKit.'));
+    };
+    document.head.appendChild(script);
+  });
+  return state.agentkit.scriptPromise;
+}
+
+async function requestAgentkitClientSecret() {
+  const payload = {
+    workflowId: state.agentkit.workflowId,
+    openaiApiKey: state.agentkit.openaiApiKey,
+  };
+  if (state.agentkit.chatkitApiBase) {
+    payload.chatkitApiBase = state.agentkit.chatkitApiBase;
+  }
+
+  const response = await fetch(CREATE_SESSION_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    try {
+      const errorJson = JSON.parse(text);
+      if (errorJson?.error) {
+        throw new Error(errorJson.error);
+      }
+    } catch (parseError) {
+      // ignore JSON parse errors and fall back to default message
+    }
+    throw new Error('Nepodařilo se vytvořit sezení pro Agentkit chat.');
+  }
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error('Odpověď služby Agentkit není validní JSON.');
+  }
+}
+
+async function initializeAgentkitChat({ force = false } = {}) {
+  if (!agentkitChatContainer || !hasAgentkitConfig()) {
+    return;
+  }
+
+  if (state.agentkit.isInitializing) {
+    return;
+  }
+
+  if (force && state.agentkit.isMounted) {
+    teardownAgentkit();
+  } else if (state.agentkit.isMounted) {
+    return;
+  }
+
+  state.agentkit.isInitializing = true;
+  setAgentkitStatus('Načítám Agentkit chat…');
+  agentkitPlaceholder?.classList.add('hidden');
+  agentkitChatContainer.classList.remove('hidden');
+  agentkitChatContainer.innerHTML = '';
+
+  try {
+    await ensureChatKitLibrary();
+    const adapter = resolveAgentkitAdapter();
+    if (!adapter) {
+      throw new Error('Knihovna ChatKit není dostupná.');
+    }
+
+    const mountResult = await adapter.mount(agentkitChatContainer, {
+      workflowId: state.agentkit.workflowId,
+      baseUrl: state.agentkit.chatkitApiBase || DEFAULT_CHATKIT_BASE,
+      theme: document.documentElement.dataset.theme || state.theme,
+      getClientSecret: async () => requestAgentkitClientSecret()
+    });
+
+    let unmountHandler = null;
+    let instance = null;
+
+    if (typeof mountResult === 'function') {
+      unmountHandler = mountResult;
+    } else if (mountResult && typeof mountResult.unmount === 'function') {
+      unmountHandler = () => mountResult.unmount();
+      instance = mountResult;
+    } else if (mountResult && typeof mountResult.destroy === 'function') {
+      unmountHandler = () => mountResult.destroy();
+      instance = mountResult;
+    } else if (window.ChatKitUI && typeof window.ChatKitUI.unmount === 'function') {
+      unmountHandler = () => window.ChatKitUI.unmount(agentkitChatContainer);
+    } else if (window.ChatKit && typeof window.ChatKit.unmount === 'function') {
+      unmountHandler = () => window.ChatKit.unmount(agentkitChatContainer);
+    }
+
+    state.agentkit.unmount = unmountHandler;
+    state.agentkit.instance = instance;
+    state.agentkit.isMounted = true;
+    setAgentkitStatus('');
+  } catch (error) {
+    console.error('Agentkit chat initialization failed', error);
+    const message = error instanceof Error ? error.message : 'Nepodařilo se načíst Agentkit chat.';
+    setAgentkitStatus(message, 'error');
+    agentkitChatContainer.classList.add('hidden');
+    state.agentkit.isMounted = false;
+  } finally {
+    state.agentkit.isInitializing = false;
+  }
+}
+
+function renderAgentkit() {
+  if (!viewAgentkit) return;
+  const isVisible = state.view === 'agentkit';
+  const hasConfig = hasAgentkitConfig();
+
+  if (agentkitPlaceholder) {
+    agentkitPlaceholder.classList.toggle('hidden', !isVisible || hasConfig);
+  }
+
+  if (!isVisible) {
+    return;
+  }
+
+  if (!hasConfig) {
+    teardownAgentkit();
+    if (agentkitChatContainer) {
+      agentkitChatContainer.classList.add('hidden');
+    }
+    setAgentkitStatus('Nejprve vyplňte workflow ID a OPENAI_API_KEY v nastavení.', 'info');
+    return;
+  }
+
+  agentkitChatContainer?.classList.remove('hidden');
+  setAgentkitStatus('');
+  if (!state.agentkit.isMounted && !state.agentkit.isInitializing) {
+    initializeAgentkitChat();
+  }
+}
+
+function handleAgentkitConfigSaved() {
+  const trimmedWorkflow = agentkitWorkflowInput ? agentkitWorkflowInput.value.trim() : '';
+  const trimmedApiKey = agentkitOpenaiKeyInput ? agentkitOpenaiKeyInput.value.trim() : '';
+  const trimmedBase = agentkitChatkitBaseInput ? agentkitChatkitBaseInput.value.trim() : '';
+
+  state.agentkit.workflowId = trimmedWorkflow;
+  state.agentkit.openaiApiKey = trimmedApiKey;
+  state.agentkit.chatkitApiBase = trimmedBase;
+
+  persistAgentkitConfig(state.agentkit);
+  showAgentkitSaveFeedback('Konfigurace byla uložena.');
+
+  fillAgentkitSettingsForm();
+  renderAgentkit();
+
+  if (!trimmedWorkflow || !trimmedApiKey) {
+    teardownAgentkit();
+    return;
+  }
+
+  if (state.view === 'agentkit') {
+    initializeAgentkitChat({ force: true });
   }
 }
 
@@ -1264,6 +1603,9 @@ function initEventListeners() {
       chatApiConnectorList.innerHTML = '';
     }
     setChatApiMessage('');
+    teardownAgentkit();
+    setAgentkitStatus('');
+    showAgentkitSaveFeedback('');
   });
 
   navButtons.forEach((button) => {
@@ -1284,8 +1626,51 @@ function initEventListeners() {
     });
   });
 
+  const openAgentkitSettings = () => {
+    fillAgentkitSettingsForm();
+    if (agentkitSettingsDialog) {
+      agentkitSettingsDialog.returnValue = 'cancel';
+      agentkitSettingsDialog.showModal();
+    }
+  };
+
+  if (agentkitSettingsButton) {
+    agentkitSettingsButton.addEventListener('click', openAgentkitSettings);
+  }
+
+  if (agentkitOpenSettingsButton) {
+    agentkitOpenSettingsButton.addEventListener('click', openAgentkitSettings);
+  }
+
+  if (agentkitSettingsForm) {
+    agentkitSettingsForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (agentkitSettingsDialog) {
+        agentkitSettingsDialog.returnValue = 'confirm';
+        agentkitSettingsDialog.close();
+      }
+      handleAgentkitConfigSaved();
+    });
+  }
+
+  if (agentkitSettingsDialog) {
+    const cancelButton = agentkitSettingsDialog.querySelector('button[value="cancel"]');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', () => {
+        agentkitSettingsDialog.returnValue = 'cancel';
+        agentkitSettingsDialog.close();
+      });
+    }
+    agentkitSettingsDialog.addEventListener('close', () => {
+      fillAgentkitSettingsForm();
+    });
+  }
+
   themeToggle.addEventListener('click', () => {
     applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    if (state.view === 'agentkit' && state.agentkit.isMounted) {
+      initializeAgentkitChat({ force: true });
+    }
   });
 
   createThreadButton.addEventListener('click', async () => {
@@ -1558,6 +1943,8 @@ function initEventListeners() {
     promptDialog.returnValue = 'cancel';
     promptDialog.close();
   });
+
+  fillAgentkitSettingsForm();
 }
 
 async function bootstrap() {
