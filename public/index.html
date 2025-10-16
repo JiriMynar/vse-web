@@ -40,32 +40,71 @@
     </div>
 
     <div class="workspace hidden" id="workspace">
+      <!-- Modernizovaná postranní navigace s responsivním zavíráním -->
       <aside class="workspace-sidebar" aria-label="Hlavní navigace">
-        <header class="workspace-brand">
-          <h2>VŠE Studio</h2>
-          <p id="workspace-user"></p>
-        </header>
+        <div class="workspace-sidebar-header">
+          <header class="workspace-brand">
+            <h2>VŠE Studio</h2>
+            <p id="workspace-user"></p>
+          </header>
+          <button id="sidebar-close" class="workspace-sidebar-close icon-button" type="button" aria-label="Zavřít navigaci">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
         <nav class="workspace-nav" role="tablist">
-          <button class="nav-item active" data-view="chat" type="button">💬 Chat</button>
-          <button class="nav-item" data-view="agentkit" type="button">🤖 Agentkit</button>
-          <button class="nav-item" data-view="automations" type="button">⚙️ Automatizace</button>
-          <button class="nav-item" data-view="profile" type="button">👤 Profil</button>
-          <button class="nav-item" data-view="help" type="button">❓ Nápověda</button>
-          <button id="nav-admin" class="nav-item hidden" data-view="admin" type="button">🛡️ Administrace</button>
+          <button class="nav-item active" data-view="chat" type="button" aria-controls="view-chat">
+            <span class="nav-icon" aria-hidden="true">💬</span>
+            <span class="nav-label">Chat</span>
+          </button>
+          <button class="nav-item" data-view="agentkit" type="button" aria-controls="view-agentkit">
+            <span class="nav-icon" aria-hidden="true">🤖</span>
+            <span class="nav-label">Agentkit</span>
+          </button>
+          <button class="nav-item" data-view="automations" type="button" aria-controls="view-automations">
+            <span class="nav-icon" aria-hidden="true">⚙️</span>
+            <span class="nav-label">Automatizace</span>
+          </button>
+          <button class="nav-item" data-view="profile" type="button" aria-controls="view-profile">
+            <span class="nav-icon" aria-hidden="true">👤</span>
+            <span class="nav-label">Profil</span>
+          </button>
+          <button class="nav-item" data-view="help" type="button" aria-controls="view-help">
+            <span class="nav-icon" aria-hidden="true">❓</span>
+            <span class="nav-label">Nápověda</span>
+          </button>
+          <button id="nav-admin" class="nav-item hidden" data-view="admin" type="button" aria-controls="view-admin">
+            <span class="nav-icon" aria-hidden="true">🛡️</span>
+            <span class="nav-label">Administrace</span>
+          </button>
         </nav>
         <footer class="workspace-footer">
           <button id="logout" class="ghost" type="button">Odhlásit se</button>
         </footer>
       </aside>
+      <!-- Přidána poloprůhledná vrstva pro mobilní otevření menu -->
+      <div id="sidebar-backdrop" class="workspace-backdrop" hidden></div>
 
       <main class="workspace-main" id="workspace-main">
         <header class="workspace-toolbar">
-          <div>
-            <h1 id="view-title">Chat</h1>
-            <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
+          <div class="workspace-toolbar-start">
+            <button
+              id="workspace-menu-toggle"
+              class="workspace-menu-toggle icon-button"
+              type="button"
+              aria-label="Zobrazit navigaci"
+              aria-expanded="false"
+            >
+              <span aria-hidden="true">☰</span>
+            </button>
+            <div class="workspace-toolbar-titles">
+              <h1 id="view-title">Chat</h1>
+              <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
+            </div>
           </div>
           <div class="toolbar-actions">
-            <button id="theme-toggle" class="icon-button" type="button" aria-label="Přepnout motiv">🌓</button>
+            <button id="theme-toggle" class="icon-button" type="button" aria-label="Přepnout motiv" aria-pressed="true">
+              <span class="icon" aria-hidden="true">🌙</span>
+            </button>
           </div>
         </header>
 
