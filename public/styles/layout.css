@@ -225,8 +225,7 @@
 }
 
 .split-layout__sidebar {
-  display: flex;
-  flex-direction: column;
+
   gap: var(--space-3);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -239,12 +238,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-}
-
-.chat-sidebar__search input[type='search'] {
-  flex: 1 1 auto;
-  min-width: 0;
-}
 
 .chat-view__header {
   display: flex;
