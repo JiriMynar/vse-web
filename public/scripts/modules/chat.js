@@ -17,8 +17,17 @@ function syncThreadSidebar(refs) {
   const hidden = state.isThreadSidebarHidden;
   refs.chatSplitLayout?.classList.toggle('is-sidebar-hidden', hidden);
   if (refs.threadSidebarToggle) {
+    const label = hidden ? 'Zobrazit historii' : 'Skrýt historii';
     refs.threadSidebarToggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-    refs.threadSidebarToggle.textContent = hidden ? 'Zobrazit historii' : 'Skrýt historii';
+    refs.threadSidebarToggle.setAttribute('aria-label', label);
+    refs.threadSidebarToggle.setAttribute('title', label);
+    const icon = refs.threadSidebarToggle.querySelector('use');
+    if (icon) {
+      icon.setAttribute('href', hidden ? '#icon-chevron-right' : '#icon-chevron-left');
+    }
+    if (refs.threadSidebarToggleLabel) {
+      refs.threadSidebarToggleLabel.textContent = label;
+    }
   }
 }
 

@@ -56,6 +56,7 @@ export const state = {
   threadFilter: 'all',
   threadSearch: '',
   isThreadSidebarHidden: false,
+  isWorkspaceSidebarHidden: false,
   messages: [],
   threadStream: null,
   messageStream: null,

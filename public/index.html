@@ -50,6 +50,12 @@
         <symbol id="icon-close" viewBox="0 0 24 24">
           <path d="m6.7 5.29 5.3 5.3 5.3-5.3 1.4 1.42-5.29 5.29 5.29 5.29-1.4 1.42-5.3-5.3-5.3 5.3-1.41-1.42 5.29-5.29-5.29-5.29Z" fill="currentColor" />
         </symbol>
+        <symbol id="icon-chevron-left" viewBox="0 0 24 24">
+          <path d="m14.7 5.3-5 5a1 1 0 0 0 0 1.4l5 5 1.4-1.4L11.41 12l4.7-4.7Z" fill="currentColor" />
+        </symbol>
+        <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+          <path d="m9.3 18.7 5-5a1 1 0 0 0 0-1.4l-5-5-1.4 1.4 4.69 4.7-4.7 4.7Z" fill="currentColor" />
+        </symbol>
         <symbol id="icon-sun" viewBox="0 0 24 24">
           <path
             d="M12 4a1 1 0 0 1 1 1v1.26a6.5 6.5 0 0 1 5.74 5.74H20a1 1 0 0 1 0 2h-1.26a6.5 6.5 0 0 1-5.74 5.74V20a1 1 0 0 1-2 0v-1.26a6.5 6.5 0 0 1-5.74-5.74H4a1 1 0 0 1 0-2h1.26a6.5 6.5 0 0 1 5.74-5.74V5a1 1 0 0 1 1-1Zm0 4a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 8Z"
@@ -117,9 +123,26 @@
               <h2>Pracovní plocha</h2>
               <p id="workspace-user"></p>
             </div>
-            <button id="sidebar-close" class="button button--icon" type="button" aria-label="Zavřít navigaci">
-              <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
-            </button>
+            <div class="workspace__brand-actions">
+              <button
+                id="workspace-sidebar-toggle"
+                class="button button--icon panel-toggle workspace__collapse"
+                type="button"
+                aria-expanded="true"
+                aria-label="Skrýt navigaci"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+                <span class="visually-hidden" data-panel-label>Skrýt navigaci</span>
+              </button>
+              <button
+                id="sidebar-close"
+                class="button button--icon workspace__sidebar-close"
+                type="button"
+                aria-label="Zavřít navigaci"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+              </button>
+            </div>
           </div>
           <div class="workspace__nav-group">
             <button id="create-thread" class="button button--primary button--full workspace__nav-action" type="button">
@@ -175,7 +198,7 @@
                     id="workspace-menu-toggle"
                     class="button button--icon workspace-menu-toggle"
                     type="button"
-                    aria-label="Zobrazit navigaci"
+                    aria-label="Přepnout navigaci"
                     aria-expanded="false"
                   >
                     <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
@@ -193,9 +216,21 @@
                   </div>
                 </header>
                 <div class="thread-header">
-                  <div>
-                    <h2 id="active-thread-title">Vyberte vlákno</h2>
-                    <p id="active-thread-meta" class="thread-card__preview"></p>
+                  <div class="thread-header__info">
+                    <button
+                      id="thread-sidebar-toggle"
+                      class="button button--icon panel-toggle thread-header__toggle"
+                      type="button"
+                      aria-expanded="true"
+                      aria-label="Skrýt historii"
+                    >
+                      <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+                      <span class="visually-hidden" data-panel-label>Skrýt historii</span>
+                    </button>
+                    <div>
+                      <h2 id="active-thread-title">Vyberte vlákno</h2>
+                      <p id="active-thread-meta" class="thread-card__preview"></p>
+                    </div>
                   </div>
                   <div class="thread-actions">
 

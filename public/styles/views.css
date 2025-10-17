@@ -10,8 +10,24 @@
   align-items: flex-start;
 }
 
+.thread-header__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.thread-header__info > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
 .thread-header h2 {
   margin: 0;
+}
+
+.thread-header__toggle {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
 .thread-actions {
