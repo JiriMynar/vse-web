@@ -47,6 +47,10 @@ export function setView(view, refs, renderers = {}) {
     renderers.agentkitCleanup();
   }
 
+  if (typeof renderers.onViewChange === 'function') {
+    renderers.onViewChange(view);
+  }
+
   if (mobileSidebarMedia.matches) {
     closeSidebar(refs);
   }

@@ -14,6 +14,12 @@
             fill="currentColor"
           />
         </symbol>
+        <symbol id="icon-history" viewBox="0 0 24 24">
+          <path
+            d="M12 2.5a9.5 9.5 0 0 0-9.5 9.5H0l3.84 3.84a.75.75 0 0 0 1.06 0L8.75 12H5.5a6.5 6.5 0 1 1 1.9 4.6l-1.4 1.4A8.5 8.5 0 1 0 12 2.5Zm-1 4.75v5.94l4.8 2.88 1-1.74-3.8-2.3V7.25Z"
+            fill="currentColor"
+          />
+        </symbol>
         <symbol id="icon-agent" viewBox="0 0 24 24">
           <path
             d="M12 2a5 5 0 0 1 5 5v1.09a5 5 0 0 1 2.74 4.44v5.22a2.25 2.25 0 0 1-2.25 2.25H6.51A2.25 2.25 0 0 1 4.26 17.75v-5.22A5 5 0 0 1 7 8.09V7a5 5 0 0 1 5-5Zm-3 5a3 3 0 1 1 6 0v1H9V7Zm-2 6.5v4.25h12v-4.25a2.5 2.5 0 0 0-2.5-2.5h-7a2.5 2.5 0 0 0-2.5 2.5Zm2 0A.5.5 0 0 1 9.5 13h5a.5.5 0 0 1 .5.5v1.5H7v-1.5Z"
@@ -148,34 +154,70 @@
             <button id="create-thread" class="button button--primary button--full workspace__nav-action" type="button">
               Nový chat
             </button>
-            <nav class="workspace__nav" role="tablist">
-              <button class="workspace__nav-button is-active" data-view="chat" type="button" aria-controls="view-chat">
-                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-chat"></use></svg>
-                <span>Chat</span>
-              </button>
-              <button class="workspace__nav-button" data-view="agentkit" type="button" aria-controls="view-agentkit">
-                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-agent"></use></svg>
-                <span>Agentkit</span>
-              </button>
-              <button class="workspace__nav-button" data-view="profile" type="button" aria-controls="view-profile">
-                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-profile"></use></svg>
-                <span>Profil</span>
-              </button>
-              <button class="workspace__nav-button" data-view="help" type="button" aria-controls="view-help">
-                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-help"></use></svg>
-                <span>Nápověda</span>
-              </button>
-              <button
-                id="nav-admin"
-                class="workspace__nav-button visually-hidden"
-                data-view="admin"
-                type="button"
-                aria-controls="view-admin"
+            <div class="workspace-menu">
+              <div id="workspace-menu-primary" class="workspace-menu__panel workspace-menu__panel--primary">
+                <nav class="workspace__nav" role="tablist">
+                  <button class="workspace__nav-button is-active" data-view="chat" type="button" aria-controls="view-chat">
+                    <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-chat"></use></svg>
+                    <span>Chat</span>
+                  </button>
+                  <button class="workspace__nav-button" data-view="agentkit" type="button" aria-controls="view-agentkit">
+                    <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-agent"></use></svg>
+                    <span>Agentkit</span>
+                  </button>
+                  <button class="workspace__nav-button" data-view="profile" type="button" aria-controls="view-profile">
+                    <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-profile"></use></svg>
+                    <span>Profil</span>
+                  </button>
+                  <button class="workspace__nav-button" data-view="help" type="button" aria-controls="view-help">
+                    <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-help"></use></svg>
+                    <span>Nápověda</span>
+                  </button>
+                  <button
+                    id="nav-admin"
+                    class="workspace__nav-button visually-hidden"
+                    data-view="admin"
+                    type="button"
+                    aria-controls="view-admin"
+                  >
+                    <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-admin"></use></svg>
+                    <span>Administrace</span>
+                  </button>
+                </nav>
+                <button
+                  id="workspace-history-button"
+                  class="workspace__nav-button workspace__nav-button--history"
+                  type="button"
+                  aria-controls="workspace-menu-history"
+                  aria-expanded="false"
+                >
+                  <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-history"></use></svg>
+                  <span>Historie chatu</span>
+                </button>
+              </div>
+              <div
+                id="workspace-menu-history"
+                class="workspace-menu__panel workspace-menu__panel--history workspace-menu__panel--hidden"
+                role="region"
+                aria-label="Historie chatu"
               >
-                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-admin"></use></svg>
-                <span>Administrace</span>
-              </button>
-            </nav>
+                <div class="workspace-menu__header">
+                  <button
+                    id="workspace-history-back"
+                    class="button button--ghost workspace-menu__back"
+                    type="button"
+                    aria-controls="workspace-menu-primary"
+                  >
+                    <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+                    <span>Zpět do menu</span>
+                  </button>
+                </div>
+                <div class="workspace-menu__search">
+                  <input id="thread-search" type="search" placeholder="Hledat vlákno" />
+                </div>
+                <ul id="thread-list" class="thread-list" role="tablist"></ul>
+              </div>
+            </div>
           </div>
           <footer class="workspace__footer">
             <button id="logout" class="button button--ghost" type="button">
@@ -191,86 +233,56 @@
           <div id="workspace-message" class="message workspace__message" role="status" aria-live="polite"></div>
 
           <section id="view-chat" class="view-panel is-active">
-            <div class="split-layout">
-              <div class="split-layout__sidebar" aria-label="Seznam vláken">
-                <div class="chat-sidebar__search">
-                  <button
-                    id="workspace-menu-toggle"
-                    class="button button--icon workspace-menu-toggle"
-                    type="button"
-                    aria-label="Přepnout navigaci"
-                    aria-expanded="false"
-                  >
-                    <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+            <div class="chat-view" aria-live="polite">
+              <header class="chat-view__header">
+                <div class="chat-sidebar__titles">
+                  <h1 id="view-title">Chat</h1>
+                  <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
+                </div>
+                <button
+                  id="workspace-menu-toggle"
+                  class="button button--icon workspace-menu-toggle"
+                  type="button"
+                  aria-label="Zobrazit menu"
+                  aria-expanded="false"
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+                </button>
+              </header>
+              <div class="thread-header">
+                <div class="thread-header__info">
+                  <div>
+                    <h2 id="active-thread-title">Vyberte vlákno</h2>
+                    <p id="active-thread-meta" class="thread-card__preview"></p>
+                  </div>
+                </div>
+                <div class="thread-actions">
+                  <button id="theme-toggle" class="button button--icon" type="button" aria-label="Přepnout motiv" aria-pressed="true">
+                    <svg class="icon" data-theme-icon="dark" aria-hidden="true"><use href="#icon-moon"></use></svg>
                   </button>
-
-                  <input id="thread-search" type="search" placeholder="Hledat vlákno" />
+                  <button id="chat-api-settings" class="button button--ghost" type="button">API nastavení</button>
                 </div>
-                <ul id="thread-list" class="thread-list" role="tablist"></ul>
               </div>
-              <div class="split-layout__main" aria-live="polite">
-                <header class="chat-view__header">
-                  <div class="chat-sidebar__titles">
-                    <h1 id="view-title">Chat</h1>
-                    <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
-                  </div>
-                  <button
-                    id="workspace-sidebar-reopen"
-                    class="button button--icon panel-toggle workspace__reveal"
-                    type="button"
-                    aria-expanded="true"
-                    aria-label="Skrýt navigaci"
-                  >
-                    <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
-                    <span class="visually-hidden" data-panel-label>Skrýt navigaci</span>
-                  </button>
-                </header>
-                <div class="thread-header">
-                  <div class="thread-header__info">
-                    <button
-                      id="thread-sidebar-toggle"
-                      class="button button--icon panel-toggle thread-header__toggle"
-                      type="button"
-                      aria-expanded="true"
-                      aria-label="Skrýt historii"
-                    >
-                      <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
-                      <span class="visually-hidden" data-panel-label>Skrýt historii</span>
-                    </button>
-                    <div>
-                      <h2 id="active-thread-title">Vyberte vlákno</h2>
-                      <p id="active-thread-meta" class="thread-card__preview"></p>
-                    </div>
-                  </div>
-                  <div class="thread-actions">
 
-                    <button id="theme-toggle" class="button button--icon" type="button" aria-label="Přepnout motiv" aria-pressed="true">
-                      <svg class="icon" data-theme-icon="dark" aria-hidden="true"><use href="#icon-moon"></use></svg>
-                    </button>
-                    <button id="chat-api-settings" class="button button--ghost" type="button">API nastavení</button>
-                  </div>
+              <div id="chat-feedback" class="message" role="status" aria-live="polite"></div>
+              <div class="chat-history-wrapper">
+                <div id="chat-history" class="chat-history" role="log"></div>
+                <div id="chat-empty" class="empty">
+                  <h3>Žádné zprávy</h3>
+                  <p>Začněte konverzaci ve vybraném vlákně nebo vytvořte nové.</p>
                 </div>
-
-                <div id="chat-feedback" class="message" role="status" aria-live="polite"></div>
-                <div class="chat-history-wrapper">
-                  <div id="chat-history" class="chat-history" role="log"></div>
-                  <div id="chat-empty" class="empty">
-                    <h3>Žádné zprávy</h3>
-                    <p>Začněte konverzaci ve vybraném vlákně nebo vytvořte nové.</p>
-                  </div>
-                </div>
-                <form id="chat-form" class="chat-form" autocomplete="off">
-                  <label for="chat-message" class="visually-hidden">Zpráva</label>
-                  <textarea id="chat-message" rows="1" placeholder="Napište zprávu…" required></textarea>
-                  <div class="chat-controls">
-                    <label class="toggle">
-                      <input type="checkbox" id="enter-to-send" />
-                      <span>Enter odešle</span>
-                    </label>
-                    <button type="submit" class="button button--primary">Odeslat</button>
-                  </div>
-                </form>
               </div>
+              <form id="chat-form" class="chat-form" autocomplete="off">
+                <label for="chat-message" class="visually-hidden">Zpráva</label>
+                <textarea id="chat-message" rows="1" placeholder="Napište zprávu…" required></textarea>
+                <div class="chat-controls">
+                  <label class="toggle">
+                    <input type="checkbox" id="enter-to-send" />
+                    <span>Enter odešle</span>
+                  </label>
+                  <button type="submit" class="button button--primary">Odeslat</button>
+                </div>
+              </form>
             </div>
           </section>
 

@@ -25,11 +25,6 @@
   margin: 0;
 }
 
-.thread-header__toggle {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
 .thread-actions {
   display: inline-flex;
   align-items: center;
