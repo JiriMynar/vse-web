@@ -1,6 +1,6 @@
 # VŠE Studio
 
-Kompletní ukázková aplikace s modulárním workspace rozhraním, které kombinuje chat, správu projektů a automatizace připravené na napojení na externí API.
+Kompletní ukázková aplikace s modulárním workspace rozhraním, které kombinuje chat a správu projektů připravené na napojení na externí API.
 
 ## Požadavky
 
@@ -54,13 +54,13 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 - `server.js` – vstupní bod, který startuje aplikaci ve složce `src/`
 - `src/app.js` – Express aplikace s bezpečnostními middleware a registrací routerů
-- `src/routes/` – REST API rozdělené na domény (auth, chat, projekty, automatizace, help, health)
-- `src/services/` – obchodní logika, včetně orchestrace vláken chatu, projektů a automatizací
+- `src/routes/` – REST API rozdělené na domény (auth, chat, projekty, help, health)
+- `src/services/` – obchodní logika, včetně orchestrace vláken chatu a projektů
 - `src/lib/eventBus.js` – jednoduchý event bus pro realtime notifikace (SSE)
-- `db.js` – inicializace SQLite databáze a migrace (uživatelé, chat, projekty, automatizace, refresh tokeny)
+- `db.js` – inicializace SQLite databáze a migrace (uživatelé, chat, projekty, refresh tokeny)
 - `auth.js` – práce s JWT a refresh tokeny, nastavení cookies
 - `chatService.js` – logika pro získávání odpovědí bota (lokální fallback + volání externí služby)
-- `public/` – modulární SPA workspace s chatem, projekty, automatizacemi a integrovanou nápovědou
+- `public/` – modulární SPA workspace s chatem, projekty a integrovanou nápovědou
 - `docs/help.json` – obsah centra nápovědy zobrazovaný přímo v aplikaci
 - `logger.js` – konfigurace logování (soubor `logs/app.log`)
 
@@ -68,9 +68,8 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 - Registrace, přihlášení a automatické obnovování relace (access + refresh tokeny)
 - Realtime synchronizace vláken a zpráv přes Server-Sent Events (bez nutnosti pollingu)
-- Workspace s přepínáním mezi moduly Chat, Projekty, Automatizace a Nápověda
+- Workspace s přepínáním mezi moduly Chat, Projekty, Agentkit a Nápověda
 - Správa projektů včetně archivace a základních metrik
-- Návrh automatizací s konfigurací ve formátu JSON a možností měnit stav (aktivní/neaktivní)
 - Kompletní help centrum s popisem pracovních postupů přímo v aplikaci
 - Administrátorské rozhraní pro správu účtů (reset hesla, přidělení role, hromadné vymazání)
 
@@ -88,7 +87,7 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 1. Spusťte `npm install && npm run start`
 2. Otevřete http://localhost:3000
 3. Zaregistrujte se nebo přihlaste
-4. Projděte hlavní moduly (Chat, Projekty, Automatizace) a vyzkoušejte realtime konverzaci s botem
+4. Projděte hlavní moduly (Chat, Projekty, Agentkit) a vyzkoušejte realtime konverzaci s botem
 
 ## Poznámky
 

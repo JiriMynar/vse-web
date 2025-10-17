@@ -196,15 +196,7 @@ export async function resetUserDatabase({ actorId }) {
 
   await db.exec('BEGIN IMMEDIATE TRANSACTION;');
   try {
-    const tablesToClear = [
-      'automation_runs',
-      'automations',
-      'project_members',
-      'projects',
-      'chat_messages',
-      'chat_threads',
-      'refresh_tokens'
-    ];
+    const tablesToClear = ['project_members', 'projects', 'chat_messages', 'chat_threads', 'refresh_tokens'];
 
     for (const table of tablesToClear) {
       await db.run(`DELETE FROM ${table}`);
@@ -223,7 +215,7 @@ export async function resetUserDatabase({ actorId }) {
     );
 
     await db.exec(
-      "DELETE FROM sqlite_sequence WHERE name IN ('users','chat_messages','chat_threads','projects','project_members','automations','automation_runs','refresh_tokens')"
+      "DELETE FROM sqlite_sequence WHERE name IN ('users','chat_messages','chat_threads','projects','project_members','refresh_tokens')"
     );
 
     await db.exec('COMMIT;');

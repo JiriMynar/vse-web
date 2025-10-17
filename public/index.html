@@ -10,7 +10,6 @@
     <svg class="visually-hidden" aria-hidden="true" focusable="false">
       <defs>
         <symbol id="icon-chat" viewBox="0 0 24 24">
-          <path
             d="M4.5 3h15a1.5 1.5 0 0 1 1.5 1.5V15a1.5 1.5 0 0 1-1.5 1.5H9.6l-3.94 3.52A1 1 0 0 1 4 19.23V4.5A1.5 1.5 0 0 1 5.5 3Z"
             fill="currentColor"
           />
@@ -18,12 +17,6 @@
         <symbol id="icon-agent" viewBox="0 0 24 24">
           <path
             d="M12 2a5 5 0 0 1 5 5v1.09a5 5 0 0 1 2.74 4.44v5.22a2.25 2.25 0 0 1-2.25 2.25H6.51A2.25 2.25 0 0 1 4.26 17.75v-5.22A5 5 0 0 1 7 8.09V7a5 5 0 0 1 5-5Zm-3 5a3 3 0 1 1 6 0v1H9V7Zm-2 6.5v4.25h12v-4.25a2.5 2.5 0 0 0-2.5-2.5h-7a2.5 2.5 0 0 0-2.5 2.5Zm2 0A.5.5 0 0 1 9.5 13h5a.5.5 0 0 1 .5.5v1.5H7v-1.5Z"
-            fill="currentColor"
-          />
-        </symbol>
-        <symbol id="icon-automation" viewBox="0 0 24 24">
-          <path
-            d="M11.25 2h1.5l.75 2.25a6.5 6.5 0 0 1 1.73.72l2.27-.95 1.06 1.06-.95 2.27c.3.54.54 1.12.72 1.73L22 9.25v1.5l-2.25.75a6.5 6.5 0 0 1-.72 1.73l.95 2.27-1.06 1.06-2.27-.95a6.5 6.5 0 0 1-1.73.72L12.75 22h-1.5l-.75-2.25a6.5 6.5 0 0 1-1.73-.72l-2.27.95-1.06-1.06.95-2.27a6.5 6.5 0 0 1-.72-1.73L2 10.75v-1.5l2.25-.75a6.5 6.5 0 0 1 .72-1.73L4.02 4.5 5.08 3.44l2.27.95c.54-.3 1.12-.54 1.73-.72L11.25 2Zm.75 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
             fill="currentColor"
           />
         </symbol>
@@ -79,7 +72,7 @@
             <p class="typography-caption">Platforma VŠE Studio</p>
             <h1 id="auth-title" class="typography-display">Testujte AI agenty bez starostí</h1>
             <p>
-              Moderní pracovní plocha pro experimentování s AI API, automatizacemi a projektovým řízením v jednom místě.
+              Moderní pracovní plocha pro experimentování s AI API a projektovým řízením v jednom místě.
             </p>
             <figure class="auth-layout__preview">
               <img src="/assets/previews/auth-preview.svg" alt="Náhled přihlašovací obrazovky VŠE Studio" loading="lazy" />
@@ -136,10 +129,6 @@
             <button class="workspace__nav-button" data-view="agentkit" type="button" aria-controls="view-agentkit">
               <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-agent"></use></svg>
               <span>Agentkit</span>
-            </button>
-            <button class="workspace__nav-button" data-view="automations" type="button" aria-controls="view-automations">
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-automation"></use></svg>
-              <span>Automatizace</span>
             </button>
             <button class="workspace__nav-button" data-view="profile" type="button" aria-controls="view-profile">
               <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-profile"></use></svg>
@@ -268,27 +257,9 @@
             </div>
             <div id="projects-empty" class="empty-state visually-hidden">
               <h3>Zatím žádné projekty</h3>
-              <p>Založte první projekt a přidejte do něj automatizace.</p>
+              <p>Založte první projekt a organizujte si práci podle vlastních potřeb.</p>
             </div>
             <div id="project-grid" class="projects-grid"></div>
-          </section>
-
-          <section id="view-automations" class="view-panel visually-hidden">
-            <div class="panel-header">
-              <div>
-                <h2>Automatizace</h2>
-                <p>Spravujte workflow v rámci vybraného projektu.</p>
-              </div>
-              <div class="panel-controls">
-                <select id="automation-project" class="form-select"></select>
-                <button id="create-automation" class="button button--primary" type="button">Nová automatizace</button>
-              </div>
-            </div>
-            <div id="automation-empty" class="empty-state">
-              <h3>Vyberte projekt</h3>
-              <p>Automatizace se zobrazí po výběru projektu s definovanými workflow.</p>
-            </div>
-            <div id="automation-list" class="automation-list visually-hidden"></div>
           </section>
 
           <section id="view-help" class="view-panel visually-hidden">
@@ -378,24 +349,8 @@
         </header>
         <p class="description"></p>
         <footer>
-          <span class="stat automations"></span>
-          <span class="stat runs"></span>
-          <button class="button button--ghost" data-action="archive" type="button">Archivovat</button>
-        </footer>
-      </article>
-    </template>
-
-    <template id="automation-card-template">
-      <article class="automation-card">
-        <header>
-          <h3 class="title"></h3>
           <span class="status"></span>
-        </header>
-        <p class="trigger"></p>
-        <pre class="config"></pre>
-        <footer>
-          <button class="button button--ghost" data-action="toggle" type="button"></button>
-          <button class="button button--danger" data-action="delete" type="button">Smazat</button>
+          <button class="button button--ghost" data-action="archive" type="button">Archivovat</button>
         </footer>
       </article>
     </template>
@@ -497,33 +452,6 @@
         <menu class="dialog__footer">
           <button value="cancel" type="button" class="button button--ghost">Zrušit</button>
           <button value="confirm" class="button button--primary" type="submit">Vytvořit</button>
-        </menu>
-      </form>
-    </dialog>
-
-    <dialog id="automation-dialog" class="dialog">
-      <form method="dialog" id="automation-form">
-        <header class="dialog__header">
-          <h2>Automatizace</h2>
-        </header>
-        <div class="dialog__body">
-          <label for="automation-name">Název</label>
-          <input type="text" id="automation-name" required />
-
-          <label for="automation-trigger">Trigger</label>
-          <input type="text" id="automation-trigger" required />
-
-          <label for="automation-config">Konfigurace (JSON)</label>
-          <textarea id="automation-config" rows="6" placeholder='{"webhook":"https://..."}'></textarea>
-
-          <label class="toggle">
-            <input type="checkbox" id="automation-active" />
-            <span>Aktivní</span>
-          </label>
-        </div>
-        <menu class="dialog__footer">
-          <button value="cancel" type="button" class="button button--ghost">Zrušit</button>
-          <button value="confirm" class="button button--primary" type="submit">Uložit</button>
         </menu>
       </form>
     </dialog>

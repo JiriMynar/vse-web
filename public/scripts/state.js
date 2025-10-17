@@ -24,10 +24,6 @@ export const VIEW_TITLES = {
     title: 'Projekty',
     subtitle: 'Organizujte si jednotlivé moduly a připravte se na další nástroje.'
   },
-  automations: {
-    title: 'Automatizace',
-    subtitle: 'Navrhujte workflow, které automatizují vaši práci.'
-  },
   help: {
     title: 'Nápověda',
     subtitle: 'Zjistěte, jak fungují jednotlivé části platformy.'
@@ -63,8 +59,6 @@ export const state = {
   threadStream: null,
   messageStream: null,
   projects: [],
-  automations: [],
-  selectedProjectId: null,
   help: null,
   adminUsers: [],
   chatApiConnectors: [],

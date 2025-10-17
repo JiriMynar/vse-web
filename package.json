@@ -1,7 +1,7 @@
 {
   "name": "vse-web",
   "version": "1.1.0",
-  "description": "Full-stack web app with authentication, chat bot integration a workspace pro projekty a automatizace",
+  "description": "Full-stack web app with authentication, chat bot integration a workspace pro projekty",
   "main": "server.js",
   "type": "module",
   "scripts": {

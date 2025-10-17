@@ -42,7 +42,6 @@ export function initializeRefs() {
   refs.viewChat = document.getElementById("view-chat");
   refs.viewAgentkit = document.getElementById("view-agentkit");
   refs.viewProjects = document.getElementById("view-projects");
-  refs.viewAutomations = document.getElementById("view-automations");
   refs.viewHelp = document.getElementById("view-help");
   refs.viewProfile = document.getElementById("view-profile");
   refs.viewAdmin = document.getElementById("view-admin");
@@ -66,18 +65,6 @@ export function initializeRefs() {
   refs.projectNameInput = document.getElementById("project-name");
   refs.projectDescriptionInput = document.getElementById("project-description");
   refs.projectColorInput = document.getElementById("project-color");
-  refs.automationProjectSelect = document.getElementById("automation-project");
-  refs.createAutomationButton = document.getElementById("create-automation");
-  refs.automationEmpty = document.getElementById("automation-empty");
-  refs.automationList = document.getElementById("automation-list");
-  refs.automationCardTemplate = document.getElementById("automation-card-template");
-  refs.automationDialog = document.getElementById("automation-dialog");
-  refs.automationForm = document.getElementById("automation-form");
-  refs.automationNameInput = document.getElementById("automation-name");
-  refs.automationTriggerInput = document.getElementById("automation-trigger");
-  refs.automationConfigInput = document.getElementById("automation-config");
-  refs.automationActiveInput = document.getElementById("automation-active");
-  refs.automationEmptyParagraph = document.querySelector("#automation-empty p");
   refs.helpContent = document.getElementById("help-content");
   refs.promptDialog = document.getElementById("prompt-dialog");
   refs.promptTitle = document.getElementById("prompt-title");

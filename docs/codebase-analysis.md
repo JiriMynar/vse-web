@@ -11,12 +11,12 @@
 
 ## Registrace tras a kontrolery
 - Funkce `registerRoutes` slučuje doménové routery pod prefix `/api`, včetně health-check endpointu. 【F:src/routes/index.js†L1-L24】
-- Samostatné routery pokrývají autentizaci, chat, projekty, automatizace, help centrum, administraci i uživatelské operace. 【F:src/routes/index.js†L4-L22】
+- Samostatné routery pokrývají autentizaci, chat, projekty, help centrum, administraci i uživatelské operace. 【F:src/routes/index.js†L4-L22】
 - Kontrolery (např. `authController`) slouží jako tenká vrstva nad servisní logikou a standardizují odpovědi nebo práci s cookies. 【F:src/controllers/authController.js†L1-L41】
 
 ## Datová vrstva a migrace
 - `db.js` vytváří (případně migruje) SQLite databázi v adresáři zajištěném funkcí `ensureWritableDir`, která preferuje trvalý disk (`DATA_DIR`) a jinak používá bezpečné fallbacky. 【F:db.js†L1-L100】【F:pathUtils.js†L14-L111】
-- Migrační skripty definují tabulky pro uživatele, chat, projekty, automatizace i refresh tokeny a postupně se aplikují podle `PRAGMA user_version`. 【F:db.js†L18-L123】【F:db.js†L206-L239】
+- Migrační skripty definují tabulky pro uživatele, chat, projekty i refresh tokeny a postupně se aplikují podle `PRAGMA user_version`. 【F:db.js†L18-L123】【F:db.js†L206-L239】
 
 ## Autentizace a správa relací
 - Modul `auth.js` řeší JWT tokeny, uložení tajného klíče na disk a práci s refresh tokeny, včetně rotace a logování bezpečnostních událostí. 【F:auth.js†L1-L123】
@@ -26,13 +26,13 @@
 ## Doménové služby
 - Chat využívá externí API (OpenAI, AI Foundry) s robustním parsováním odpovědí a lokálními fallbacky, aby se zabránilo pádu při nečekaném formátu odpovědi. 【F:chatService.js†L1-L119】
 - Admin služba automaticky vytváří nebo povyšuje administrátorský účet, chrání před nebezpečnými operacemi (odebrání vlastní role, mazání jiných adminů) a loguje zásahy. 【F:src/services/adminService.js†L12-L118】
-- Ostatní služby (`projectService`, `automationService`, `userService`, `helpService`, `chatApiService`) dělí logiku na spravovatelné celky a sdílí přístup k databázi pomocí `getDb()`.
+- Ostatní služby (`projectService`, `userService`, `helpService`, `chatApiService`) dělí logiku na spravovatelné celky a sdílí přístup k databázi pomocí `getDb()`.
 
 ## Události a realtime kanály
 - `src/lib/eventBus.js` implementuje jednoduchý publish/subscribe mechanismus pro server-sent events, který se využívá v chatové části a u projektů. (viz soubor pro detailní implementaci).
 
 ## Veřejné rozhraní a dokumentace
-- Složka `public/` obsahuje single-page aplikaci s moduly Chat, Projekty, Automatizace a Nápověda; obsah nápovědy je ukládán v `docs/help.json`, takže jej lze verzovat a lokalizovat. 【F:docs/help.json†L1-L120】
+- Složka `public/` obsahuje single-page aplikaci s moduly Chat, Projekty, Agentkit a Nápověda; obsah nápovědy je ukládán v `docs/help.json`, takže jej lze verzovat a lokalizovat. 【F:docs/help.json†L1-L120】
 - Repozitář doplňují podrobné průvodce pro nasazení na Renderu, včetně řešení perzistentního disku a scénářů ztráty dat. 【F:docs/render-persistent-disk-setup.md†L1-L120】【F:docs/render-data-loss-analysis.md†L1-L22】
 
 ## Logování a sledování stavu

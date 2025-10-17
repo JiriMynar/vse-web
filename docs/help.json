@@ -1,11 +1,11 @@
 {
   "title": "VŠE Studio – Centrum nápovědy",
-  "intro": "Tento průvodce vysvětluje, jak pracovat s chatem, projekty a automatizacemi v novém workspace rozhraní.",
+  "intro": "Tento průvodce vysvětluje, jak pracovat s chatem, projekty a integrací agentů v novém workspace rozhraní.",
   "sections": [
     {
       "title": "Začínáme",
       "items": [
-        "Po registraci nebo přihlášení se otevře pracovní plocha se třemi hlavními moduly: Chat, Projekty a Automatizace.",
+        "Po registraci nebo přihlášení se otevře pracovní plocha s moduly Chat, Projekty a Agentkit.",
         "V levém postranním panelu najdete přepínač modulů a rychlý přehled stavu vašeho workspace.",
         "V horní části každého modulu je dostupná kontextová nápověda s klávesovými zkratkami a odkazy na dokumentaci."
       ]
@@ -29,17 +29,9 @@
     {
       "title": "Projekty",
       "items": [
-        "Projekty slouží jako složky pro skupiny chatů a automatizací. Každý projekt má barvu, popis a stav.",
+        "Projekty slouží jako složky pro skupiny chatů nebo doplňkových materiálů. Každý projekt má barvu, popis a stav.",
         "Tlačítkem \"Nový projekt\" přidáte další modul – například sběr dat, analytiku nebo plánovač úloh.",
-        "Z karty projektu vidíte přehled automatizací a posledních běhů. Projekt lze kdykoliv archivovat."
-      ]
-    },
-    {
-      "title": "Automatizace",
-      "items": [
-        "Automatizace se vážou ke konkrétnímu projektu. Nastavte trigger (např. \"nová zpráva ve vlákně\") a stav aktivní/neaktivní.",
-        "Konfiguraci automatizace vyplníte ve formátu JSON – například cílový webhook, časovač nebo vstupní proměnné.",
-        "Každý běh se zapisuje do protokolu, odkud je možné zobrazit vstupy i výstupy pro audit."
+        "Z karty projektu získáte rychlý přehled o popisu a stavu. Projekt lze kdykoliv archivovat."
       ]
     },
     {

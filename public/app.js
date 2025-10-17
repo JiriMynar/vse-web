@@ -12,16 +12,11 @@ import {
   teardownAgentkit,
   resetAgentkitMessages
 } from './scripts/modules/agentkit.js';
-import {
-  loadProjectData,
-  renderProjects,
-  renderAutomations,
-  initProjectInteractions
-} from './scripts/modules/projects.js';
+import { loadProjectData, renderProjects, initProjectInteractions } from './scripts/modules/projects.js';
 import { initProfile, renderProfile } from './scripts/modules/profile.js';
 import { initAdmin, loadAdminUsers, renderAdminUsers } from './scripts/modules/admin.js';
 import { loadHelp, renderHelp } from './scripts/modules/help.js';
-import { openProjectDialog, openAutomationDialog } from './scripts/modules/dialogs.js';
+import { openProjectDialog } from './scripts/modules/dialogs.js';
 import { initNavigation, setView } from './scripts/modules/navigation.js';
 import { toggleVisibility, setMessage } from './scripts/utils/dom.js';
 
@@ -78,13 +73,12 @@ async function loadWorkspace() {
 
     await Promise.all([
       loadThreads(refs, { subscribe: true }),
-      loadProjectData(refs, { withAutomations: true }),
+      loadProjectData(refs),
       loadHelp()
     ]);
 
     renderHelp(refs);
     renderProjects(refs);
-    renderAutomations(refs);
     renderProfile(refs);
 
     if (state.user.isAdmin) {
@@ -157,11 +151,6 @@ const viewRenderers = {
   agentkit: () => renderAgentkit(refs),
   projects: () => {
     renderProjects(refs);
-    renderAutomations(refs);
-  },
-  automations: () => {
-    renderProjects(refs);
-    renderAutomations(refs);
   },
   help: () => renderHelp(refs),
   profile: () => renderProfile(refs),
@@ -195,8 +184,7 @@ function initializeWorkspace(refs) {
   initChat(refs);
   initAgentkit(refs);
   initProjectInteractions(refs, {
-    openProjectDialog: () => openProjectDialog(refs),
-    openAutomationDialog: () => openAutomationDialog(refs)
+    openProjectDialog: () => openProjectDialog(refs)
   });
   initProfile(refs, updateWorkspaceUser);
   initAdmin(refs);
