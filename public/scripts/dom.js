@@ -8,6 +8,7 @@ export function initializeRefs() {
   refs.workspaceUser = document.getElementById("workspace-user");
   refs.workspaceMenuToggle = document.getElementById("workspace-menu-toggle");
   refs.workspaceSidebarToggle = document.getElementById("workspace-sidebar-toggle");
+
   refs.workspaceSidebar = document.querySelector(".workspace__sidebar");
   refs.sidebarBackdrop = document.getElementById("sidebar-backdrop");
   refs.sidebarCloseButton = document.getElementById("sidebar-close");
@@ -27,7 +28,7 @@ export function initializeRefs() {
   refs.threadList = document.getElementById("thread-list");
   refs.threadSearch = document.getElementById("thread-search");
   refs.threadSidebarToggle = document.getElementById("thread-sidebar-toggle");
-  refs.workspaceSidebarToggleLabel = refs.workspaceSidebarToggle?.querySelector("[data-panel-label]") || null;
+
   refs.threadSidebarToggleLabel = refs.threadSidebarToggle?.querySelector("[data-panel-label]") || null;
   refs.chatHistory = document.getElementById("chat-history");
   refs.chatEmpty = document.getElementById("chat-empty");

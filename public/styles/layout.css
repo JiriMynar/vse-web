@@ -133,6 +133,7 @@
   flex-shrink: 0;
 }
 
+
 .workspace__brand h2 {
   margin: 0;
   font-size: var(--font-size-xl);
@@ -473,6 +474,7 @@
     display: none;
   }
 
+
   .workspace__sidebar-close {
     display: inline-flex;
   }
@@ -528,6 +530,7 @@
   .workspace__sidebar-close {
     display: none;
   }
+
 }
 
 @media (max-width: 640px) {
