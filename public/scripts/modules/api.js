@@ -70,7 +70,9 @@ export async function apiFetch(url, options = {}) {
 export async function tryRefresh() {
   try {
     await apiFetch('/api/auth/refresh', { method: 'POST', skipAuthRefresh: true });
+    return true;
   } catch (error) {
     console.error('Refresh token selhal', error);
+    return false;
   }
 }

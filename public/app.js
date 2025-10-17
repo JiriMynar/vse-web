@@ -65,7 +65,9 @@ async function loadWorkspace() {
     userResolved = true;
     state.user = user;
     updateWorkspaceUser(user);
-    refs.enterToSendCheckbox.checked = state.enterToSend;
+    if (refs.enterToSendCheckbox) {
+      refs.enterToSendCheckbox.checked = state.enterToSend;
+    }
     toggleAuthVisibility(false);
     applyTheme(state.theme, refs);
     setMessage(refs.workspaceMessage, '');
@@ -94,19 +96,35 @@ async function loadWorkspace() {
 
     setView(state.view, refs, viewRenderers);
     setMessage(refs.workspaceMessage, '');
-  } catch (error) {
-    console.error(error);
-    }
 
     const authMessage = resolveAuthMessage(refs);
     if (authMessage) {
       setMessage(authMessage, '');
     }
 
-    const fallbackMessage = error?.message
-      ? `Nepodařilo se načíst pracovní plochu: ${error.message}`
-      : 'Nepodařilo se načíst pracovní plochu. Zkuste to prosím znovu.';
-    setMessage(refs.workspaceMessage, fallbackMessage, 'error');
+    return true;
+  } catch (error) {
+    console.error(error);
+
+    if (!userResolved) {
+      state.user = null;
+      const authMessage = resolveAuthMessage(refs);
+      if (authMessage) {
+        setMessage(
+          authMessage,
+          error?.message || 'Nepodařilo se načíst pracovní plochu. Zkuste to prosím znovu.',
+          'error'
+        );
+      }
+      toggleAuthVisibility(true);
+    } else {
+      const fallbackMessage = error?.message
+        ? `Nepodařilo se načíst pracovní plochu: ${error.message}`
+        : 'Nepodařilo se načíst pracovní plochu. Zkuste to prosím znovu.';
+      setMessage(refs.workspaceMessage, fallbackMessage, 'error');
+    }
+
+    return false;
   } finally {
     state.isLoading = false;
   }
@@ -191,15 +209,17 @@ function initializeWorkspace(refs) {
   refs.workspaceMenuToggle?.setAttribute('aria-expanded', 'false');
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initializeRefs();
   initializeWorkspace(refs);
   applyTheme(state.theme, refs);
-  refs.enterToSendCheckbox.checked = state.enterToSend;
-    const isAuthenticated = await tryRefresh();
-    if (isAuthenticated) {
-      await loadWorkspace();
-    } else {
-      toggleAuthVisibility(true);
-    }
+  if (refs.enterToSendCheckbox) {
+    refs.enterToSendCheckbox.checked = state.enterToSend;
+  }
+  const isAuthenticated = await tryRefresh();
+  if (isAuthenticated) {
+    await loadWorkspace();
+  } else {
+    toggleAuthVisibility(true);
+  }
 });
