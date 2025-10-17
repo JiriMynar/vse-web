@@ -213,9 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeRefs();
   initializeWorkspace(refs);
   applyTheme(state.theme, refs);
-  if (refs.enterToSendCheckbox) {
-    refs.enterToSendCheckbox.checked = state.enterToSend;
-  }
+
   const isAuthenticated = await tryRefresh();
   if (isAuthenticated) {
     await loadWorkspace();
