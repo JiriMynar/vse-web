@@ -98,6 +98,7 @@ async function loadWorkspace() {
     console.error(error);
     }
 
+    const authMessage = resolveAuthMessage(refs);
     if (authMessage) {
       setMessage(authMessage, '');
     }
