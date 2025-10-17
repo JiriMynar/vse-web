@@ -36,9 +36,6 @@ function renderThreadHeader(refs) {
   if (!thread) {
     refs.activeThreadTitle.textContent = 'Vyberte vlákno';
     refs.activeThreadMeta.textContent = '';
-    refs.insightMessages.textContent = '0 zpráv';
-    refs.insightActivity.textContent = 'Žádná aktivita';
-    refs.insightFavorite.textContent = 'Neoblíbené';
     toggleVisibility(refs.chatForm, false, { hiddenClass: 'visually-hidden' });
     return;
   }
@@ -53,11 +50,6 @@ function renderThreadHeader(refs) {
     parts.push(`Naposledy ${formatRelativeTime(thread.last_activity)}`);
   }
   refs.activeThreadMeta.textContent = parts.join(' • ');
-  refs.insightMessages.textContent = `${thread.message_count || 0} zpráv`;
-  refs.insightActivity.textContent = thread.last_activity
-    ? `Aktivita ${formatRelativeTime(thread.last_activity)}`
-    : 'Žádná aktivita';
-  refs.insightFavorite.textContent = thread.is_favorite ? 'Oblíbené' : 'Neoblíbené';
 }
 
 function renderThreads(refs) {
@@ -401,15 +393,6 @@ export function initChat(refs) {
     renderThreads(refs);
     await loadMessages(refs, threadId);
     subscribeToMessages(refs, threadId);
-  });
-
-  refs.threadFilterButtons?.forEach((button) => {
-    button.addEventListener('click', () => {
-      state.threadFilter = button.dataset.filter;
-      refs.threadFilterButtons.forEach((btn) => toggleActive(btn, btn === button, { activeClass: 'is-active' }));
-      filterThreads();
-      renderThreads(refs);
-    });
   });
 
   refs.threadSearch?.addEventListener('input', (event) => {
