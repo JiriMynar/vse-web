@@ -49,7 +49,7 @@ export function initAuth(refs, loadWorkspace) {
       if (authMessage) {
         setMessage(authMessage, "Přihlášení proběhlo úspěšně.", "success");
       }
-      // await loadWorkspace(); // Redundant, loadWorkspace is called in app.js after tryRefresh()
+      await loadWorkspace();
     } catch (error) {
       const authMessage = resolveAuthMessage(refs);
       if (authMessage) {
@@ -80,7 +80,7 @@ export function initAuth(refs, loadWorkspace) {
         setMessage(authMessage, "Registrace proběhla úspěšně.", "success");
       }
       toggleForms('login', refs);
-      // await loadWorkspace(); // Redundant, loadWorkspace is called in app.js after tryRefresh()
+      await loadWorkspace();
     } catch (error) {
       const authMessage = resolveAuthMessage(refs);
       if (authMessage) {

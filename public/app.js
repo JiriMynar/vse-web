@@ -199,8 +199,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isAuthenticated = await tryRefresh();
     if (isAuthenticated) {
       toggleAuthVisibility(false);
-    }
-    if (!isAuthenticated) {
       await loadWorkspace();
+    } else {
+      toggleAuthVisibility(true);
     }
 });
