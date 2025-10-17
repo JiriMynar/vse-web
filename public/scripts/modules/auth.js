@@ -31,7 +31,7 @@ export function initAuth(refs, loadWorkspace) {
       setMessage(refs.authMessage, 'Přihlášení proběhlo úspěšně.', 'success');
       await loadWorkspace();
     } catch (error) {
-      setMessage(refs.authMessage, error.message, 'error');
+      setMessage(document.getElementById('auth-message'), error.message, 'error');
     } finally {
       setInputsDisabled(refs.loginForm, false);
       setButtonLoading(refs.loginForm.querySelector('button[type="submit"]'), false);
@@ -55,7 +55,7 @@ export function initAuth(refs, loadWorkspace) {
       toggleForms('login', refs);
       await loadWorkspace();
     } catch (error) {
-      setMessage(refs.authMessage, error.message, 'error');
+      setMessage(document.getElementById('auth-message'), error.message, 'error');
     } finally {
       setInputsDisabled(refs.registerForm, false);
       setButtonLoading(refs.registerForm.querySelector('button[type="submit"]'), false);
