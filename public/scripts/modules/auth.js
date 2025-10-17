@@ -2,13 +2,27 @@ import { apiFetch } from './api.js';
 import { toggleVisibility, setInputsDisabled, setButtonLoading, setMessage } from '../utils/dom.js';
 import { setActiveTab } from './layout.js';
 
+function resolveAuthMessage(refs) {
+  const current = refs.authMessage;
+  if (current instanceof Element) {
+    return current;
+  }
+  const element = document.getElementById('auth-message');
+  if (element instanceof Element) {
+    refs.authMessage = element;
+    return element;
+  }
+  return null;
+}
+
 function toggleForms(mode, refs) {
   const isLogin = mode === 'login';
   toggleVisibility(refs.loginForm, isLogin);
   toggleVisibility(refs.registerForm, !isLogin);
   setActiveTab(isLogin ? refs.tabLogin : refs.tabRegister, isLogin ? refs.tabRegister : refs.tabLogin);
-  if (refs.authMessage) {
-    setMessage(refs.authMessage, "");
+  const authMessage = resolveAuthMessage(refs);
+  if (authMessage) {
+    setMessage(authMessage, "");
   }
 }
 
@@ -30,13 +44,15 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      if (refs.authMessage) {
-        setMessage(refs.authMessage, "Přihlášení proběhlo úspěšně.", "success");
+      const authMessage = resolveAuthMessage(refs);
+      if (authMessage) {
+        setMessage(authMessage, "Přihlášení proběhlo úspěšně.", "success");
       }
       await loadWorkspace();
     } catch (error) {
-      if (refs.authMessage) {
-        setMessage(refs.authMessage, error.message, "error");
+      const authMessage = resolveAuthMessage(refs);
+      if (authMessage) {
+        setMessage(authMessage, error.message, "error");
       }
     } finally {
       setInputsDisabled(refs.loginForm, false);
@@ -57,14 +73,16 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
-      if (refs.authMessage) {
-        setMessage(refs.authMessage, "Registrace proběhla úspěšně.", "success");
+      const authMessage = resolveAuthMessage(refs);
+      if (authMessage) {
+        setMessage(authMessage, "Registrace proběhla úspěšně.", "success");
       }
       toggleForms('login', refs);
       await loadWorkspace();
     } catch (error) {
-      if (refs.authMessage) {
-        setMessage(refs.authMessage, error.message, "error");
+      const authMessage = resolveAuthMessage(refs);
+      if (authMessage) {
+        setMessage(authMessage, error.message, "error");
       }
     } finally {
       setInputsDisabled(refs.registerForm, false);

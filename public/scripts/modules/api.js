@@ -1,4 +1,6 @@
-async function refreshSession() {
+let refreshPromise = null;
+
+async function executeRefreshRequest() {
   const response = await fetch('/api/auth/refresh', {
     method: 'POST',
     credentials: 'include',
@@ -13,6 +15,18 @@ async function refreshSession() {
   const error = new Error(payload.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.');
   error.status = response.status;
   throw error;
+}
+
+async function refreshSession() {
+  if (!refreshPromise) {
+    refreshPromise = executeRefreshRequest();
+  }
+
+  try {
+    await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
 }
 
 export async function apiFetch(url, options = {}) {
