@@ -1,6 +1,41 @@
+import { state } from '../state.js';
 import { toggleActive } from '../utils/dom.js';
 
 export const mobileSidebarMedia = window.matchMedia('(max-width: 1080px)');
+
+function syncWorkspaceSidebar(refs) {
+  const hidden = state.isWorkspaceSidebarHidden;
+  refs.workspace?.classList.toggle('is-nav-hidden', hidden);
+
+  const label = hidden ? 'Zobrazit navigaci' : 'Skrýt navigaci';
+
+  const sidebarToggles = [refs.workspaceSidebarToggle, refs.workspaceSidebarReopen].filter(Boolean);
+
+  sidebarToggles.forEach((button) => {
+    button.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+
+    const labelTarget = button.querySelector('[data-panel-label]');
+    if (labelTarget) {
+      labelTarget.textContent = label;
+    }
+
+    const icon = button.querySelector('use');
+    if (icon) {
+      icon.setAttribute('href', hidden ? '#icon-chevron-right' : '#icon-chevron-left');
+    }
+  });
+
+  if (refs.workspaceMenuToggle) {
+    const expanded = hidden ? 'false' : 'true';
+    if (!mobileSidebarMedia.matches) {
+      refs.workspaceMenuToggle.setAttribute('aria-expanded', expanded);
+    }
+    refs.workspaceMenuToggle.setAttribute('aria-label', label);
+    refs.workspaceMenuToggle.setAttribute('title', label);
+  }
+}
 
 function syncSidebarState(refs, isOpen) {
   const { workspaceSidebar, sidebarBackdrop, workspaceMenuToggle } = refs;
@@ -16,7 +51,11 @@ function syncSidebarState(refs, isOpen) {
 }
 
 export function openSidebar(refs) {
-  if (!mobileSidebarMedia.matches) return;
+  if (!mobileSidebarMedia.matches) {
+    state.isWorkspaceSidebarHidden = false;
+    syncWorkspaceSidebar(refs);
+    return;
+  }
   syncSidebarState(refs, true);
 }
 
@@ -28,6 +67,11 @@ export function closeSidebar(refs, { restoreFocus = false } = {}) {
 }
 
 export function toggleSidebar(refs) {
+  if (!mobileSidebarMedia.matches) {
+    state.isWorkspaceSidebarHidden = !state.isWorkspaceSidebarHidden;
+    syncWorkspaceSidebar(refs);
+    return;
+  }
   const isOpen = refs.workspaceSidebar?.classList.contains('is-open');
   if (isOpen) {
     closeSidebar(refs);
@@ -38,9 +82,18 @@ export function toggleSidebar(refs) {
 
 export function initLayout(refs) {
   syncSidebarState(refs, false);
+  syncWorkspaceSidebar(refs);
 
   if (refs.workspaceMenuToggle) {
     refs.workspaceMenuToggle.addEventListener('click', () => toggleSidebar(refs));
+  }
+
+  if (refs.workspaceSidebarToggle) {
+    refs.workspaceSidebarToggle.addEventListener('click', () => toggleSidebar(refs));
+  }
+
+  if (refs.workspaceSidebarReopen) {
+    refs.workspaceSidebarReopen.addEventListener('click', () => toggleSidebar(refs));
   }
 
   if (refs.sidebarCloseButton) {
@@ -61,6 +114,7 @@ export function initLayout(refs) {
     if (!event.matches) {
       closeSidebar(refs);
     }
+    syncWorkspaceSidebar(refs);
   };
 
   if (typeof mobileSidebarMedia.addEventListener === 'function') {

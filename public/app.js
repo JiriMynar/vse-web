@@ -194,7 +194,10 @@ function initializeWorkspace(refs) {
 
   refs.logoutButton?.addEventListener('click', handleLogout);
 
-  refs.workspaceMenuToggle?.setAttribute('aria-expanded', 'false');
+  if (refs.workspaceMenuToggle) {
+    const expanded = state.isWorkspaceSidebarHidden ? 'false' : 'true';
+    refs.workspaceMenuToggle.setAttribute('aria-expanded', expanded);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
