@@ -3,6 +3,23 @@
   padding: var(--space-6);
 }
 
+.thread-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.thread-header h2 {
+  margin: 0;
+}
+
+.thread-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .panel-header {
   display: flex;
   flex-wrap: wrap;
