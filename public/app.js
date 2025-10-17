@@ -84,7 +84,9 @@ async function loadWorkspace() {
     teardownChatStreams();
     teardownAgentkit(refs);
     showAgentkitSaveFeedback(refs, '');
-    setMessage(refs.authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
+    if (refs.authMessage) {
+      setMessage(refs.authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
+    }
   } finally {
     state.isLoading = false;
   }
