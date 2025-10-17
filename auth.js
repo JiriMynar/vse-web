@@ -161,7 +161,11 @@ function resolveCookieSecurity(req) {
   const forwardedProto = req.headers['x-forwarded-proto'];
   const isForwardedSecure = typeof forwardedProto === 'string' && forwardedProto.split(',')[0].trim() === 'https';
   const secure = Boolean(req.secure || isForwardedSecure);
-  const sameSite = secure ? 'none' : 'lax';
+  const sameSite = secure ? 'None' : 'Lax';
+  // When SameSite is 'None', the Secure attribute must also be set.
+  // If secure is true, we want SameSite to be 'None'.
+  // If secure is false, SameSite should be 'Lax'.
+  // The original code already handles 'lax' for non-secure, so we only need to ensure 'None' is capitalized.
   return { secure, sameSite };
 }
 
