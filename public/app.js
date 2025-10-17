@@ -196,6 +196,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeWorkspace(refs);
   applyTheme(state.theme, refs);
   refs.enterToSendCheckbox.checked = state.enterToSend;
-  await tryRefresh();
-  await loadWorkspace();
+    const isAuthenticated = await tryRefresh();
+    if (isAuthenticated) {
+      toggleAuthVisibility(false);
+    }
+    if (!isAuthenticated) {
+      await loadWorkspace();
+    }
 });
