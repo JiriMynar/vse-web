@@ -34,7 +34,7 @@ export function initAuth(refs, loadWorkspace) {
 
   refs.loginForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    event.stopPropagation();
+    
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
@@ -49,7 +49,7 @@ export function initAuth(refs, loadWorkspace) {
       if (authMessage) {
         setMessage(authMessage, "Přihlášení proběhlo úspěšně.", "success");
       }
-      await loadWorkspace();
+
     } catch (error) {
       const authMessage = resolveAuthMessage(refs);
       if (authMessage) {
@@ -63,7 +63,7 @@ export function initAuth(refs, loadWorkspace) {
 
   refs.registerForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    event.stopPropagation();
+    
     const name = document.getElementById('register-name').value.trim();
     const email = document.getElementById('register-email').value.trim();
     const password = document.getElementById('register-password').value;
@@ -80,7 +80,7 @@ export function initAuth(refs, loadWorkspace) {
         setMessage(authMessage, "Registrace proběhla úspěšně.", "success");
       }
       toggleForms('login', refs);
-      await loadWorkspace();
+
     } catch (error) {
       const authMessage = resolveAuthMessage(refs);
       if (authMessage) {
