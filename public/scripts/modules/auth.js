@@ -34,6 +34,7 @@ export function initAuth(refs, loadWorkspace) {
 
   refs.loginForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
@@ -62,6 +63,7 @@ export function initAuth(refs, loadWorkspace) {
 
   refs.registerForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     const name = document.getElementById('register-name').value.trim();
     const email = document.getElementById('register-email').value.trim();
     const password = document.getElementById('register-password').value;
