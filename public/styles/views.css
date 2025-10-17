@@ -18,12 +18,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
 
-.thread-actions > * {
-  flex-shrink: 0;
 }
 
 .panel-header {

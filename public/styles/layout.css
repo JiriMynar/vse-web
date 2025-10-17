@@ -234,10 +234,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.split-actions {
-  display: grid;
-  gap: var(--space-3);
-}
 
 .chat-sidebar__header {
   display: flex;
