@@ -1,93 +1,95 @@
-export const refs = {
-  authWrapper: document.getElementById('auth-wrapper'),
-  workspace: document.getElementById('workspace'),
-  workspaceMain: document.getElementById('workspace-main'),
-  workspaceUser: document.getElementById('workspace-user'),
-  workspaceMenuToggle: document.getElementById('workspace-menu-toggle'),
-  workspaceSidebar: document.querySelector('.workspace__sidebar'),
-  sidebarBackdrop: document.getElementById('sidebar-backdrop'),
-  sidebarCloseButton: document.getElementById('sidebar-close'),
-  viewTitle: document.getElementById('view-title'),
-  viewSubtitle: document.getElementById('view-subtitle'),
-  themeToggle: document.getElementById('theme-toggle'),
-  tabLogin: document.getElementById('tab-login'),
-  tabRegister: document.getElementById('tab-register'),
-  loginForm: document.getElementById('login-form'),
-  registerForm: document.getElementById('register-form'),
-  authMessage: document.getElementById('auth-message'),
-  navButtons: Array.from(document.querySelectorAll('.workspace__nav-button')),
-  navAdminButton: document.getElementById('nav-admin'),
-  logoutButton: document.getElementById('logout'),
-  createThreadButton: document.getElementById('create-thread'),
-  threadList: document.getElementById('thread-list'),
-  threadSearch: document.getElementById('thread-search'),
-  chatHistory: document.getElementById('chat-history'),
-  chatEmpty: document.getElementById('chat-empty'),
-  chatForm: document.getElementById('chat-form'),
-  chatMessageInput: document.getElementById('chat-message'),
-  chatFeedback: document.getElementById('chat-feedback'),
-  enterToSendCheckbox: document.getElementById('enter-to-send'),
-  messageTemplate: document.getElementById('message-template'),
-  chatApiSettingsButton: document.getElementById('chat-api-settings'),
-  activeThreadTitle: document.getElementById('active-thread-title'),
-  activeThreadMeta: document.getElementById('active-thread-meta'),
-  chatApiDialog: document.getElementById('chat-api-dialog'),
-  chatApiCloseButton: document.getElementById('chat-api-close'),
-  chatApiMessage: document.getElementById('chat-api-message'),
-  chatApiConnectorList: document.getElementById('chat-api-connector-list'),
-  chatApiConnectorTemplate: document.getElementById('chat-api-connector-template'),
-  viewChat: document.getElementById('view-chat'),
-  viewAgentkit: document.getElementById('view-agentkit'),
-  viewProjects: document.getElementById('view-projects'),
-  viewAutomations: document.getElementById('view-automations'),
-  viewHelp: document.getElementById('view-help'),
-  viewProfile: document.getElementById('view-profile'),
-  viewAdmin: document.getElementById('view-admin'),
-  agentkitMessage: document.getElementById('agentkit-message'),
-  agentkitPlaceholder: document.getElementById('agentkit-placeholder'),
-  agentkitChatContainer: document.getElementById('agentkit-chat-container'),
-  agentkitSettingsButton: document.getElementById('agentkit-settings-button'),
-  agentkitOpenSettingsButton: document.getElementById('agentkit-open-settings'),
-  agentkitSettingsDialog: document.getElementById('agentkit-settings-dialog'),
-  agentkitSettingsForm: document.getElementById('agentkit-settings-form'),
-  agentkitWorkflowInput: document.getElementById('agentkit-workflow-id'),
-  agentkitOpenaiKeyInput: document.getElementById('agentkit-openai-key'),
-  agentkitChatkitBaseInput: document.getElementById('agentkit-chatkit-base'),
-  agentkitSaveMessage: document.getElementById('agentkit-save-message'),
-  createProjectButton: document.getElementById('create-project'),
-  projectsEmpty: document.getElementById('projects-empty'),
-  projectGrid: document.getElementById('project-grid'),
-  projectCardTemplate: document.getElementById('project-card-template'),
-  projectDialog: document.getElementById('project-dialog'),
-  projectForm: document.getElementById('project-form'),
-  projectNameInput: document.getElementById('project-name'),
-  projectDescriptionInput: document.getElementById('project-description'),
-  projectColorInput: document.getElementById('project-color'),
-  automationProjectSelect: document.getElementById('automation-project'),
-  createAutomationButton: document.getElementById('create-automation'),
-  automationEmpty: document.getElementById('automation-empty'),
-  automationList: document.getElementById('automation-list'),
-  automationCardTemplate: document.getElementById('automation-card-template'),
-  automationDialog: document.getElementById('automation-dialog'),
-  automationForm: document.getElementById('automation-form'),
-  automationNameInput: document.getElementById('automation-name'),
-  automationTriggerInput: document.getElementById('automation-trigger'),
-  automationConfigInput: document.getElementById('automation-config'),
-  automationActiveInput: document.getElementById('automation-active'),
-  automationEmptyParagraph: document.querySelector('#automation-empty p'),
-  helpContent: document.getElementById('help-content'),
-  promptDialog: document.getElementById('prompt-dialog'),
-  promptTitle: document.getElementById('prompt-title'),
-  promptLabel: document.getElementById('prompt-label'),
-  promptInput: document.getElementById('prompt-input'),
-  profileMessage: document.getElementById('profile-message'),
-  profileNameForm: document.getElementById('profile-name-form'),
-  profileNameInput: document.getElementById('profile-name'),
-  profilePasswordForm: document.getElementById('profile-password-form'),
-  profileCurrentPasswordInput: document.getElementById('profile-current-password'),
-  profileNewPasswordInput: document.getElementById('profile-new-password'),
-  profileConfirmPasswordInput: document.getElementById('profile-confirm-password'),
-  adminMessage: document.getElementById('admin-message'),
-  adminUsersTable: document.getElementById('admin-users-table'),
-  adminUsersTableBody: document.querySelector('#admin-users-table tbody')
-};
+export const refs = {};
+
+export function initializeRefs() {
+  refs.authWrapper = document.getElementById("auth-wrapper");
+  refs.workspace = document.getElementById("workspace");
+  refs.workspaceMain = document.getElementById("workspace-main");
+  refs.workspaceUser = document.getElementById("workspace-user");
+  refs.workspaceMenuToggle = document.getElementById("workspace-menu-toggle");
+  refs.workspaceSidebar = document.querySelector(".workspace__sidebar");
+  refs.sidebarBackdrop = document.getElementById("sidebar-backdrop");
+  refs.sidebarCloseButton = document.getElementById("sidebar-close");
+  refs.viewTitle = document.getElementById("view-title");
+  refs.viewSubtitle = document.getElementById("view-subtitle");
+  refs.themeToggle = document.getElementById("theme-toggle");
+  refs.tabLogin = document.getElementById("tab-login");
+  refs.tabRegister = document.getElementById("tab-register");
+  refs.loginForm = document.getElementById("login-form");
+  refs.registerForm = document.getElementById("register-form");
+  refs.authMessage = document.getElementById("auth-message");
+  refs.navButtons = Array.from(document.querySelectorAll(".workspace__nav-button"));
+  refs.navAdminButton = document.getElementById("nav-admin");
+  refs.logoutButton = document.getElementById("logout");
+  refs.createThreadButton = document.getElementById("create-thread");
+  refs.threadList = document.getElementById("thread-list");
+  refs.threadSearch = document.getElementById("thread-search");
+  refs.chatHistory = document.getElementById("chat-history");
+  refs.chatEmpty = document.getElementById("chat-empty");
+  refs.chatForm = document.getElementById("chat-form");
+  refs.chatMessageInput = document.getElementById("chat-message");
+  refs.chatFeedback = document.getElementById("chat-feedback");
+  refs.enterToSendCheckbox = document.getElementById("enter-to-send");
+  refs.messageTemplate = document.getElementById("message-template");
+  refs.chatApiSettingsButton = document.getElementById("chat-api-settings");
+  refs.activeThreadTitle = document.getElementById("active-thread-title");
+  refs.activeThreadMeta = document.getElementById("active-thread-meta");
+  refs.chatApiDialog = document.getElementById("chat-api-dialog");
+  refs.chatApiCloseButton = document.getElementById("chat-api-close");
+  refs.chatApiMessage = document.getElementById("chat-api-message");
+  refs.chatApiConnectorList = document.getElementById("chat-api-connector-list");
+  refs.chatApiConnectorTemplate = document.getElementById("chat-api-connector-template");
+  refs.viewChat = document.getElementById("view-chat");
+  refs.viewAgentkit = document.getElementById("view-agentkit");
+  refs.viewProjects = document.getElementById("view-projects");
+  refs.viewAutomations = document.getElementById("view-automations");
+  refs.viewHelp = document.getElementById("view-help");
+  refs.viewProfile = document.getElementById("view-profile");
+  refs.viewAdmin = document.getElementById("view-admin");
+  refs.agentkitMessage = document.getElementById("agentkit-message");
+  refs.agentkitPlaceholder = document.getElementById("agentkit-placeholder");
+  refs.agentkitChatContainer = document.getElementById("agentkit-chat-container");
+  refs.agentkitSettingsButton = document.getElementById("agentkit-settings-button");
+  refs.agentkitOpenSettingsButton = document.getElementById("agentkit-open-settings");
+  refs.agentkitSettingsDialog = document.getElementById("agentkit-settings-dialog");
+  refs.agentkitSettingsForm = document.getElementById("agentkit-settings-form");
+  refs.agentkitWorkflowInput = document.getElementById("agentkit-workflow-id");
+  refs.agentkitOpenaiKeyInput = document.getElementById("agentkit-openai-key");
+  refs.agentkitChatkitBaseInput = document.getElementById("agentkit-chatkit-base");
+  refs.agentkitSaveMessage = document.getElementById("agentkit-save-message");
+  refs.createProjectButton = document.getElementById("create-project");
+  refs.projectsEmpty = document.getElementById("projects-empty");
+  refs.projectGrid = document.getElementById("project-grid");
+  refs.projectCardTemplate = document.getElementById("project-card-template");
+  refs.projectDialog = document.getElementById("project-dialog");
+  refs.projectForm = document.getElementById("project-form");
+  refs.projectNameInput = document.getElementById("project-name");
+  refs.projectDescriptionInput = document.getElementById("project-description");
+  refs.projectColorInput = document.getElementById("project-color");
+  refs.automationProjectSelect = document.getElementById("automation-project");
+  refs.createAutomationButton = document.getElementById("create-automation");
+  refs.automationEmpty = document.getElementById("automation-empty");
+  refs.automationList = document.getElementById("automation-list");
+  refs.automationCardTemplate = document.getElementById("automation-card-template");
+  refs.automationDialog = document.getElementById("automation-dialog");
+  refs.automationForm = document.getElementById("automation-form");
+  refs.automationNameInput = document.getElementById("automation-name");
+  refs.automationTriggerInput = document.getElementById("automation-trigger");
+  refs.automationConfigInput = document.getElementById("automation-config");
+  refs.automationActiveInput = document.getElementById("automation-active");
+  refs.automationEmptyParagraph = document.querySelector("#automation-empty p");
+  refs.helpContent = document.getElementById("help-content");
+  refs.promptDialog = document.getElementById("prompt-dialog");
+  refs.promptTitle = document.getElementById("prompt-title");
+  refs.promptLabel = document.getElementById("prompt-label");
+  refs.promptInput = document.getElementById("prompt-input");
+  refs.profileMessage = document.getElementById("profile-message");
+  refs.profileNameForm = document.getElementById("profile-name-form");
+  refs.profileNameInput = document.getElementById("profile-name");
+  refs.profilePasswordForm = document.getElementById("profile-password-form");
+  refs.profileCurrentPasswordInput = document.getElementById("profile-current-password");
+  refs.profileNewPasswordInput = document.getElementById("profile-new-password");
+  refs.profileConfirmPasswordInput = document.getElementById("profile-confirm-password");
+  refs.adminMessage = document.getElementById("admin-message");
+  refs.adminUsersTable = document.getElementById("admin-users-table");
+  refs.adminUsersTableBody = document.querySelector("#admin-users-table tbody");
+}

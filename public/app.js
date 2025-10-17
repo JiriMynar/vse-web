@@ -1,4 +1,4 @@
-import { refs } from './scripts/dom.js';
+import { refs, initializeRefs } from './scripts/dom.js';
 import { state } from './scripts/state.js';
 import { apiFetch, tryRefresh } from './scripts/modules/api.js';
 import { initTheme, applyTheme } from './scripts/modules/theme.js';
@@ -143,7 +143,7 @@ function initializeDialogs() {
   });
 }
 
-function initializeWorkspace() {
+function initializeWorkspace(refs) {
   if (refs.workspace) {
     refs.workspace.hidden = true;
   }
@@ -171,7 +171,8 @@ function initializeWorkspace() {
 }
 
 async function bootstrap() {
-  initializeWorkspace();
+  initializeRefs();
+  initializeWorkspace(refs);
   applyTheme(state.theme, refs);
   refs.enterToSendCheckbox.checked = state.enterToSend;
   await tryRefresh();

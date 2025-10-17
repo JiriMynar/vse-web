@@ -7,7 +7,9 @@ function toggleForms(mode, refs) {
   toggleVisibility(refs.loginForm, isLogin);
   toggleVisibility(refs.registerForm, !isLogin);
   setActiveTab(isLogin ? refs.tabLogin : refs.tabRegister, isLogin ? refs.tabRegister : refs.tabLogin);
-  setMessage(refs.authMessage, '');
+  if (refs.authMessage) {
+    setMessage(refs.authMessage, "");
+  }
 }
 
 export function initAuth(refs, loadWorkspace) {
@@ -28,10 +30,14 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      setMessage(refs.authMessage, 'Přihlášení proběhlo úspěšně.', 'success');
+      if (refs.authMessage) {
+        setMessage(refs.authMessage, "Přihlášení proběhlo úspěšně.", "success");
+      }
       await loadWorkspace();
     } catch (error) {
-      setMessage(document.getElementById('auth-message'), error.message, 'error');
+      if (refs.authMessage) {
+        setMessage(refs.authMessage, error.message, "error");
+      }
     } finally {
       setInputsDisabled(refs.loginForm, false);
       setButtonLoading(refs.loginForm.querySelector('button[type="submit"]'), false);
@@ -51,11 +57,15 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
-      setMessage(refs.authMessage, 'Registrace proběhla úspěšně.', 'success');
+      if (refs.authMessage) {
+        setMessage(refs.authMessage, "Registrace proběhla úspěšně.", "success");
+      }
       toggleForms('login', refs);
       await loadWorkspace();
     } catch (error) {
-      setMessage(document.getElementById('auth-message'), error.message, 'error');
+      if (refs.authMessage) {
+        setMessage(refs.authMessage, error.message, "error");
+      }
     } finally {
       setInputsDisabled(refs.registerForm, false);
       setButtonLoading(refs.registerForm.querySelector('button[type="submit"]'), false);
