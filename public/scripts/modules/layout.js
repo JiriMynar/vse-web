@@ -9,23 +9,7 @@ function syncWorkspaceSidebar(refs) {
 
   const label = hidden ? 'Zobrazit navigaci' : 'Skrýt navigaci';
 
-  const sidebarToggles = [refs.workspaceSidebarToggle, refs.workspaceSidebarReopen].filter(Boolean);
 
-  sidebarToggles.forEach((button) => {
-    button.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-    button.setAttribute('aria-label', label);
-    button.setAttribute('title', label);
-
-    const labelTarget = button.querySelector('[data-panel-label]');
-    if (labelTarget) {
-      labelTarget.textContent = label;
-    }
-
-    const icon = button.querySelector('use');
-    if (icon) {
-      icon.setAttribute('href', hidden ? '#icon-chevron-right' : '#icon-chevron-left');
-    }
-  });
 
   if (refs.workspaceMenuToggle) {
     const expanded = hidden ? 'false' : 'true';
@@ -92,9 +76,6 @@ export function initLayout(refs) {
     refs.workspaceSidebarToggle.addEventListener('click', () => toggleSidebar(refs));
   }
 
-  if (refs.workspaceSidebarReopen) {
-    refs.workspaceSidebarReopen.addEventListener('click', () => toggleSidebar(refs));
-  }
 
   if (refs.sidebarCloseButton) {
     refs.sidebarCloseButton.addEventListener('click', () => closeSidebar(refs, { restoreFocus: true }));

@@ -133,11 +133,6 @@
   flex-shrink: 0;
 }
 
-.workspace__reveal {
-  display: none;
-  flex-shrink: 0;
-  align-self: flex-start;
-}
 
 .workspace__brand h2 {
   margin: 0;
@@ -479,9 +474,6 @@
     display: none;
   }
 
-  .workspace__reveal {
-    display: none;
-  }
 
   .workspace__sidebar-close {
     display: inline-flex;
@@ -539,9 +531,6 @@
     display: none;
   }
 
-  .workspace.is-nav-hidden .workspace__reveal {
-    display: inline-flex;
-  }
 }
 
 @media (max-width: 640px) {
