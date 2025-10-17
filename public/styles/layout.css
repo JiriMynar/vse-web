@@ -225,7 +225,8 @@
 }
 
 .split-layout__sidebar {
-
+  display: grid;
+  align-content: start;
   gap: var(--space-3);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -238,6 +239,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
 
 .chat-view__header {
   display: flex;
