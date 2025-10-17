@@ -34,12 +34,16 @@ function toUserPayload(row) {
 }
 
 export async function ensureAdminUser(options = {}) {
+  logger.info(`[ensureAdminUser] Function called.`);
   const { email, name, password: predefinedPassword } = resolveAdminConfig(options);
+  logger.info(`[ensureAdminUser] Resolved Admin Config: Email - ${email}, Name - ${name}, Password - ${predefinedPassword ? 'predefined' : 'generated'}`);
   const db = await getDb();
   const existing = await db.get('SELECT * FROM users WHERE email = ?', email);
 
   if (existing) {
+    logger.info(`[ensureAdminUser] Admin user ${email} already exists.`);
     if (!existing.is_admin) {
+      logger.info(`[ensureAdminUser] User ${email} is not admin, updating role.`);
       await db.run('UPDATE users SET is_admin = 1 WHERE id = ?', existing.id);
       logger.info(`Aktualizován administrátorský účet ${email}.`);
     }
@@ -47,6 +51,7 @@ export async function ensureAdminUser(options = {}) {
   }
 
   const password = predefinedPassword || generatePassword();
+  logger.info(`[ensureAdminUser] Creating new admin user ${email}.`);
   const passwordHash = await bcrypt.hash(password, 12);
   const result = await db.run(
     'INSERT INTO users (email, password_hash, name, is_admin) VALUES (?, ?, ?, 1)',
@@ -56,12 +61,13 @@ export async function ensureAdminUser(options = {}) {
   );
 
   if (predefinedPassword) {
+    logger.warn(`[ensureAdminUser] Admin user ${email} (ID ${result.lastID}) created with predefined password.`);
     logger.warn(`Vytvořen administrátorský účet ${email} (ID ${result.lastID}).`);
     return null;
   }
 
   logger.warn(
-    `Vytvořen nový administrátorský účet ${email} (ID ${result.lastID}). Dočasné heslo: ${password}`
+    `[ensureAdminUser] New admin user ${email} (ID ${result.lastID}) created with temporary password: ${password}`
   );
   return { email, password };
 }
@@ -154,7 +160,7 @@ export async function updateUserRole({ actorId, targetId, role }) {
   }
 
   const db = await getDb();
-  const user = await db.get('SELECT id, email, name, is_admin, created_at FROM users WHERE id = ?', userId);
+  const user = await db.get('SELECT id, is_admin FROM users WHERE id = ?', userId);
   if (!user) {
     const error = new Error('Uživatel nebyl nalezen.');
     error.status = 404;
@@ -233,3 +239,4 @@ function generatePassword() {
     .replace(/[^a-zA-Z0-9]/g, '')
     .slice(0, 12);
 }
+
