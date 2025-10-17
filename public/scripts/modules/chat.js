@@ -9,25 +9,26 @@ import {
   setMessage
 } from '../utils/dom.js';
 import { formatRelativeTime, formatDateTime } from '../utils/datetime.js';
-import { truncate } from '../utils/text.js';
+import { closeSidebar, mobileSidebarMedia } from './layout.js';
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-function syncThreadSidebar(refs) {
-  const hidden = state.isThreadSidebarHidden;
-  refs.chatSplitLayout?.classList.toggle('is-sidebar-hidden', hidden);
-  if (refs.threadSidebarToggle) {
-    const label = hidden ? 'Zobrazit historii' : 'Skrýt historii';
-    refs.threadSidebarToggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-    refs.threadSidebarToggle.setAttribute('aria-label', label);
-    refs.threadSidebarToggle.setAttribute('title', label);
-    const icon = refs.threadSidebarToggle.querySelector('use');
-    if (icon) {
-      icon.setAttribute('href', hidden ? '#icon-chevron-right' : '#icon-chevron-left');
-    }
-    if (refs.threadSidebarToggleLabel) {
-      refs.threadSidebarToggleLabel.textContent = label;
-    }
+export function syncChatMenu(refs) {
+  const showHistory = state.activeSidebarPanel === 'history';
+  toggleVisibility(refs.workspaceMenuPrimary, !showHistory, { hiddenClass: 'workspace-menu__panel--hidden' });
+  toggleVisibility(refs.workspaceHistoryPanel, showHistory, { hiddenClass: 'workspace-menu__panel--hidden' });
+
+  if (refs.workspaceMenuPrimary) {
+    refs.workspaceMenuPrimary.setAttribute('aria-hidden', showHistory ? 'true' : 'false');
+  }
+
+  if (refs.workspaceHistoryPanel) {
+    refs.workspaceHistoryPanel.setAttribute('aria-hidden', showHistory ? 'false' : 'true');
+  }
+
+  if (refs.workspaceHistoryButton) {
+    refs.workspaceHistoryButton.setAttribute('aria-expanded', showHistory ? 'true' : 'false');
+    toggleActive(refs.workspaceHistoryButton, showHistory);
   }
 }
 
@@ -423,7 +424,20 @@ export async function sendMessage(refs, message) {
 }
 
 export function initChat(refs) {
-  syncThreadSidebar(refs);
+  syncChatMenu(refs);
+
+  refs.workspaceHistoryButton?.addEventListener('click', () => {
+    if (state.activeSidebarPanel === 'history') return;
+    state.activeSidebarPanel = 'history';
+    syncChatMenu(refs);
+    refs.threadSearch?.focus();
+  });
+
+  refs.workspaceHistoryBack?.addEventListener('click', () => {
+    state.activeSidebarPanel = 'navigation';
+    syncChatMenu(refs);
+    refs.workspaceHistoryButton?.focus();
+  });
 
   refs.threadList?.addEventListener('click', async (event) => {
     const button = event.target.closest('button');
@@ -433,6 +447,9 @@ export function initChat(refs) {
     renderThreads(refs);
     await loadMessages(refs, threadId);
     subscribeToMessages(refs, threadId);
+    if (mobileSidebarMedia.matches) {
+      closeSidebar(refs);
+    }
   });
 
   refs.threadSearch?.addEventListener('input', (event) => {
@@ -470,11 +487,6 @@ export function initChat(refs) {
     localStorage.setItem(STORAGE_KEYS.enterToSend, state.enterToSend);
   });
 
-  refs.threadSidebarToggle?.addEventListener('click', () => {
-    state.isThreadSidebarHidden = !state.isThreadSidebarHidden;
-    syncThreadSidebar(refs);
-  });
-
   refs.createThreadButton?.addEventListener('click', async () => {
     const thread = await apiFetch('/api/chat/threads', { method: 'POST', body: JSON.stringify({}) });
     state.activeThreadId = thread.thread.id;
@@ -505,7 +517,7 @@ export function renderChatView(refs) {
   renderThreadHeader(refs);
   renderThreads(refs);
   renderMessages(refs);
-  syncThreadSidebar(refs);
+  syncChatMenu(refs);
 }
 
 export function teardownChatStreams() {

@@ -7,7 +7,7 @@ function syncWorkspaceSidebar(refs) {
   const hidden = state.isWorkspaceSidebarHidden;
   refs.workspace?.classList.toggle('is-nav-hidden', hidden);
 
-  const label = hidden ? 'Zobrazit navigaci' : 'Skrýt navigaci';
+  const label = hidden ? 'Zobrazit menu' : 'Skrýt menu';
 
 
 

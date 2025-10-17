@@ -55,7 +55,7 @@ export const state = {
   activeThreadId: null,
   threadFilter: 'all',
   threadSearch: '',
-  isThreadSidebarHidden: false,
+  activeSidebarPanel: 'navigation',
   isWorkspaceSidebarHidden: false,
   messages: [],
   threadStream: null,

@@ -4,7 +4,7 @@ import { apiFetch, tryRefresh } from './scripts/modules/api.js';
 import { initTheme, applyTheme } from './scripts/modules/theme.js';
 import { initLayout, closeSidebar, mobileSidebarMedia } from './scripts/modules/layout.js';
 import { initAuth } from './scripts/modules/auth.js';
-import { initChat, loadThreads, renderChatView, teardownChatStreams } from './scripts/modules/chat.js';
+import { initChat, loadThreads, renderChatView, teardownChatStreams, syncChatMenu } from './scripts/modules/chat.js';
 import {
   initAgentkit,
   renderAgentkit,
@@ -59,6 +59,7 @@ async function loadWorkspace() {
     const { user } = await apiFetch('/api/auth/me');
     userResolved = true;
     state.user = user;
+    state.activeSidebarPanel = 'navigation';
     updateWorkspaceUser(user);
     if (refs.enterToSendCheckbox) {
       refs.enterToSendCheckbox.checked = state.enterToSend;
@@ -129,10 +130,12 @@ async function handleLogout() {
   state.user = null;
   state.adminUsers = [];
   state.chatApiConnectors = [];
+  state.activeSidebarPanel = 'navigation';
   teardownChatStreams();
   teardownAgentkit(refs);
   showAgentkitSaveFeedback(refs, '');
   setMessage(refs.workspaceMessage, '');
+  syncChatMenu(refs);
   if (refs.chatApiDialog?.open) {
     refs.chatApiDialog.close();
   }
@@ -155,7 +158,13 @@ const viewRenderers = {
   help: () => renderHelp(refs),
   profile: () => renderProfile(refs),
   admin: () => renderAdminUsers(refs),
-  agentkitCleanup: () => resetAgentkitMessages(refs)
+  agentkitCleanup: () => resetAgentkitMessages(refs),
+  onViewChange: (view) => {
+    if (view !== 'chat') {
+      state.activeSidebarPanel = 'navigation';
+      syncChatMenu(refs);
+    }
+  }
 };
 
 function initializeDialogs() {
