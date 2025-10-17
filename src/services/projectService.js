@@ -14,9 +14,7 @@ export async function listProjects(userId) {
   const db = await getDb();
   const projects = await db.all(
     `SELECT
-        p.*, 
-        (SELECT COUNT(*) FROM automations WHERE project_id = p.id) AS automation_count,
-        (SELECT COUNT(*) FROM automation_runs r INNER JOIN automations a ON a.id = r.automation_id WHERE a.project_id = p.id) AS run_count
+        p.*
       FROM projects p
       INNER JOIN project_members m ON m.project_id = p.id
       WHERE m.user_id = ?
@@ -25,11 +23,7 @@ export async function listProjects(userId) {
     userId
   );
 
-  return projects.map((project) => ({
-    ...project,
-    automation_count: Number(project.automation_count) || 0,
-    run_count: Number(project.run_count) || 0
-  }));
+  return projects;
 }
 
 export async function createProject(userId, payload) {
@@ -83,9 +77,7 @@ export async function updateProject(userId, projectId, payload) {
 export async function getProjectById(userId, projectId) {
   const db = await getDb();
   const project = await db.get(
-    `SELECT p.*, 
-            (SELECT COUNT(*) FROM automations WHERE project_id = p.id) AS automation_count,
-            (SELECT COUNT(*) FROM automation_runs r INNER JOIN automations a ON a.id = r.automation_id WHERE a.project_id = p.id) AS run_count
+    `SELECT p.*
       FROM projects p
       INNER JOIN project_members m ON m.project_id = p.id
       WHERE p.id = ? AND m.user_id = ?`,
@@ -99,11 +91,7 @@ export async function getProjectById(userId, projectId) {
     throw error;
   }
 
-  return {
-    ...project,
-    automation_count: Number(project.automation_count) || 0,
-    run_count: Number(project.run_count) || 0
-  };
+  return project;
 }
 
 export async function archiveProject(userId, projectId) {

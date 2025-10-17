@@ -22,7 +22,6 @@
 }
 
 .projects-grid,
-.automation-list,
 .profile-grid {
   display: grid;
   gap: var(--space-5);
@@ -32,8 +31,7 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
-.project-card,
-.automation-card {
+.project-card {
   display: grid;
   gap: var(--space-4);
   background: var(--color-surface);
@@ -43,8 +41,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.project-card header,
-.automation-card header {
+.project-card header {
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
@@ -52,26 +49,20 @@
 }
 
 .project-card .meta,
-.automation-card .status {
+.project-card .status {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
 
-.project-card footer,
-.automation-card footer {
+.project-card footer {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
 }
 
-.automation-card pre {
-  margin: 0;
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  background: rgba(148, 163, 184, 0.08);
-  font-size: var(--font-size-sm);
-  overflow-x: auto;
+.project-card footer .status {
+  margin-right: auto;
 }
 
 .profile-grid {

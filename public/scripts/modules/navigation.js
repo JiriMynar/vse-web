@@ -6,7 +6,6 @@ const viewMap = {
   chat: 'viewChat',
   agentkit: 'viewAgentkit',
   projects: 'viewProjects',
-  automations: 'viewAutomations',
   help: 'viewHelp',
   profile: 'viewProfile',
   admin: 'viewAdmin'

@@ -97,36 +97,6 @@ const migrations = [
 
       await db.exec('CREATE INDEX IF NOT EXISTS idx_project_members_user ON project_members(user_id);');
 
-      await db.exec(`
-        CREATE TABLE IF NOT EXISTS automations (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          project_id INTEGER NOT NULL,
-          name TEXT NOT NULL,
-          trigger TEXT NOT NULL,
-          status TEXT DEFAULT 'inactive',
-          config TEXT,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
-        );
-      `);
-
-      await db.exec('CREATE INDEX IF NOT EXISTS idx_automations_project ON automations(project_id);');
-
-      await db.exec(`
-        CREATE TABLE IF NOT EXISTS automation_runs (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          automation_id INTEGER NOT NULL,
-          started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          finished_at DATETIME,
-          status TEXT DEFAULT 'success',
-          payload TEXT,
-          result TEXT,
-          FOREIGN KEY(automation_id) REFERENCES automations(id) ON DELETE CASCADE
-        );
-      `);
-
-      await db.exec('CREATE INDEX IF NOT EXISTS idx_runs_automation ON automation_runs(automation_id);');
     }
   },
   {
