@@ -73,17 +73,8 @@ function renderThreads(refs) {
     title.className = 'thread-card__title';
     title.textContent = thread.title;
 
-    const preview = document.createElement('p');
-    preview.className = 'thread-card__preview';
-    preview.textContent = truncate(thread.last_message || 'Bez poslední zprávy', 120);
-
-    const meta = document.createElement('div');
-    meta.className = 'thread-card__meta';
-    const activity = thread.last_activity ? formatRelativeTime(thread.last_activity) : 'Bez aktivity';
-    meta.innerHTML = `<span>${activity}</span><span>${thread.message_count || 0} zpráv</span>`;
-
     toggleActive(button, thread.id === state.activeThreadId);
-    button.append(title, preview, meta);
+    button.append(title);
     item.appendChild(button);
     refs.threadList.appendChild(item);
   });
