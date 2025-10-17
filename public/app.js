@@ -170,13 +170,11 @@ function initializeWorkspace(refs) {
   refs.workspaceMenuToggle?.setAttribute('aria-expanded', 'false');
 }
 
-async function bootstrap() {
+document.addEventListener("DOMContentLoaded", async () => {
   initializeRefs();
   initializeWorkspace(refs);
   applyTheme(state.theme, refs);
   refs.enterToSendCheckbox.checked = state.enterToSend;
   await tryRefresh();
   await loadWorkspace();
-}
-
-bootstrap();
+});
