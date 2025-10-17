@@ -38,10 +38,6 @@ function resolveAuthMessage(refs) {
   return null;
 }
 
-function isAuthError(error) {
-  const status = typeof error?.status === 'number' ? error.status : null;
-  return status === 401 || status === 403;
-}
 
 function updateWorkspaceUser(user) {
   if (!refs.workspaceUser) return;
@@ -100,19 +96,6 @@ async function loadWorkspace() {
     setMessage(refs.workspaceMessage, '');
   } catch (error) {
     console.error(error);
-    const authMessage = resolveAuthMessage(refs);
-    if (isAuthError(error) || !userResolved) {
-      state.user = null;
-      state.adminUsers = [];
-      toggleAuthVisibility(true);
-      teardownChatStreams();
-      teardownAgentkit(refs);
-      showAgentkitSaveFeedback(refs, '');
-      setMessage(refs.workspaceMessage, '');
-      if (authMessage) {
-        setMessage(authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
-      }
-      return;
     }
 
     if (authMessage) {
