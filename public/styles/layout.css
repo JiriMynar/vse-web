@@ -121,16 +121,22 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: transparent;
   border: 1px solid transparent;
   font-weight: 600;
   color: var(--color-text-muted);
   text-align: left;
+  transition: all var(--transition-base);
 }
 
 .workspace__nav-button .icon {
   opacity: 0.85;
+}
+
+.workspace__nav-button:hover:not(.is-active) {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
 }
 
 .workspace__nav-button.is-active {
@@ -209,9 +215,10 @@
 
 .split-layout {
   display: grid;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
   gap: var(--space-6);
   align-items: stretch;
+  height: 100%;
 }
 
 .split-layout__sidebar {
@@ -245,7 +252,7 @@
 }
 
 .chat-history {
-  max-height: 520px;
+  max-height: 600px;
   overflow-y: auto;
   display: grid;
   gap: var(--space-3);

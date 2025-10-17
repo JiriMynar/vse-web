@@ -1,10 +1,6 @@
 .view-panel {
   gap: var(--space-6);
-}
-
-.view-panel > .view-preview {
-  width: min(640px, 100%);
-  justify-self: start;
+  padding: var(--space-6);
 }
 
 .panel-header {
@@ -202,10 +198,6 @@
 }
 
 @media (max-width: 640px) {
-  .view-panel > .view-preview {
-    width: 100%;
-  }
-
   .projects-grid {
     grid-template-columns: 1fr;
   }
