@@ -242,7 +242,7 @@
 
 .chat-sidebar__search input[type='search'] {
   flex: 1 1 auto;
-  min-width: 0;
+
 }
 
 .chat-view__header {
