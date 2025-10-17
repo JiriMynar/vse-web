@@ -4,6 +4,7 @@ export function initializeRefs() {
   refs.authWrapper = document.getElementById("auth-wrapper");
   refs.workspace = document.getElementById("workspace");
   refs.workspaceMain = document.getElementById("workspace-main");
+  refs.chatSplitLayout = document.querySelector(".split-layout");
   refs.workspaceUser = document.getElementById("workspace-user");
   refs.workspaceMenuToggle = document.getElementById("workspace-menu-toggle");
   refs.workspaceSidebar = document.querySelector(".workspace__sidebar");
@@ -24,6 +25,7 @@ export function initializeRefs() {
   refs.createThreadButton = document.getElementById("create-thread");
   refs.threadList = document.getElementById("thread-list");
   refs.threadSearch = document.getElementById("thread-search");
+  refs.threadSidebarToggle = document.getElementById("thread-sidebar-toggle");
   refs.chatHistory = document.getElementById("chat-history");
   refs.chatEmpty = document.getElementById("chat-empty");
   refs.chatForm = document.getElementById("chat-form");

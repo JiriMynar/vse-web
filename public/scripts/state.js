@@ -55,6 +55,7 @@ export const state = {
   activeThreadId: null,
   threadFilter: 'all',
   threadSearch: '',
+  isThreadSidebarHidden: false,
   messages: [],
   threadStream: null,
   messageStream: null,
