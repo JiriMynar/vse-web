@@ -25,6 +25,19 @@ import { openProjectDialog, openAutomationDialog } from './scripts/modules/dialo
 import { initNavigation, setView } from './scripts/modules/navigation.js';
 import { toggleVisibility, setMessage } from './scripts/utils/dom.js';
 
+function resolveAuthMessage(refs) {
+  const current = refs.authMessage;
+  if (current instanceof Element) {
+    return current;
+  }
+  const element = document.getElementById('auth-message');
+  if (element instanceof Element) {
+    refs.authMessage = element;
+    return element;
+  }
+  return null;
+}
+
 function updateWorkspaceUser(user) {
   if (!refs.workspaceUser) return;
   const roleLabel = user.isAdmin ? ' • Administrátor' : '';
@@ -84,8 +97,9 @@ async function loadWorkspace() {
     teardownChatStreams();
     teardownAgentkit(refs);
     showAgentkitSaveFeedback(refs, '');
-    if (refs.authMessage) {
-      setMessage(refs.authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
+    const authMessage = resolveAuthMessage(refs);
+    if (authMessage) {
+      setMessage(authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
     }
   } finally {
     state.isLoading = false;
