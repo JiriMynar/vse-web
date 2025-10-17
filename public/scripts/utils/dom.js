@@ -1,29 +1,33 @@
+function isElement(node) {
+  return node instanceof Element;
+}
+
 export function toggleVisibility(element, show, { hiddenClass = 'visually-hidden' } = {}) {
-  if (!element) return;
+  if (!isElement(element)) return;
   element.classList.toggle(hiddenClass, !show);
 }
 
 export function toggleActive(element, active, { activeClass = 'is-active' } = {}) {
-  if (!element) return;
+  if (!isElement(element)) return;
   element.classList.toggle(activeClass, active);
 }
 
 export function clearChildren(node) {
-  if (!node) return;
+  if (!(node instanceof Node)) return;
   while (node.firstChild) {
     node.removeChild(node.firstChild);
   }
 }
 
 export function setInputsDisabled(form, disabled) {
-  if (!form) return;
+  if (!(form instanceof HTMLFormElement)) return;
   Array.from(form.elements).forEach((element) => {
     element.disabled = disabled;
   });
 }
 
 export function setButtonLoading(button, loading, text) {
-  if (!button) return;
+  if (!(button instanceof HTMLElement)) return;
   if (!button.dataset.originalLabel) {
     button.dataset.originalLabel = button.textContent.trim();
   }
@@ -36,7 +40,7 @@ export function setButtonLoading(button, loading, text) {
 }
 
 export function setMessage(element, message, type = 'info') {
-  if (!element) return;
+  if (!isElement(element)) return;
   if (!message) {
     element.textContent = '';
     element.className = 'message';

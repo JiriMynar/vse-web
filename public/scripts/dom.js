@@ -9,6 +9,7 @@ export function initializeRefs() {
   refs.workspaceSidebar = document.querySelector(".workspace__sidebar");
   refs.sidebarBackdrop = document.getElementById("sidebar-backdrop");
   refs.sidebarCloseButton = document.getElementById("sidebar-close");
+  refs.workspaceMessage = document.getElementById("workspace-message");
   refs.viewTitle = document.getElementById("view-title");
   refs.viewSubtitle = document.getElementById("view-subtitle");
   refs.themeToggle = document.getElementById("theme-toggle");
