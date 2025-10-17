@@ -226,7 +226,7 @@
 
 .split-layout__sidebar {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -234,18 +234,21 @@
   box-shadow: var(--shadow-sm);
 }
 
+.chat-sidebar__search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
 
-.chat-sidebar__header {
+.chat-sidebar__search input[type='search'] {
+  flex: 1 1 auto;
+}
+
+.chat-view__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-}
-
-.chat-sidebar__title-group {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
 }
 
 .chat-sidebar__titles {
@@ -264,8 +267,20 @@
   color: var(--color-text-muted);
 }
 
-.split-layout__sidebar #thread-search {
-  margin-top: var(--space-2);
+
+.chat-view__header .chat-sidebar__titles {
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .chat-sidebar__search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chat-sidebar__search input[type='search'] {
+    width: 100%;
+  }
 }
 
 .split-layout__main {
