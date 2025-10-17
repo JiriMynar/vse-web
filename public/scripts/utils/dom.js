@@ -41,16 +41,33 @@ export function setButtonLoading(button, loading, text) {
 
 export function setMessage(element, message, type = 'info') {
   if (!isElement(element)) return;
+
+  if (!element.dataset.messageBaseClass) {
+    element.dataset.messageBaseClass = element.className;
+  }
+
+  const baseClasses = element.dataset.messageBaseClass
+    .split(' ')
+    .filter(Boolean);
+
+  if (!baseClasses.includes('message')) {
+    baseClasses.push('message');
+  }
+
   if (!message) {
     element.textContent = '';
-    element.className = 'message';
-    element.classList.remove('is-visible');
+    element.className = baseClasses.join(' ');
     return;
   }
+
   element.textContent = message;
-  const base = ['message', 'is-visible'];
-  if (type === 'error') base.push('message--error');
-  if (type === 'success') base.push('message--success');
-  if (type === 'info') base.push('message--info');
-  element.className = base.join(' ');
+
+  const classSet = new Set(baseClasses);
+  classSet.add('is-visible');
+
+  if (type === 'error') classSet.add('message--error');
+  if (type === 'success') classSet.add('message--success');
+  if (type === 'info') classSet.add('message--info');
+
+  element.className = Array.from(classSet).join(' ');
 }
