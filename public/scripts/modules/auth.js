@@ -45,9 +45,9 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      const authMessage = resolveAuthMessage(refs);
-      if (authMessage) {
-        setMessage(authMessage, "Přihlášení proběhlo úspěšně.", "success");
+      const workspaceLoaded = await loadWorkspace();
+      if (!workspaceLoaded) {
+        return;
       }
 
     } catch (error) {
@@ -75,11 +75,11 @@ export function initAuth(refs, loadWorkspace) {
         method: 'POST',
         body: JSON.stringify({ name, email, password })
       });
-      const authMessage = resolveAuthMessage(refs);
-      if (authMessage) {
-        setMessage(authMessage, "Registrace proběhla úspěšně.", "success");
+      const workspaceLoaded = await loadWorkspace();
+      if (!workspaceLoaded) {
+        toggleForms('login', refs);
+        return;
       }
-      toggleForms('login', refs);
 
     } catch (error) {
       const authMessage = resolveAuthMessage(refs);
