@@ -13,6 +13,15 @@ import { truncate } from '../utils/text.js';
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+function syncThreadSidebar(refs) {
+  const hidden = state.isThreadSidebarHidden;
+  refs.chatSplitLayout?.classList.toggle('is-sidebar-hidden', hidden);
+  if (refs.threadSidebarToggle) {
+    refs.threadSidebarToggle.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    refs.threadSidebarToggle.textContent = hidden ? 'Zobrazit historii' : 'Skrýt historii';
+  }
+}
+
 function filterThreads() {
   const query = state.threadSearch.toLowerCase();
   state.filteredThreads = state.threads.filter((thread) => {
@@ -405,6 +414,8 @@ export async function sendMessage(refs, message) {
 }
 
 export function initChat(refs) {
+  syncThreadSidebar(refs);
+
   refs.threadList?.addEventListener('click', async (event) => {
     const button = event.target.closest('button');
     if (!button) return;
@@ -450,6 +461,11 @@ export function initChat(refs) {
     localStorage.setItem(STORAGE_KEYS.enterToSend, state.enterToSend);
   });
 
+  refs.threadSidebarToggle?.addEventListener('click', () => {
+    state.isThreadSidebarHidden = !state.isThreadSidebarHidden;
+    syncThreadSidebar(refs);
+  });
+
   refs.createThreadButton?.addEventListener('click', async () => {
     const thread = await apiFetch('/api/chat/threads', { method: 'POST', body: JSON.stringify({}) });
     state.activeThreadId = thread.thread.id;
@@ -480,6 +496,7 @@ export function renderChatView(refs) {
   renderThreadHeader(refs);
   renderThreads(refs);
   renderMessages(refs);
+  syncThreadSidebar(refs);
 }
 
 export function teardownChatStreams() {

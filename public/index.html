@@ -121,34 +121,39 @@
               <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
             </button>
           </div>
-          <nav class="workspace__nav" role="tablist">
-            <button class="workspace__nav-button is-active" data-view="chat" type="button" aria-controls="view-chat">
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-chat"></use></svg>
-              <span>Chat</span>
+          <div class="workspace__nav-group">
+            <button id="create-thread" class="button button--primary button--full workspace__nav-action" type="button">
+              Nový chat
             </button>
-            <button class="workspace__nav-button" data-view="agentkit" type="button" aria-controls="view-agentkit">
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-agent"></use></svg>
-              <span>Agentkit</span>
-            </button>
-            <button class="workspace__nav-button" data-view="profile" type="button" aria-controls="view-profile">
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-profile"></use></svg>
-              <span>Profil</span>
-            </button>
-            <button class="workspace__nav-button" data-view="help" type="button" aria-controls="view-help">
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-help"></use></svg>
-              <span>Nápověda</span>
-            </button>
-            <button
-              id="nav-admin"
-              class="workspace__nav-button visually-hidden"
-              data-view="admin"
-              type="button"
-              aria-controls="view-admin"
-            >
-              <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-admin"></use></svg>
-              <span>Administrace</span>
-            </button>
-          </nav>
+            <nav class="workspace__nav" role="tablist">
+              <button class="workspace__nav-button is-active" data-view="chat" type="button" aria-controls="view-chat">
+                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-chat"></use></svg>
+                <span>Chat</span>
+              </button>
+              <button class="workspace__nav-button" data-view="agentkit" type="button" aria-controls="view-agentkit">
+                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-agent"></use></svg>
+                <span>Agentkit</span>
+              </button>
+              <button class="workspace__nav-button" data-view="profile" type="button" aria-controls="view-profile">
+                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-profile"></use></svg>
+                <span>Profil</span>
+              </button>
+              <button class="workspace__nav-button" data-view="help" type="button" aria-controls="view-help">
+                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-help"></use></svg>
+                <span>Nápověda</span>
+              </button>
+              <button
+                id="nav-admin"
+                class="workspace__nav-button visually-hidden"
+                data-view="admin"
+                type="button"
+                aria-controls="view-admin"
+              >
+                <svg class="icon icon--lg" aria-hidden="true"><use href="#icon-admin"></use></svg>
+                <span>Administrace</span>
+              </button>
+            </nav>
+          </div>
           <footer class="workspace__footer">
             <button id="logout" class="button button--ghost" type="button">
               <svg class="icon" aria-hidden="true"><use href="#icon-logout"></use></svg>
@@ -183,7 +188,6 @@
                   </div>
                 </header>
                 <div class="split-actions">
-                  <button id="create-thread" class="button button--primary button--full" type="button">Nový chat</button>
                   <input id="thread-search" type="search" placeholder="Hledat vlákno" />
                 </div>
                 <ul id="thread-list" class="thread-list" role="tablist"></ul>
@@ -195,6 +199,7 @@
                     <p id="active-thread-meta" class="thread-card__preview"></p>
                   </div>
                   <div class="thread-actions">
+
                     <button id="theme-toggle" class="button button--icon" type="button" aria-label="Přepnout motiv" aria-pressed="true">
                       <svg class="icon" data-theme-icon="dark" aria-hidden="true"><use href="#icon-moon"></use></svg>
                     </button>
