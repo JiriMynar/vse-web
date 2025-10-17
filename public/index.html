@@ -170,29 +170,28 @@
           <section id="view-chat" class="view-panel is-active">
             <div class="split-layout">
               <div class="split-layout__sidebar" aria-label="Seznam vláken">
-                <header class="chat-sidebar__header">
-                  <div class="chat-sidebar__title-group">
-                    <button
-                      id="workspace-menu-toggle"
-                      class="button button--icon workspace-menu-toggle"
-                      type="button"
-                      aria-label="Zobrazit navigaci"
-                      aria-expanded="false"
-                    >
-                      <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
-                    </button>
-                    <div class="chat-sidebar__titles">
-                      <h1 id="view-title">Chat</h1>
-                      <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
-                    </div>
-                  </div>
-                </header>
-                <div class="split-actions">
+                <div class="chat-sidebar__search">
+                  <button
+                    id="workspace-menu-toggle"
+                    class="button button--icon workspace-menu-toggle"
+                    type="button"
+                    aria-label="Zobrazit navigaci"
+                    aria-expanded="false"
+                  >
+                    <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+                  </button>
+                  <label for="thread-search" class="visually-hidden">Hledat vlákno</label>
                   <input id="thread-search" type="search" placeholder="Hledat vlákno" />
                 </div>
                 <ul id="thread-list" class="thread-list" role="tablist"></ul>
               </div>
               <div class="split-layout__main" aria-live="polite">
+                <header class="chat-view__header">
+                  <div class="chat-sidebar__titles">
+                    <h1 id="view-title">Chat</h1>
+                    <p id="view-subtitle">Spravujte konverzace a sledujte odpovědi v reálném čase.</p>
+                  </div>
+                </header>
                 <div class="thread-header">
                   <div>
                     <h2 id="active-thread-title">Vyberte vlákno</h2>
