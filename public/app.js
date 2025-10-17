@@ -65,7 +65,9 @@ async function loadWorkspace() {
     userResolved = true;
     state.user = user;
     updateWorkspaceUser(user);
-    refs.enterToSendCheckbox.checked = state.enterToSend;
+    if (refs.enterToSendCheckbox) {
+      refs.enterToSendCheckbox.checked = state.enterToSend;
+    }
     toggleAuthVisibility(false);
     applyTheme(state.theme, refs);
     setMessage(refs.workspaceMessage, '');
@@ -211,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeRefs();
   initializeWorkspace(refs);
   applyTheme(state.theme, refs);
-  refs.enterToSendCheckbox.checked = state.enterToSend;
+
   const isAuthenticated = await tryRefresh();
   if (isAuthenticated) {
     await loadWorkspace();
