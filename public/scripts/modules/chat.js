@@ -333,7 +333,22 @@ function subscribeToMessages(refs, threadId) {
 
 export async function loadThreads(refs, options = {}) {
   const { subscribe = false, preserveActive = false } = options;
-  const data = await apiFetch('/api/chat/threads');
+  let data;
+  try {
+    data = await apiFetch('/api/chat/threads');
+  } catch (error) {
+    if (error?.status === 401 || error?.status === 403) {
+      throw error;
+    }
+    const message = error?.message
+      ? `Nepodařilo se načíst chat: ${error.message}`
+      : 'Nepodařilo se načíst chat.';
+    const contextualError = new Error(message);
+    if (typeof error?.status === 'number') {
+      contextualError.status = error.status;
+    }
+    throw contextualError;
+  }
   state.threads = data.threads;
   if (preserveActive && state.activeThreadId) {
     const exists = state.threads.some((thread) => thread.id === state.activeThreadId);
@@ -354,11 +369,25 @@ export async function loadThreads(refs, options = {}) {
 }
 
 export async function loadMessages(refs, threadId) {
-  const data = await apiFetch(`/api/chat/history?threadId=${threadId}`);
-  state.messages = data.messages;
-  state.activeThreadId = data.threadId;
-  renderMessages(refs);
-  renderThreadHeader(refs);
+  try {
+    const data = await apiFetch(`/api/chat/history?threadId=${threadId}`);
+    state.messages = data.messages;
+    state.activeThreadId = data.threadId;
+    renderMessages(refs);
+    renderThreadHeader(refs);
+  } catch (error) {
+    if (error?.status === 401 || error?.status === 403) {
+      throw error;
+    }
+    const message = error?.message
+      ? `Nepodařilo se načíst historii konverzace: ${error.message}`
+      : 'Nepodařilo se načíst historii konverzace.';
+    const contextualError = new Error(message);
+    if (typeof error?.status === 'number') {
+      contextualError.status = error.status;
+    }
+    throw contextualError;
+  }
 }
 
 export async function sendMessage(refs, message) {

@@ -4,8 +4,22 @@ import { toggleVisibility, clearChildren } from '../utils/dom.js';
 import { formatRelativeTime } from '../utils/datetime.js';
 
 async function fetchProjects() {
-  const { projects } = await apiFetch('/api/projects');
-  state.projects = projects;
+  try {
+    const { projects } = await apiFetch('/api/projects');
+    state.projects = projects;
+  } catch (error) {
+    if (error?.status === 401 || error?.status === 403) {
+      throw error;
+    }
+    const message = error?.message
+      ? `Nepodařilo se načíst projekty: ${error.message}`
+      : 'Nepodařilo se načíst projekty.';
+    const contextualError = new Error(message);
+    if (typeof error?.status === 'number') {
+      contextualError.status = error.status;
+    }
+    throw contextualError;
+  }
 }
 
 async function fetchAutomations(projectId) {
@@ -13,8 +27,22 @@ async function fetchAutomations(projectId) {
     state.automations = [];
     return;
   }
-  const { automations } = await apiFetch(`/api/automations/project/${projectId}`);
-  state.automations = automations;
+  try {
+    const { automations } = await apiFetch(`/api/automations/project/${projectId}`);
+    state.automations = automations;
+  } catch (error) {
+    if (error?.status === 401 || error?.status === 403) {
+      throw error;
+    }
+    const message = error?.message
+      ? `Nepodařilo se načíst automatizace: ${error.message}`
+      : 'Nepodařilo se načíst automatizace.';
+    const contextualError = new Error(message);
+    if (typeof error?.status === 'number') {
+      contextualError.status = error.status;
+    }
+    throw contextualError;
+  }
 }
 
 export function renderProjects(refs) {

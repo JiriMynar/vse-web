@@ -38,6 +38,7 @@ function resolveAuthMessage(refs) {
   return null;
 }
 
+
 function updateWorkspaceUser(user) {
   if (!refs.workspaceUser) return;
   const roleLabel = user.isAdmin ? ' • Administrátor' : '';
@@ -57,14 +58,17 @@ function toggleAuthVisibility(showAuth) {
 }
 
 async function loadWorkspace() {
+  let userResolved = false;
   try {
     state.isLoading = true;
     const { user } = await apiFetch('/api/auth/me');
+    userResolved = true;
     state.user = user;
     updateWorkspaceUser(user);
     refs.enterToSendCheckbox.checked = state.enterToSend;
     toggleAuthVisibility(false);
     applyTheme(state.theme, refs);
+    setMessage(refs.workspaceMessage, '');
 
     if (!user.isAdmin && state.view === 'admin') {
       state.view = 'chat';
@@ -89,18 +93,19 @@ async function loadWorkspace() {
     }
 
     setView(state.view, refs, viewRenderers);
+    setMessage(refs.workspaceMessage, '');
   } catch (error) {
     console.error(error);
-    state.user = null;
-    state.adminUsers = [];
-    toggleAuthVisibility(true);
-    teardownChatStreams();
-    teardownAgentkit(refs);
-    showAgentkitSaveFeedback(refs, '');
-    const authMessage = resolveAuthMessage(refs);
-    if (authMessage) {
-      setMessage(authMessage, error.message || 'Přihlášení vypršelo, přihlaste se prosím znovu.', 'error');
     }
+
+    if (authMessage) {
+      setMessage(authMessage, '');
+    }
+
+    const fallbackMessage = error?.message
+      ? `Nepodařilo se načíst pracovní plochu: ${error.message}`
+      : 'Nepodařilo se načíst pracovní plochu. Zkuste to prosím znovu.';
+    setMessage(refs.workspaceMessage, fallbackMessage, 'error');
   } finally {
     state.isLoading = false;
   }
@@ -114,6 +119,7 @@ async function handleLogout() {
   teardownChatStreams();
   teardownAgentkit(refs);
   showAgentkitSaveFeedback(refs, '');
+  setMessage(refs.workspaceMessage, '');
   if (refs.chatApiDialog?.open) {
     refs.chatApiDialog.close();
   }
