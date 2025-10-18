@@ -3,6 +3,25 @@
   padding: var(--space-6);
 }
 
+#view-chat.view-panel {
+  padding: 0;
+  min-height: 0;
+}
+
+#view-chat.view-panel.is-active {
+  display: flex;
+  flex-direction: column;
+}
+
+#view-chat .chat-view {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
 .thread-header {
   display: flex;
   justify-content: space-between;
