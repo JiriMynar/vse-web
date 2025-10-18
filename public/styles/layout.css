@@ -275,7 +275,7 @@
   grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
   background: linear-gradient(160deg, rgba(12, 18, 33, 0.8), rgba(12, 18, 33, 0.6));
-  padding-block: var(--space-6);
+  padding: 0;
 }
 
 .workspace__message {
