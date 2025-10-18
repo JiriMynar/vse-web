@@ -290,7 +290,7 @@
 
 .view-panel {
   display: none;
-  min-height: calc(100vh - 6rem);
+
   flex: 1;
 }
 
