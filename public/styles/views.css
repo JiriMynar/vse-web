@@ -221,6 +221,10 @@
   display: none;
 }
 
+.workspace.is-nav-hidden .workspace-menu-toggle {
+  display: inline-flex;
+}
+
 @media (max-width: 1080px) {
   .workspace-menu-toggle {
     display: inline-flex;
