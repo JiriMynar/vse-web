@@ -274,15 +274,19 @@
 .workspace__main {
   display: flex;
   flex-direction: column;
-
+  gap: var(--space-6);
+  padding: var(--space-6);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
 }
 
 .workspace__message {
-  margin: 0 var(--space-6) var(--space-4);
+  margin: 0;
 }
 
 .workspace__message:empty {
-  margin: 0;
+  display: none;
 }
 
 .workspace__content {
@@ -293,12 +297,14 @@
 
 .view-panel {
   display: none;
-
+  min-height: 0;
 }
 
 .view-panel.is-active {
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .chat-view {
@@ -310,7 +316,9 @@
   padding: var(--space-5);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  min-height: 100%;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
 }
 
 .chat-view__header {
@@ -347,14 +355,18 @@
   background: var(--color-surface-alt);
   border: 1px solid rgba(148, 163, 184, 0.16);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .chat-history {
-  max-height: 600px;
-  overflow-y: auto;
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .chat-form {
@@ -525,16 +537,13 @@
     visibility: visible;
   }
 
-  .workspace__content {
+  .workspace__main {
     padding: var(--space-5);
+    gap: var(--space-5);
   }
 
   .workspace__message {
-    margin: 0 var(--space-5) var(--space-4);
-  }
-
-  .chat-history {
-    max-height: none;
+    margin: 0;
   }
 }
 
@@ -562,12 +571,13 @@
     margin-top: var(--space-4);
   }
 
-  .workspace__content {
+  .workspace__main {
     padding: var(--space-4);
+    gap: var(--space-4);
   }
 
   .workspace__message {
-    margin: 0 var(--space-4) var(--space-3);
+    margin: 0;
   }
 
   .chat-view {
@@ -609,12 +619,13 @@
     width: 100%;
   }
 
-  .workspace__content {
+  .workspace__main {
     padding: var(--space-3);
+    gap: var(--space-3);
   }
 
   .workspace__message {
-    margin: 0 var(--space-3) var(--space-3);
+    margin: 0;
   }
 
   .chat-view {
