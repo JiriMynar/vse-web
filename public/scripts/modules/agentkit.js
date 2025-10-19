@@ -46,7 +46,25 @@ async function loadAgentkitScript(baseUrl) {
 }
 
 async function requestClientSecret() {
-  const payload = await apiFetch('/api/create-session', { method: 'POST' });
+  const workflowId = state.agentkit.workflowId?.trim();
+  const apiKey = state.agentkit.openaiApiKey?.trim();
+  const baseUrl = state.agentkit.chatkitApiBase?.trim();
+
+  if (!workflowId || !apiKey) {
+    throw new Error('Konfigurace Agentkit není kompletní.');
+  }
+
+  const body = {
+    workflowId,
+    openaiApiKey: apiKey,
+    ...(baseUrl ? { chatkitApiBase: baseUrl } : {})
+  };
+
+  const payload = await apiFetch('/api/create-session', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+
   if (!payload?.client_secret?.value) {
     throw new Error('Server nevrátil client secret pro Agentkit.');
   }
