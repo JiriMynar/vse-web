@@ -529,6 +529,10 @@
     padding: var(--space-5);
   }
 
+  .workspace__message {
+    margin: 0 var(--space-5) var(--space-4);
+  }
+
   .chat-history {
     max-height: none;
   }
@@ -558,8 +562,63 @@
     margin-top: var(--space-4);
   }
 
+  .workspace__content {
+    padding: var(--space-4);
+  }
+
+  .workspace__message {
+    margin: 0 var(--space-4) var(--space-3);
+  }
+
+  .chat-view {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  .chat-view__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
   .chat-controls {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+@media (max-width: 480px) {
+  .auth-layout {
+    padding: var(--space-4);
+  }
+
+  .auth-layout__card {
+    padding: var(--space-4);
+    gap: var(--space-5);
+  }
+
+  .auth-layout__forms {
+    padding: var(--space-4);
+  }
+
+  .auth-layout__tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-layout__tab {
+    width: 100%;
+  }
+
+  .workspace__content {
+    padding: var(--space-3);
+  }
+
+  .workspace__message {
+    margin: 0 var(--space-3) var(--space-3);
+  }
+
+  .chat-view {
+    padding: var(--space-3);
+  }
+
 }
