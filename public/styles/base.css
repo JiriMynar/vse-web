@@ -105,3 +105,18 @@ body.lock-scroll {
   letter-spacing: 0.08em;
   color: var(--color-text-subtle);
 }
+
+@media (max-width: 640px) {
+  .typography-display {
+    font-size: var(--font-size-2xl);
+  }
+
+  .typography-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .view-panel,
+  .workspace__content {
+    gap: var(--space-5);
+  }
+}
