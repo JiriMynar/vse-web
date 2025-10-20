@@ -27,8 +27,7 @@ async function loadAgentkitScript(baseUrl) {
   if (state.agentkit.scriptPromise) {
     return state.agentkit.scriptPromise;
   }
-  const normalized = (baseUrl || DEFAULTS.chatkitBase).replace(/\/$/, '');
-  const src = `${normalized}/ui.js`;
+ const normalized = \'https://cdn.platform.openai.com/deployments/chatkit\';  const src = `${normalized}/chatkit.js`;
   state.agentkit.scriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
