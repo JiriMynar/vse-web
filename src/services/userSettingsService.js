@@ -26,7 +26,7 @@ const agentkitSchema = z
       .max(2048)
       .refine(
         (value) => !value || /^https?:\/\//i.test(value),
-        'Volitelná základní URL musí být platná URL (např. https://api.openai.com/v1/agentkit).'
+        'Volitelná základní URL musí být platná URL (např. https://api.openai.com/v1/chatkit).'
       )
       .optional()
   })

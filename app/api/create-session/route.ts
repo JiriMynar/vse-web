@@ -35,13 +35,18 @@ export async function POST(request: NextRequest) {
   }
 
   const baseUrl = (chatkitApiBase && chatkitApiBase.trim()) || DEFAULT_CHATKIT_BASE;
+  const normalizedBase = baseUrl.replace(/\/+$/, "");
+  const sessionUrl = normalizedBase.endsWith("/sessions")
+    ? normalizedBase
+    : `${normalizedBase}/sessions`;
 
   try {
-    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/v1/sessions`, {
+    const response = await fetch(sessionUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${openaiApiKey}`,
+        "OpenAI-Beta": "chatkit_beta=v1",
       },
       body: JSON.stringify({
         workflow_id: workflowId,
