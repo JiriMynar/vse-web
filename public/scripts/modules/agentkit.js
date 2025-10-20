@@ -6,7 +6,78 @@ import { saveAgentkitSettings as persistAgentkitSettings } from './settings.js';
 let saveMessageTimeout = null;
 
 function hasConfig() {
-  // For testing purposes, always return true to allow initialization even if keys are not present
+  const workflowId = state.agentkit.workflowId?.trim();
+  const apiKey = state.agentkit.openaiApiKey?.trim();
+  return Boolean(workflowId && apiKey);
+}
+
+function resetInputValidity(input) {
+  if (!(input instanceof HTMLInputElement)) {
+    return;
+  }
+  input.setCustomValidity('');
+  input.removeAttribute('aria-invalid');
+}
+
+function flagInputInvalid(input, message) {
+  if (!(input instanceof HTMLInputElement)) {
+    return;
+  }
+  input.setCustomValidity(message);
+  input.setAttribute('aria-invalid', 'true');
+}
+
+function validateAgentkitInputs(refs) {
+  const workflowInput = refs.agentkitWorkflowInput;
+  const apiKeyInput = refs.agentkitOpenaiKeyInput;
+  const baseInput = refs.agentkitChatkitBaseInput;
+
+  const invalidFields = [];
+
+  resetInputValidity(workflowInput);
+  resetInputValidity(apiKeyInput);
+  resetInputValidity(baseInput);
+
+  if (workflowInput) {
+    const value = workflowInput.value.trim();
+    if (!value) {
+      flagInputInvalid(workflowInput, 'Zadejte Workflow ID.');
+      invalidFields.push(workflowInput);
+    }
+  }
+
+  if (apiKeyInput) {
+    const value = apiKeyInput.value.trim();
+    if (!value) {
+      flagInputInvalid(apiKeyInput, 'Zadejte OpenAI API klíč.');
+      invalidFields.push(apiKeyInput);
+    }
+  }
+
+  if (baseInput) {
+    const value = baseInput.value.trim();
+    if (value) {
+      try {
+        new URL(value);
+      } catch (error) {
+        flagInputInvalid(
+          baseInput,
+          'Základní URL musí být ve tvaru https://example.com/path.'
+        );
+        invalidFields.push(baseInput);
+      }
+    }
+  }
+
+  if (invalidFields.length > 0) {
+    const firstInvalid = invalidFields[0];
+    window.requestAnimationFrame(() => {
+      firstInvalid.focus();
+      firstInvalid.reportValidity();
+    });
+    return false;
+  }
+
   return true;
 }
 
@@ -24,20 +95,89 @@ function getAdapter() {
   throw new Error('Nebyl nalezen Agentkit UI adaptér.');
 }
 
+function createScriptLoader(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      reject(new Error('URL skriptu není definována.'));
+      return;
+    }
+
+    const existing = document.querySelector(`script[data-agentkit-loader="${src}"]`);
+    if (existing) {
+      if (existing.dataset.agentkitLoaded === 'true' || window.ChatKitUI || window.ChatKit) {
+        resolve();
+        return;
+      }
+
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst Agentkit UI.')), {
+        once: true
+      });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.dataset.agentkitLoader = src;
+    script.onload = () => {
+      script.dataset.agentkitLoaded = 'true';
+      resolve();
+    };
+    script.onerror = () => {
+      script.remove();
+      reject(new Error('Nepodařilo se načíst Agentkit UI.'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
 async function loadAgentkitScript(baseUrl) {
   if (state.agentkit.scriptPromise) {
     return state.agentkit.scriptPromise;
   }
- const normalized = 'https://cdn.jsdelivr.net/npm/@openai/chatkit@1.0.0';  const src = `${normalized}/chatkit.js`;
-  state.agentkit.scriptPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Nepodařilo se načíst Agentkit UI.'));
-    document.head.appendChild(script);
+
+  const normalizedBase = typeof baseUrl === 'string' ? baseUrl.trim().replace(/\/$/, '') : '';
+  const candidateBases = [
+    normalizedBase,
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit@1.0.0',
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit@latest',
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit'
+  ].filter(Boolean);
+
+  const candidateScripts = [];
+  const suffixes = ['/chatkit.js', '/dist/chatkit.js', '/dist/index.global.js'];
+  for (const base of candidateBases) {
+    const cleanedBase = base.replace(/\/$/, '');
+    for (const suffix of suffixes) {
+      candidateScripts.push(`${cleanedBase}${suffix}`);
+    }
+  }
+
+  const uniqueCandidates = [...new Set(candidateScripts)];
+
+  const loadPromise = (async () => {
+    let lastError = null;
+    for (const src of uniqueCandidates) {
+      try {
+        await createScriptLoader(src);
+        return;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Nepodařilo se načíst Agentkit UI.');
+      }
+    }
+    throw lastError || new Error('Nepodařilo se načíst Agentkit UI.');
+  })();
+
+  state.agentkit.scriptPromise = loadPromise;
+
+  loadPromise.catch(() => {
+    if (state.agentkit.scriptPromise === loadPromise) {
+      state.agentkit.scriptPromise = null;
+    }
   });
-  return state.agentkit.scriptPromise;
+
+  return loadPromise;
 }
 
 async function requestClientSecret() {
@@ -46,10 +186,7 @@ async function requestClientSecret() {
   const baseUrl = state.agentkit.chatkitApiBase?.trim();
 
   if (!workflowId || !apiKey) {
-    // For testing purposes, allow empty API key and workflow ID if user explicitly wants to bypass env vars
-    // This is NOT recommended for production environments due to security risks.
-    console.warn('Agentkit workflowId or OpenAI API Key is missing. This is not recommended for production.');
-    // throw new Error('Konfigurace Agentkit není kompletní.'); // Commented out for testing
+    throw new Error('Nejprve vyplňte Workflow ID a OpenAI API klíč v nastavení Agentkit.');
   }
 
   const body = {
@@ -124,12 +261,11 @@ export function renderAgentkit(refs) {
   if (!isVisible) {
     return;
   }
-  // Bypassed for testing purposes. User explicitly wants to proceed without strict config validation.
-  // if (!hasConfig()) {
-  //   teardownAgentkit(refs);
-  //   setAgentkitStatus(refs, 'Nejprve vyplňte workflow ID a OPENAI_API_KEY v nastavení.', 'info');
-  //   return;
-  // }
+  if (!hasConfig()) {
+    teardownAgentkit(refs);
+    setAgentkitStatus(refs, 'Nejprve vyplňte Workflow ID a OpenAI API klíč v nastavení.', 'info');
+    return;
+  }
   toggleVisibility(refs.agentkitChatContainer, true);
   setAgentkitStatus(refs, '');
   if (!state.agentkit.isMounted && !state.agentkit.isInitializing) {
@@ -142,6 +278,13 @@ async function initializeAgentkitChat(refs, options = {}) {
   if (state.agentkit.isInitializing) return;
   const { force = false } = options;
   if (state.agentkit.isMounted && !force) {
+    return;
+  }
+
+  if (!hasConfig()) {
+    setAgentkitStatus(refs, 'Nejprve vyplňte Workflow ID a OpenAI API klíč v nastavení.', 'info');
+    toggleVisibility(refs.agentkitPlaceholder, true);
+    toggleVisibility(refs.agentkitChatContainer, false);
     return;
   }
 
@@ -187,7 +330,10 @@ async function initializeAgentkitChat(refs, options = {}) {
     const message = error instanceof Error ? error.message : 'Nepodařilo se načíst Agentkit chat.';
     setAgentkitStatus(refs, message, 'error');
     toggleVisibility(refs.agentkitChatContainer, false);
+    toggleVisibility(refs.agentkitPlaceholder, true);
     state.agentkit.isMounted = false;
+    state.agentkit.unmount = null;
+    state.agentkit.instance = null;
   } finally {
     state.agentkit.isInitializing = false;
   }
@@ -217,6 +363,16 @@ export async function saveAgentkitConfig(refs) {
     showAgentkitSaveFeedback(refs, 'Konfigurace byla uložena.');
     setAgentkitStatus(refs, '');
     fillAgentkitSettingsForm(refs);
+    if (!trimmedWorkflow || !trimmedApiKey) {
+      teardownAgentkit(refs);
+      toggleVisibility(refs.agentkitPlaceholder, true);
+      setAgentkitStatus(
+        refs,
+        'Pro zobrazení chatu je nutné zadat Workflow ID i OpenAI API klíč.',
+        'info'
+      );
+      return;
+    }
     renderAgentkit(refs);
   } catch (error) {
     console.error('Uložení Agentkit konfigurace selhalo:', error);
@@ -228,12 +384,6 @@ export async function saveAgentkitConfig(refs) {
     setAgentkitStatus(refs, error?.message || 'Nepodařilo se uložit konfiguraci.', 'error');
     return;
   }
-
-  // Bypassed for testing purposes. User explicitly wants to proceed without strict config validation.
-  // if (!trimmedWorkflow || !trimmedApiKey) {
-  //   teardownAgentkit(refs);
-  //   return;
-  // }
 
   if (state.view === 'agentkit') {
     initializeAgentkitChat(refs, { force: true });
@@ -262,10 +412,26 @@ export function initAgentkit(refs) {
 
   refs.agentkitSettingsForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const isValid = validateAgentkitInputs(refs);
+    if (!isValid) {
+      if (state.view === 'agentkit') {
+        setAgentkitStatus(refs, 'Nejprve vyplňte povinná pole v nastavení Agentkit.', 'error');
+      }
+      return;
+    }
+
     refs.agentkitSettingsDialog.returnValue = 'confirm';
     refs.agentkitSettingsDialog.close();
     await saveAgentkitConfig(refs);
   });
+
+  [refs.agentkitWorkflowInput, refs.agentkitOpenaiKeyInput, refs.agentkitChatkitBaseInput]
+    .filter((input) => input instanceof HTMLInputElement)
+    .forEach((input) => {
+      input.addEventListener('input', () => {
+        resetInputValidity(input);
+      });
+    });
 
   fillAgentkitSettingsForm(refs);
 }
