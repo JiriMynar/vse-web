@@ -46,9 +46,10 @@ async function requestClientSecret() {
   const baseUrl = state.agentkit.chatkitApiBase?.trim();
 
   if (!workflowId || !apiKey) {
-// For testing purposes, we allow these to be empty as per user request
+    // For testing purposes, allow empty API key and workflow ID if user explicitly wants to bypass env vars
     // This is NOT recommended for production environments due to security risks.
-    console.warn('Agentkit workflowId or OpenAI API Key is missing from frontend. This is not recommended for production.');
+    console.warn('Agentkit workflowId or OpenAI API Key is missing. This is not recommended for production.');
+    // throw new Error('Konfigurace Agentkit není kompletní.'); // Commented out for testing
   }
 
   const body = {
