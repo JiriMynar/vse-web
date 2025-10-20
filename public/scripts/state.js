@@ -8,7 +8,7 @@ export const STORAGE_KEYS = {
 
 export const DEFAULTS = {
   theme: 'dark',
-  chatkitBase: 'https://api.openai.com/v1/agentkit'
+  chatkitBase: 'https://api.openai.com/v1/chatkit'
 };
 
 export const VIEW_TITLES = {

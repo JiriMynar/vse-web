@@ -2,7 +2,7 @@ import { z, ZodError } from 'zod';
 
 import { logger } from '../../logger.js';
 
-const DEFAULT_CHATKIT_BASE = (process.env.AGENTKIT_DEFAULT_BASE || 'https://api.openai.com/v1/agentkit')
+const DEFAULT_CHATKIT_BASE = (process.env.AGENTKIT_DEFAULT_BASE || 'https://api.openai.com/v1/chatkit')
   .trim()
   .replace(/\/$/, '');
 
@@ -18,7 +18,7 @@ const createSessionSchema = z.object({
   chatkitApiBase: z
     .string()
     .trim()
-    .url('Volitelná základní URL musí být platná URL (např. https://api.openai.com/v1/agentkit).')
+    .url('Volitelná základní URL musí být platná URL (např. https://api.openai.com/v1/chatkit).')
     .optional()
 });
 
@@ -47,6 +47,7 @@ export async function createAgentkitSession(payload = {}) {
   }
 
   const baseUrl = normalizeBaseUrl(data.chatkitApiBase);
+  const sessionUrl = baseUrl.endsWith('/sessions') ? baseUrl : `${baseUrl}/sessions`;
 
   // Use payload values if available, otherwise fallback to environment variables
   const finalWorkflowId = data.workflowId || process.env.AGENTKIT_WORKFLOW_ID;
@@ -60,11 +61,12 @@ export async function createAgentkitSession(payload = {}) {
 
   let response;
   try {
-    response = await fetch(`${baseUrl}/v1/sessions`, {
+    response = await fetch(sessionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${finalOpenaiApiKey}`
+        Authorization: `Bearer ${finalOpenaiApiKey}`,
+        'OpenAI-Beta': 'chatkit_beta=v1'
       },
       body: JSON.stringify({
         workflow_id: finalWorkflowId
