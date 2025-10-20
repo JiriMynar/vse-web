@@ -60,7 +60,7 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 - `db.js` – inicializace SQLite databáze a migrace (uživatelé, chat, projekty, refresh tokeny)
 - `auth.js` – práce s JWT a refresh tokeny, nastavení cookies
 - `chatService.js` – logika pro získávání odpovědí bota (lokální fallback + volání externí služby)
-- `public/` – modulární SPA workspace s chatem, projekty a integrovanou nápovědou
+- `public/` – modulární SPA workspace s modulem Rádce, projekty a integrovanou nápovědou
 - `docs/help.json` – obsah centra nápovědy zobrazovaný přímo v aplikaci
 - `logger.js` – konfigurace logování (soubor `logs/app.log`)
 
@@ -68,7 +68,7 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 
 - Registrace, přihlášení a automatické obnovování relace (access + refresh tokeny)
 - Realtime synchronizace vláken a zpráv přes Server-Sent Events (bez nutnosti pollingu)
-- Workspace s přepínáním mezi moduly Chat, Projekty, Agentkit a Nápověda
+- Workspace s přepínáním mezi moduly Rádce, Projekty, Agentkit a Nápověda
 - Správa projektů včetně archivace a základních metrik
 - Kompletní help centrum s popisem pracovních postupů přímo v aplikaci
 - Administrátorské rozhraní pro správu účtů (reset hesla, přidělení role, hromadné vymazání)
@@ -87,7 +87,7 @@ Pokud `CHAT_API_URL` není nastavená, aplikace použije jednoduchého demonstra
 1. Spusťte `npm install && npm run start`
 2. Otevřete http://localhost:3000
 3. Zaregistrujte se nebo přihlaste
-4. Projděte hlavní moduly (Chat, Projekty, Agentkit) a vyzkoušejte realtime konverzaci s botem
+4. Projděte hlavní moduly (Rádce, Projekty, Agentkit) a vyzkoušejte realtime konverzaci s botem
 
 ## Poznámky
 
