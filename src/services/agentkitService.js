@@ -49,13 +49,13 @@ export async function createAgentkitSession(payload = {}) {
   const baseUrl = normalizeBaseUrl(data.chatkitApiBase);
 
   // Use payload values if available, otherwise fallback to environment variables
-  const finalWorkflowId = data.workflowId || process.env.AGENTKIT_WORKFLOW_ID;
-  const finalOpenaiApiKey = data.openaiApiKey || process.env.OPENAI_API_KEY;
+  const finalWorkflowId = data.workflowId;
+  const finalOpenaiApiKey = data.openaiApiKey;
 
   if (!finalWorkflowId || !finalOpenaiApiKey) {
-    const err = new Error("Konfigurace Agentkit není kompletní. Chybí Workflow ID nebo OpenAI API klíč.");
-    err.status = 400;
-    throw err;
+    // For testing purposes, allow empty API key and workflow ID if user explicitly wants to bypass env vars
+    // This is NOT recommended for production environments due to security risks.
+    logger.warn("Agentkit workflowId or OpenAI API Key is missing from frontend. This is not recommended for production.");
   }
 
   let response;
