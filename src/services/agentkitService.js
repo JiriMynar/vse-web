@@ -61,6 +61,13 @@ export async function createAgentkitSession(payload = {}) {
 
   let response;
   try {
+    logger.info(
+      `[Agentkit API Call] Attempting to call Agentkit API: URL=${sessionUrl}, WorkflowID=${finalWorkflowId}, APIKey=${
+        finalOpenaiApiKey
+          ? finalOpenaiApiKey.substring(0, 5) + '...' + finalOpenaiApiKey.substring(finalOpenaiApiKey.length - 5)
+          : 'N/A'
+      }`
+    );
     response = await fetch(sessionUrl, {
       method: 'POST',
       headers: {
@@ -80,6 +87,10 @@ export async function createAgentkitSession(payload = {}) {
   }
 
   const text = await response.text();
+
+  logger.info(
+    `[Agentkit API Call] Received response from Agentkit API: Status=${response.status}, Body=${text.slice(0, 500)}`
+  );
 
   if (!response.ok) {
     logger.warn(

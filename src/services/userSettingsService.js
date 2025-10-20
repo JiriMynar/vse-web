@@ -115,6 +115,10 @@ export async function getAgentkitSettings(userId) {
     return { ...defaultAgentkitSettings };
   }
 
+  logger.info(
+    `[Agentkit Settings] Retrieved raw settings for user ${userId}: workflow_id=${row.workflow_id}, api_base=${row.api_base}, encrypted_api_key=${row.encrypted_api_key ? 'Encrypted' : 'N/A'}`
+  );
+
   let apiKey = '';
   if (row.encrypted_api_key) {
     try {
@@ -123,6 +127,12 @@ export async function getAgentkitSettings(userId) {
       logger.warn(`Nepodařilo se dešifrovat uložený Agentkit API klíč: ${error.message}`);
     }
   }
+
+  logger.info(
+    `[Agentkit Settings] Decrypted settings for user ${userId}: workflowId=${row.workflow_id || ''}, chatkitApiBase=${row.api_base || ''}, openaiApiKey=${
+      apiKey ? apiKey.substring(0, 5) + '...' + apiKey.substring(apiKey.length - 5) : 'N/A'
+    }`
+  );
 
   return {
     workflowId: row.workflow_id || '',
@@ -138,6 +148,14 @@ export async function updateAgentkitSettings(userId, payload = {}) {
   const chatkitApiBase = normalizeBaseUrl(parsed.chatkitApiBase || '');
   const openaiApiKey = parsed.openaiApiKey || '';
   const encryptedKey = openaiApiKey ? encryptSecret(openaiApiKey) : null;
+
+  logger.info(
+    `[Agentkit Settings] Updating settings for user ${userId}: workflowId=${workflowId}, chatkitApiBase=${chatkitApiBase}, openaiApiKey=${
+      openaiApiKey
+        ? openaiApiKey.substring(0, 5) + '...' + openaiApiKey.substring(openaiApiKey.length - 5)
+        : 'N/A'
+    }`
+  );
 
   const db = await getDb();
   await db.run(
