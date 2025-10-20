@@ -24,20 +24,89 @@ function getAdapter() {
   throw new Error('Nebyl nalezen Agentkit UI adaptér.');
 }
 
+function createScriptLoader(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      reject(new Error('URL skriptu není definována.'));
+      return;
+    }
+
+    const existing = document.querySelector(`script[data-agentkit-loader="${src}"]`);
+    if (existing) {
+      if (existing.dataset.agentkitLoaded === 'true' || window.ChatKitUI || window.ChatKit) {
+        resolve();
+        return;
+      }
+
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('Nepodařilo se načíst Agentkit UI.')), {
+        once: true
+      });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.dataset.agentkitLoader = src;
+    script.onload = () => {
+      script.dataset.agentkitLoaded = 'true';
+      resolve();
+    };
+    script.onerror = () => {
+      script.remove();
+      reject(new Error('Nepodařilo se načíst Agentkit UI.'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
 async function loadAgentkitScript(baseUrl) {
   if (state.agentkit.scriptPromise) {
     return state.agentkit.scriptPromise;
   }
- const normalized = 'https://cdn.jsdelivr.net/npm/@openai/chatkit@1.0.0';  const src = `${normalized}/chatkit.js`;
-  state.agentkit.scriptPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Nepodařilo se načíst Agentkit UI.'));
-    document.head.appendChild(script);
+
+  const normalizedBase = typeof baseUrl === 'string' ? baseUrl.trim().replace(/\/$/, '') : '';
+  const candidateBases = [
+    normalizedBase,
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit@1.0.0',
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit@latest',
+    'https://cdn.jsdelivr.net/npm/@openai/chatkit'
+  ].filter(Boolean);
+
+  const candidateScripts = [];
+  const suffixes = ['/chatkit.js', '/dist/chatkit.js', '/dist/index.global.js'];
+  for (const base of candidateBases) {
+    const cleanedBase = base.replace(/\/$/, '');
+    for (const suffix of suffixes) {
+      candidateScripts.push(`${cleanedBase}${suffix}`);
+    }
+  }
+
+  const uniqueCandidates = [...new Set(candidateScripts)];
+
+  const loadPromise = (async () => {
+    let lastError = null;
+    for (const src of uniqueCandidates) {
+      try {
+        await createScriptLoader(src);
+        return;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Nepodařilo se načíst Agentkit UI.');
+      }
+    }
+    throw lastError || new Error('Nepodařilo se načíst Agentkit UI.');
+  })();
+
+  state.agentkit.scriptPromise = loadPromise;
+
+  loadPromise.catch(() => {
+    if (state.agentkit.scriptPromise === loadPromise) {
+      state.agentkit.scriptPromise = null;
+    }
   });
-  return state.agentkit.scriptPromise;
+
+  return loadPromise;
 }
 
 async function requestClientSecret() {
