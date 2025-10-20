@@ -12,7 +12,7 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
    - V sekci **Connect a repository** povolte Renderu přístup ke svému GitHub účtu (pokud jste to ještě neudělali) a vyberte repozitář s touto aplikací.
 
 3. **Vyplňte základní údaje**
-   - **Name**: libovolný název služby (např. `vse-chat-app`).
+   - **Name**: libovolný název služby (např. `vse-radce-app`).
    - **Region**: vyberte region nejblíže vašim uživatelům (např. Frankfurt).
    - **Branch**: `main` (nebo jinou větev, kterou chcete nasazovat).
 
@@ -41,7 +41,7 @@ Tento návod předpokládá, že už máte účet na Render.com a repozitář s 
 
 8. **Otestujte aplikaci**
    - Po dokončení nasazení klikněte na tlačítko **Open in Browser**.
-   - Otevře se stránka s přihlášením/registrací. Vytvořte si první účet, přihlaste se a zkuste odeslat zprávu v chatu. Bez API klíče se odpovědi bota nezobrazí, ale historie zpráv se uloží.
+   - Otevře se stránka s přihlášením/registrací. Vytvořte si první účet, přihlaste se a zkuste odeslat zprávu v sekci Rádce. Bez API klíče se odpovědi bota nezobrazí, ale historie zpráv se uloží.
 
 9. **Aktualizace a nové deploye**
    - Při každém pushi na vybranou větev (např. `main`) Render automaticky spustí nový build a nasazení.

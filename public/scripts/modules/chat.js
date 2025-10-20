@@ -496,7 +496,7 @@ export function initChat(refs) {
       state.enterToSend = previousValue;
       refs.enterToSendCheckbox.checked = previousValue;
       localStorage.setItem(STORAGE_KEYS.enterToSend, String(previousValue));
-      renderChatFeedback(refs, 'Nepodařilo se uložit nastavení chatu.', 'error');
+      renderChatFeedback(refs, 'Nepodařilo se uložit nastavení Rádce.', 'error');
     }
   });
 

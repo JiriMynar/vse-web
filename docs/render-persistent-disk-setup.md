@@ -19,7 +19,7 @@ Pokud se vám při nasazení na Render.com objeví chyba související se zápis
 ### Jak poznám, že disk funguje?
 - Ve webovém logu uvidíte, že aplikace vytváří soubory v `DATA_DIR` (např. `/var/data/...` nebo `/data/...`) bez chyb.
 - V záložce **Logs** už se neobjevují hlášky o neschopnosti zapisovat do `data/` nebo `/tmp`.
-- Po redeployi nebo restartu služby zůstanou data zachovaná (uživatelé, chaty, logy).
+- Po redeployi nebo restartu služby zůstanou data zachovaná (uživatelé, rozhovory Rádce, logy).
 
 ### Co když disk nepotřebuji?
 Pokud vám nevadí, že se všechna data smažou při každém redeployi, můžete disk vynechat. V takovém případě se nic nastavovat nemusí a aplikace použije fallback do `/tmp`, ale data budou dočasná.
