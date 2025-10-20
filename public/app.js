@@ -1,5 +1,5 @@
 import { refs, initializeRefs } from './scripts/dom.js';
-import { state } from './scripts/state.js';
+import { state, STORAGE_KEYS } from './scripts/state.js';
 import { apiFetch, tryRefresh } from './scripts/modules/api.js';
 import { initTheme, applyTheme } from './scripts/modules/theme.js';
 import { initLayout, closeSidebar, mobileSidebarMedia } from './scripts/modules/layout.js';
@@ -10,7 +10,8 @@ import {
   renderAgentkit,
   showAgentkitSaveFeedback,
   teardownAgentkit,
-  resetAgentkitMessages
+  resetAgentkitMessages,
+  fillAgentkitSettingsForm
 } from './scripts/modules/agentkit.js';
 import { loadProjectData, renderProjects, initProjectInteractions } from './scripts/modules/projects.js';
 import { initProfile, renderProfile } from './scripts/modules/profile.js';
@@ -19,6 +20,7 @@ import { loadHelp, renderHelp } from './scripts/modules/help.js';
 import { openProjectDialog } from './scripts/modules/dialogs.js';
 import { initNavigation, setView } from './scripts/modules/navigation.js';
 import { toggleVisibility, setMessage } from './scripts/utils/dom.js';
+import { fetchUserSettings } from './scripts/modules/settings.js';
 
 function resolveAuthMessage(refs) {
   const current = refs.authMessage;
@@ -61,11 +63,19 @@ async function loadWorkspace() {
     state.user = user;
     state.activeSidebarPanel = 'navigation';
     updateWorkspaceUser(user);
+    toggleAuthVisibility(false);
+
+    try {
+      await fetchUserSettings();
+    } catch (error) {
+      console.error('Načtení uživatelských nastavení selhalo:', error);
+    }
+
+    applyTheme(state.theme, refs);
     if (refs.enterToSendCheckbox) {
       refs.enterToSendCheckbox.checked = state.enterToSend;
     }
-    toggleAuthVisibility(false);
-    applyTheme(state.theme, refs);
+    fillAgentkitSettingsForm(refs);
     setMessage(refs.workspaceMessage, '');
 
     if (!user.isAdmin && state.view === 'admin') {
@@ -130,10 +140,18 @@ async function handleLogout() {
   state.user = null;
   state.adminUsers = [];
   state.chatApiConnectors = [];
+  state.enterToSend = false;
+  if (refs.enterToSendCheckbox) {
+    refs.enterToSendCheckbox.checked = state.enterToSend;
+  }
   state.activeSidebarPanel = 'navigation';
   teardownChatStreams();
   teardownAgentkit(refs);
   showAgentkitSaveFeedback(refs, '');
+  state.agentkit.workflowId = '';
+  state.agentkit.openaiApiKey = '';
+  state.agentkit.chatkitApiBase = '';
+  fillAgentkitSettingsForm(refs);
   setMessage(refs.workspaceMessage, '');
   syncChatMenu(refs);
   if (refs.chatApiDialog?.open) {
@@ -143,6 +161,10 @@ async function handleLogout() {
     refs.chatApiConnectorList.innerHTML = '';
   }
   setMessage(refs.chatApiMessage, '');
+  localStorage.removeItem(STORAGE_KEYS.agentkitWorkflow);
+  localStorage.removeItem(STORAGE_KEYS.agentkitOpenaiKey);
+  localStorage.removeItem(STORAGE_KEYS.agentkitChatkitBase);
+  localStorage.removeItem(STORAGE_KEYS.enterToSend);
   toggleAuthVisibility(true);
   if (mobileSidebarMedia.matches) {
     closeSidebar(refs);

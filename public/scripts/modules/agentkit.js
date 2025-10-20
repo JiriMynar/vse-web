@@ -1,6 +1,7 @@
-import { state, STORAGE_KEYS, DEFAULTS } from '../state.js';
+import { state, DEFAULTS } from '../state.js';
 import { toggleVisibility, setMessage } from '../utils/dom.js';
 import { apiFetch } from './api.js';
+import { saveAgentkitSettings as persistAgentkitSettings } from './settings.js';
 
 let saveMessageTimeout = null;
 
@@ -8,14 +9,8 @@ function hasConfig() {
   return Boolean(state.agentkit.workflowId && state.agentkit.openaiApiKey);
 }
 
-function persistConfig(config) {
-  localStorage.setItem(STORAGE_KEYS.agentkitWorkflow, config.workflowId);
-  localStorage.setItem(STORAGE_KEYS.agentkitOpenaiKey, config.openaiApiKey);
-  if (config.chatkitApiBase) {
-    localStorage.setItem(STORAGE_KEYS.agentkitChatkitBase, config.chatkitApiBase);
-  } else {
-    localStorage.removeItem(STORAGE_KEYS.agentkitChatkitBase);
-  }
+async function persistConfig(config) {
+  await persistAgentkitSettings(config);
 }
 
 function getAdapter() {
@@ -194,19 +189,41 @@ async function initializeAgentkitChat(refs, options = {}) {
   }
 }
 
-export function saveAgentkitConfig(refs) {
+export async function saveAgentkitConfig(refs) {
   const trimmedWorkflow = refs.agentkitWorkflowInput?.value.trim() || '';
   const trimmedApiKey = refs.agentkitOpenaiKeyInput?.value.trim() || '';
   const trimmedBase = refs.agentkitChatkitBaseInput?.value.trim() || '';
+
+  const previousConfig = {
+    workflowId: state.agentkit.workflowId,
+    openaiApiKey: state.agentkit.openaiApiKey,
+    chatkitApiBase: state.agentkit.chatkitApiBase
+  };
 
   state.agentkit.workflowId = trimmedWorkflow;
   state.agentkit.openaiApiKey = trimmedApiKey;
   state.agentkit.chatkitApiBase = trimmedBase;
 
-  persistConfig(state.agentkit);
-  showAgentkitSaveFeedback(refs, 'Konfigurace byla uložena.');
-  fillAgentkitSettingsForm(refs);
-  renderAgentkit(refs);
+  try {
+    await persistConfig({
+      workflowId: trimmedWorkflow,
+      openaiApiKey: trimmedApiKey,
+      chatkitApiBase: trimmedBase
+    });
+    showAgentkitSaveFeedback(refs, 'Konfigurace byla uložena.');
+    setAgentkitStatus(refs, '');
+    fillAgentkitSettingsForm(refs);
+    renderAgentkit(refs);
+  } catch (error) {
+    console.error('Uložení Agentkit konfigurace selhalo:', error);
+    state.agentkit.workflowId = previousConfig.workflowId;
+    state.agentkit.openaiApiKey = previousConfig.openaiApiKey;
+    state.agentkit.chatkitApiBase = previousConfig.chatkitApiBase;
+    fillAgentkitSettingsForm(refs);
+    showAgentkitSaveFeedback(refs, '');
+    setAgentkitStatus(refs, error?.message || 'Nepodařilo se uložit konfiguraci.', 'error');
+    return;
+  }
 
   if (!trimmedWorkflow || !trimmedApiKey) {
     teardownAgentkit(refs);
@@ -238,11 +255,11 @@ export function initAgentkit(refs) {
     });
   }
 
-  refs.agentkitSettingsForm?.addEventListener('submit', (event) => {
+  refs.agentkitSettingsForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     refs.agentkitSettingsDialog.returnValue = 'confirm';
     refs.agentkitSettingsDialog.close();
-    saveAgentkitConfig(refs);
+    await saveAgentkitConfig(refs);
   });
 
   fillAgentkitSettingsForm(refs);
