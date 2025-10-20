@@ -189,6 +189,32 @@ const migrations = [
         `);
       }
     }
+  },
+  {
+    version: 7,
+    async up(db) {
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS user_preferences (
+          user_id INTEGER PRIMARY KEY,
+          data TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+      `);
+
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS agentkit_settings (
+          user_id INTEGER PRIMARY KEY,
+          workflow_id TEXT,
+          api_base TEXT,
+          encrypted_api_key TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+      `);
+    }
   }
 ];
 

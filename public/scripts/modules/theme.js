@@ -1,4 +1,5 @@
 import { state, STORAGE_KEYS } from '../state.js';
+import { updateUserPreferences } from './settings.js';
 
 function updateThemeIcon(themeToggle) {
   if (!themeToggle) return;
@@ -23,11 +24,22 @@ export function applyTheme(theme, refs) {
 export function initTheme(refs, onThemeChange) {
   applyTheme(state.theme, refs);
   if (!refs.themeToggle) return;
-  refs.themeToggle.addEventListener('click', () => {
+  refs.themeToggle.addEventListener('click', async () => {
+    const previousTheme = state.theme;
     const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
     applyTheme(nextTheme, refs);
     if (typeof onThemeChange === 'function') {
       onThemeChange(nextTheme);
+    }
+
+    try {
+      await updateUserPreferences({ theme: nextTheme });
+    } catch (error) {
+      console.error('Uložení nastavení motivu selhalo:', error);
+      applyTheme(previousTheme, refs);
+      if (typeof onThemeChange === 'function') {
+        onThemeChange(previousTheme);
+      }
     }
   });
 }

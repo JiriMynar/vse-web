@@ -10,6 +10,7 @@ import {
 } from '../utils/dom.js';
 import { formatRelativeTime, formatDateTime } from '../utils/datetime.js';
 import { closeSidebar, mobileSidebarMedia } from './layout.js';
+import { updateUserPreferences } from './settings.js';
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -482,9 +483,21 @@ export function initChat(refs) {
     }
   });
 
-  refs.enterToSendCheckbox?.addEventListener('change', () => {
-    state.enterToSend = refs.enterToSendCheckbox.checked;
-    localStorage.setItem(STORAGE_KEYS.enterToSend, state.enterToSend);
+  refs.enterToSendCheckbox?.addEventListener('change', async () => {
+    const previousValue = state.enterToSend;
+    const nextValue = Boolean(refs.enterToSendCheckbox.checked);
+    state.enterToSend = nextValue;
+    localStorage.setItem(STORAGE_KEYS.enterToSend, String(nextValue));
+
+    try {
+      await updateUserPreferences({ enterToSend: nextValue });
+    } catch (error) {
+      console.error('Uložení nastavení odesílání zpráv selhalo:', error);
+      state.enterToSend = previousValue;
+      refs.enterToSendCheckbox.checked = previousValue;
+      localStorage.setItem(STORAGE_KEYS.enterToSend, String(previousValue));
+      renderChatFeedback(refs, 'Nepodařilo se uložit nastavení chatu.', 'error');
+    }
   });
 
   refs.createThreadButton?.addEventListener('click', async () => {
