@@ -6,7 +6,8 @@ import { saveAgentkitSettings as persistAgentkitSettings } from './settings.js';
 let saveMessageTimeout = null;
 
 function hasConfig() {
-  return Boolean(state.agentkit.workflowId && state.agentkit.openaiApiKey);
+  // For testing purposes, always return true to allow initialization even if keys are not present
+  return true;
 }
 
 async function persistConfig(config) {
@@ -27,7 +28,7 @@ async function loadAgentkitScript(baseUrl) {
   if (state.agentkit.scriptPromise) {
     return state.agentkit.scriptPromise;
   }
- const normalized = \'https://cdn.platform.openai.com/deployments/chatkit\';  const src = `${normalized}/chatkit.js`;
+ const normalized = 'https://cdn.platform.openai.com/deployments/chatkit';  const src = `${normalized}/chatkit.js`;
   state.agentkit.scriptPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
@@ -45,7 +46,10 @@ async function requestClientSecret() {
   const baseUrl = state.agentkit.chatkitApiBase?.trim();
 
   if (!workflowId || !apiKey) {
-    throw new Error('Konfigurace Agentkit není kompletní.');
+    // For testing purposes, allow empty API key and workflow ID if user explicitly wants to bypass env vars
+    // This is NOT recommended for production environments due to security risks.
+    console.warn('Agentkit workflowId or OpenAI API Key is missing. This is not recommended for production.');
+    // throw new Error('Konfigurace Agentkit není kompletní.'); // Commented out for testing
   }
 
   const body = {
@@ -120,11 +124,12 @@ export function renderAgentkit(refs) {
   if (!isVisible) {
     return;
   }
-  if (!hasConfig()) {
-    teardownAgentkit(refs);
-    setAgentkitStatus(refs, 'Nejprve vyplňte workflow ID a OPENAI_API_KEY v nastavení.', 'info');
-    return;
-  }
+  // Bypassed for testing purposes. User explicitly wants to proceed without strict config validation.
+  // if (!hasConfig()) {
+  //   teardownAgentkit(refs);
+  //   setAgentkitStatus(refs, 'Nejprve vyplňte workflow ID a OPENAI_API_KEY v nastavení.', 'info');
+  //   return;
+  // }
   toggleVisibility(refs.agentkitChatContainer, true);
   setAgentkitStatus(refs, '');
   if (!state.agentkit.isMounted && !state.agentkit.isInitializing) {
@@ -224,10 +229,11 @@ export async function saveAgentkitConfig(refs) {
     return;
   }
 
-  if (!trimmedWorkflow || !trimmedApiKey) {
-    teardownAgentkit(refs);
-    return;
-  }
+  // Bypassed for testing purposes. User explicitly wants to proceed without strict config validation.
+  // if (!trimmedWorkflow || !trimmedApiKey) {
+  //   teardownAgentkit(refs);
+  //   return;
+  // }
 
   if (state.view === 'agentkit') {
     initializeAgentkitChat(refs, { force: true });
@@ -270,3 +276,4 @@ export function resetAgentkitMessages(refs) {
     showAgentkitSaveFeedback(refs, '');
   }
 }
+

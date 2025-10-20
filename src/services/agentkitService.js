@@ -8,13 +8,13 @@ const DEFAULT_CHATKIT_BASE = (process.env.AGENTKIT_DEFAULT_BASE || 'https://api.
 
 const createSessionSchema = z.object({
   workflowId: z
-    .string({ required_error: 'workflowId je povinný parametr.' })
+    .string()
     .trim()
-    .min(1, 'workflowId je povinný parametr.'),
+    .optional(),
   openaiApiKey: z
-    .string({ required_error: 'OPENAI_API_KEY je povinný parametr.' })
+    .string()
     .trim()
-    .min(1, 'OPENAI_API_KEY je povinný parametr.'),
+    .optional(),
   chatkitApiBase: z
     .string()
     .trim()
@@ -48,16 +48,26 @@ export async function createAgentkitSession(payload = {}) {
 
   const baseUrl = normalizeBaseUrl(data.chatkitApiBase);
 
+  // Use payload values if available, otherwise fallback to environment variables
+  const finalWorkflowId = data.workflowId || process.env.AGENTKIT_WORKFLOW_ID;
+  const finalOpenaiApiKey = data.openaiApiKey || process.env.OPENAI_API_KEY;
+
+  if (!finalWorkflowId || !finalOpenaiApiKey) {
+    const err = new Error("Konfigurace Agentkit není kompletní. Chybí Workflow ID nebo OpenAI API klíč.");
+    err.status = 400;
+    throw err;
+  }
+
   let response;
   try {
     response = await fetch(`${baseUrl}/v1/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${data.openaiApiKey}`
+        Authorization: `Bearer ${finalOpenaiApiKey}`
       },
       body: JSON.stringify({
-        workflow_id: data.workflowId
+        workflow_id: finalWorkflowId
       })
     });
   } catch (error) {
@@ -99,3 +109,4 @@ export async function createAgentkitSession(payload = {}) {
 
   return json;
 }
+
