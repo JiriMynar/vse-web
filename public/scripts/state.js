@@ -13,8 +13,8 @@ export const DEFAULTS = {
 
 export const VIEW_TITLES = {
   chat: {
-    title: 'Chat',
-    subtitle: 'Spravujte konverzace a sledujte odpovědi v reálném čase.'
+    title: 'Rádce',
+    subtitle: 'Spravujte konverzace a sledujte odpovědi Rádce v reálném čase.'
   },
   agentkit: {
     title: 'Agentkit',

@@ -11,7 +11,7 @@
 
 ## Registrace tras a kontrolery
 - Funkce `registerRoutes` slučuje doménové routery pod prefix `/api`, včetně health-check endpointu. 【F:src/routes/index.js†L1-L24】
-- Samostatné routery pokrývají autentizaci, chat, projekty, help centrum, administraci i uživatelské operace. 【F:src/routes/index.js†L4-L22】
+- Samostatné routery pokrývají autentizaci, modul Rádce (chat), projekty, help centrum, administraci i uživatelské operace. 【F:src/routes/index.js†L4-L22】
 - Kontrolery (např. `authController`) slouží jako tenká vrstva nad servisní logikou a standardizují odpovědi nebo práci s cookies. 【F:src/controllers/authController.js†L1-L41】
 
 ## Datová vrstva a migrace
@@ -24,7 +24,7 @@
 - API nastavuje HTTP-only cookies pro access i refresh tokeny a korektně je odstraňuje při odhlášení. 【F:auth.js†L81-L123】
 
 ## Doménové služby
-- Chat využívá externí API (OpenAI, AI Foundry) s robustním parsováním odpovědí a lokálními fallbacky, aby se zabránilo pádu při nečekaném formátu odpovědi. 【F:chatService.js†L1-L119】
+- Modul Rádce využívá externí API (OpenAI, AI Foundry) s robustním parsováním odpovědí a lokálními fallbacky, aby se zabránilo pádu při nečekaném formátu odpovědi. 【F:chatService.js†L1-L119】
 - Admin služba automaticky vytváří nebo povyšuje administrátorský účet, chrání před nebezpečnými operacemi (odebrání vlastní role, mazání jiných adminů) a loguje zásahy. 【F:src/services/adminService.js†L12-L118】
 - Ostatní služby (`projectService`, `userService`, `helpService`, `chatApiService`) dělí logiku na spravovatelné celky a sdílí přístup k databázi pomocí `getDb()`.
 
@@ -32,7 +32,7 @@
 - `src/lib/eventBus.js` implementuje jednoduchý publish/subscribe mechanismus pro server-sent events, který se využívá v chatové části a u projektů. (viz soubor pro detailní implementaci).
 
 ## Veřejné rozhraní a dokumentace
-- Složka `public/` obsahuje single-page aplikaci s moduly Chat, Projekty, Agentkit a Nápověda; obsah nápovědy je ukládán v `docs/help.json`, takže jej lze verzovat a lokalizovat. 【F:docs/help.json†L1-L120】
+- Složka `public/` obsahuje single-page aplikaci s moduly Rádce, Projekty, Agentkit a Nápověda; obsah nápovědy je ukládán v `docs/help.json`, takže jej lze verzovat a lokalizovat. 【F:docs/help.json†L1-L120】
 - Repozitář doplňují podrobné průvodce pro nasazení na Renderu, včetně řešení perzistentního disku a scénářů ztráty dat. 【F:docs/render-persistent-disk-setup.md†L1-L120】【F:docs/render-data-loss-analysis.md†L1-L22】
 
 ## Logování a sledování stavu
@@ -47,7 +47,7 @@
 1. **Perzistentní úložiště:** na produkci vždy nastavit `DATA_DIR` a `LOG_DIR` na připojený disk, jinak hrozí ztráta dat po redeployi. 【F:pathUtils.js†L18-L109】
 2. **Bezpečnost JWT:** v produkci nezapomenout definovat silný `JWT_SECRET` nebo sledovat logy, zda nedochází k jeho automatickému generování. 【F:auth.js†L43-L79】
 3. **Monitoring chyb:** rozšířit `errorHandler` o zasílání chyb do externího monitoringu (Sentry apod.) pro lepší dohled nad provozem. 【F:src/middleware/errorHandlers.js†L1-L80】
-4. **Testy:** doplnit integrační testy pro klíčové scénáře (registrace, přihlášení, chat) – v repozitáři zatím chybí automatizované testy.
+4. **Testy:** doplnit integrační testy pro klíčové scénáře (registrace, přihlášení, Rádce) – v repozitáři zatím chybí automatizované testy.
 
 ## Shrnutí
 Aplikace je členěna do přehledných vrstev (entry point → server → Express app → routery → služby → databáze). Důraz je kladen na bezpečnost (rate limiting, JWT, role admina), perzistenci dat a modularitu. Nejčastějším zdrojem problémů při nasazení je chybějící persistent disk a – před úpravou – také vývojový skript závislý na `nodemon`, který na produkci vedl k chybě „Exited with status 127“.

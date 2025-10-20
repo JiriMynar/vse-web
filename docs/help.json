@@ -1,35 +1,35 @@
 {
   "title": "VŠE Studio – Centrum nápovědy",
-  "intro": "Tento průvodce vysvětluje, jak pracovat s chatem, projekty a integrací agentů v novém workspace rozhraní.",
+  "intro": "Tento průvodce vysvětluje, jak pracovat s modulem Rádce, projekty a integrací agentů v novém workspace rozhraní.",
   "sections": [
     {
       "title": "Začínáme",
       "items": [
-        "Po registraci nebo přihlášení se otevře pracovní plocha s moduly Chat, Projekty a Agentkit.",
+        "Po registraci nebo přihlášení se otevře pracovní plocha s moduly Rádce, Projekty a Agentkit.",
         "V levém postranním panelu najdete přepínač modulů a rychlý přehled stavu vašeho workspace.",
         "V horní části každého modulu je dostupná kontextová nápověda s klávesovými zkratkami a odkazy na dokumentaci."
       ]
     },
     {
-      "title": "Chat",
+      "title": "Rádce",
       "items": [
-        "Vlákna konverzací jsou organizována v postranním panelu, kde můžete vytvářet nové chaty, označit je jako oblíbené a filtrovat.",
-        "Při odeslání zprávy se ihned uloží do historie. Odpovědi asistenta a změny ve vláknech dorazí v reálném čase pomocí streamu událostí.",
+        "Vlákna konverzací jsou organizována v postranním panelu, kde můžete vytvářet nové rozhovory s Rádcem, označit je jako oblíbené a filtrovat.",
+        "Při odeslání zprávy se ihned uloží do historie. Odpovědi Rádce a změny ve vláknech dorazí v reálném čase pomocí streamu událostí.",
         "Historii můžete exportovat nebo hromadně smazat. Nastavení \"Enter odešle\" a zvolený motiv se ukládají do vašeho profilu."
       ]
     },
     {
       "title": "Integrace agentů",
       "items": [
-        "V dialogu \"Nastavení chat API\" vyberte požadovaný konektor (OpenAI nebo AI Foundry) a vyplňte požadovaná pole.",
+        "V dialogu \"Nastavení API Rádce\" vyberte požadovaný konektor (OpenAI nebo AI Foundry) a vyplňte požadovaná pole.",
         "U OpenAI stačí zadat API klíč, volitelně model a případnou vlastní URL. Pokud pole necháte prázdné, použije se výchozí model gpt-4o-mini a oficiální endpoint.",
-        "Pro AI Foundry doplňte API klíč, základní URL služby a ID agenta. Přepínačem \"Aktivní konektor\" určíte, který poskytovatel bude chat používat."
+        "Pro AI Foundry doplňte API klíč, základní URL služby a ID agenta. Přepínačem \"Aktivní konektor\" určíte, který poskytovatel bude Rádce používat."
       ]
     },
     {
       "title": "Projekty",
       "items": [
-        "Projekty slouží jako složky pro skupiny chatů nebo doplňkových materiálů. Každý projekt má barvu, popis a stav.",
+        "Projekty slouží jako složky pro skupiny rozhovorů s Rádcem nebo doplňkových materiálů. Každý projekt má barvu, popis a stav."
         "Tlačítkem \"Nový projekt\" přidáte další modul – například sběr dat, analytiku nebo plánovač úloh.",
         "Z karty projektu získáte rychlý přehled o popisu a stavu. Projekt lze kdykoliv archivovat."
       ]

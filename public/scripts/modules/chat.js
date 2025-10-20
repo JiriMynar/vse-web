@@ -15,6 +15,25 @@ import { updateUserPreferences } from './settings.js';
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 export function syncChatMenu(refs) {
+  const isChatView = state.view === 'chat';
+  toggleVisibility(refs.createThreadButton, isChatView);
+  toggleVisibility(refs.workspaceHistoryButton, isChatView, { hiddenClass: 'visually-hidden' });
+
+  if (!isChatView) {
+    if (refs.workspaceHistoryPanel) {
+      refs.workspaceHistoryPanel.classList.add('workspace-menu__panel--hidden');
+      refs.workspaceHistoryPanel.setAttribute('aria-hidden', 'true');
+    }
+    if (refs.workspaceMenuPrimary) {
+      refs.workspaceMenuPrimary.classList.remove('workspace-menu__panel--hidden');
+      refs.workspaceMenuPrimary.setAttribute('aria-hidden', 'false');
+    }
+    if (refs.workspaceHistoryButton) {
+      refs.workspaceHistoryButton.setAttribute('aria-expanded', 'false');
+    }
+    return;
+  }
+
   const showHistory = state.activeSidebarPanel === 'history';
   toggleVisibility(refs.workspaceMenuPrimary, !showHistory, { hiddenClass: 'workspace-menu__panel--hidden' });
   toggleVisibility(refs.workspaceHistoryPanel, showHistory, { hiddenClass: 'workspace-menu__panel--hidden' });
@@ -496,7 +515,7 @@ export function initChat(refs) {
       state.enterToSend = previousValue;
       refs.enterToSendCheckbox.checked = previousValue;
       localStorage.setItem(STORAGE_KEYS.enterToSend, String(previousValue));
-      renderChatFeedback(refs, 'Nepodařilo se uložit nastavení chatu.', 'error');
+      renderChatFeedback(refs, 'Nepodařilo se uložit nastavení Rádce.', 'error');
     }
   });
 
