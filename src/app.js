@@ -41,6 +41,10 @@ app.use(express.static(publicDir));
 registerRoutes(app);
 
 app.use(notFoundHandler);
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(publicDir, "index.html"));
+});
+
 app.use(errorHandler);
 
 export { app };
